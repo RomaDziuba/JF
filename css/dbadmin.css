@@ -1,0 +1,606 @@
+body {
+	background-color: #fafaff;
+	margin: 0px;
+	padding: 0px;
+	font-family: Tahoma;
+	font-size: 11px;
+	color: #333333;
+}
+
+
+/*
+td {
+	font-family: Tahoma;
+	font-size: 11px;
+	color: #333333;	
+}
+*/
+.tdb {
+	border-right:1px solid #e2e6e8;
+	border-bottom:1px solid #e2e6e8;
+	font-family: Tahoma;
+	font-size: 11px;
+	color: #333333;	
+}
+
+
+.tdh {
+	border-right:1px solid #e2e6e8;
+	border-bottom:1px solid #e2e6e8;
+	font-family: Tahoma;
+	font-size: 12px;
+	color: #173F7F;
+	font-weight: bold;
+	height:24px;
+	text-align: center;
+}
+
+.menu_block {
+	width: 195px;
+	border: 4px solid #e6e6ee;
+	background-color: #f4f5f7;
+	margin-bottom: 10px;
+	font-size: 11px;
+	padding-left:4px;
+	padding-top:5px;
+	font-weight: bold;
+	color: #1d1d1d;
+}
+
+.title {
+	font-size: 13px;
+	color: #173F7F;
+	font-weight: bold;
+	padding: 5px 0 12px 0;
+}
+
+.block_out {
+	border: 4px solid #80A9EA;
+	padding: 0px;
+}
+
+.block_in {	
+	border: 1px solid #949cb4;
+	background-color: #fff;
+	padding: 15px 6px 10px 10px;
+}
+
+.page {
+	font-size: 11px;
+	color: #1d1d1d;
+	font-weight: normal;
+	text-align: right;
+}
+
+.form {
+	height: 30px;
+	color: #1d1d1d;
+	font-weight: bold;
+	text-align: right;
+	padding-right: 10px;
+}
+
+
+a.menu {
+	font-size: 11px;
+	color: #1d1d1d;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.db_link {
+	font-size: 12px;
+	color: black;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.db_link:hover {
+text-decoration: underline;
+}
+
+a.title_link {
+	font-size: 11px;
+	color: #173F7F;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+a.title_link:hover {
+	text-decoration: underline;
+}
+a.title_link:visited {
+	color: #173F7F;
+}
+
+.db_rellink {
+	font-size: 11px;
+	color: #173F7F;
+	text-decoration: none;
+}
+
+a.top_table:hover {
+	font-size: 11px;
+	color: #173F7F;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+a.page {
+	font-size: 11px;
+	color: #1d1d1d;
+	font-weight: normal;
+	text-decoration: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+a.page:hover {
+	font-size: 11px;
+	color: #1d1d1d;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+
+
+INPUT {
+	font-size: 11px;
+	margin: 1px;
+	vertical-align: middle;
+}
+
+.lbutton, .ibutton, .sbutton {	
+	HEIGHT: 21px; 
+	COLOR: #000000; 
+	FONT-FAMILY: Verdana, Tahoma; 
+	FONT-SIZE: 11px; 
+	MARGIN: 0px; 
+	padding-top: 0px; 
+	padding-bottom: 16px; 
+	vertical-align:middle;
+}
+
+.lbutton {
+	WIDTH: 120px; 
+	padding-top: 3px; 
+	BACKGROUND: URL(../images/skin/button/yellowbuttonbg.gif) no-repeat; 
+}
+
+.sbutton {
+	WIDTH: 64px; 
+	padding-top: 3px; 
+	BACKGROUND: URL(../images/skin/button/yellowbuttonbg_small.gif) no-repeat; 
+}
+
+.ibutton {
+	/*width:140px;*/
+}
+
+.buttontxt {	
+    font-size: 11px;
+	color: #1d1d1d;
+}
+
+TEXTAREA {
+	border: 1px solid #b5bac1;
+	font-size: 11px;
+	font-family: Tahoma;
+	padding: 3px;
+}
+
+.error_messages {
+	font-size: 12px;
+	font-weight: bold;
+	color: red;
+
+}
+.success_messages {
+	font-size: 12px;
+	font-weight: bold;
+	color: green;
+
+}
+
+
+table.thin {
+	background-color : #FEFEFE;
+    BORDER: 1px solid black;
+}
+
+td.thin, td.truethin, .formtable > TBODY > TR > TD  {
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+    COLOR: #000000;
+    padding-left:3px;
+    padding-right:3px;
+    height: 15px;
+    background-color: white;
+}
+    
+td.truethin, .formtable > TBODY > TR > TD{
+    BORDER-right: 1px solid black;
+    BORDER-bottom: 1px solid black;
+    height: 20px;
+}
+
+td.import_products {
+	FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+    COLOR: #000000;
+    padding-left:3px;
+    padding-right:3px;
+    BORDER-right: 1px solid black;
+    BORDER-bottom: 1px solid black;
+    height: 20px;
+}
+
+td.import_products_header {
+	FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+    COLOR: #000000;
+    padding-left:3px;
+    padding-right:3px;
+    BORDER-right: 1px solid black;
+    BORDER-bottom: 1px solid black;
+    height: 20px;
+}
+
+td.truethin_fixed_header {
+	FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+    COLOR: #000000;    
+    height: 15px;
+    background-color: white;
+    BORDER-right: 1px solid black;
+    BORDER-bottom: 1px solid black;
+    height: 20px;
+    
+}
+
+.error {
+    margin-top: 3px;
+    margin-bottom: 0px; text-align: center;
+    FONT-SIZE: 15px;
+    font-family: verdana;
+    color: red;
+    font-weight: bold
+}
+
+td.grey, A.grey, A.grey:visited, A.grey:link, td.bgrey  {
+	FONT-FAMILY: tahoma,sans-serif,verdana,arial;
+	font-variant : normal;
+	font-style : normal;
+	font-weight : bold;
+	font-size        : 10pt;
+    COLOR: black;
+	text-align: center;
+	height: 21px;
+	background-color: #eeeeee;
+}
+.btThin {
+	font-weight:bold;
+	border: 1px black solid;	
+	width: 120px
+}
+/*
+TD {
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+}
+*/
+TH {
+	FONT-SIZE: x-small; FONT-FAMILY: tahoma,sans-serif,verdana,arial
+}
+.plain {
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+}
+
+.link {
+	color: blue;
+	font-family: verdana;
+	font-size: 12px;
+}
+td.bthin {
+    BORDER-left: 1px solid black;
+    BORDER-top: 1px solid black;
+}
+
+td.bgrey {
+    BORDER-left: 1px solid white;
+    BORDER-top: 1px solid white;    
+}
+
+.text {
+  vertical-align:bottom;
+  font-family: Verdana, Arial;
+  font-size: 9pt;
+}
+
+input.thin, select.thin {
+	border: 1px solid #b5bac1;
+	height: 21px;
+	font-size: 11px;
+	line-height: 16px;
+	padding-left: 3px;
+}
+
+textarea.thin {
+	border: 1px solid #b5bac1;
+	height: 80px;
+	font-size: 11px;
+	line-height: 16px;
+	padding-left: 3px;
+}
+
+
+.reportGrid, .reportGridSmall {
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: verdana;
+	COLOR: #000000;
+	background-color: white;
+	border-left: 1px solid #cccccc;
+}
+
+
+
+.reportGrid > TBODY > TR > TD, .reportGridSmall > TBODY > TR > TD{
+    padding-left:3px;
+    padding-right:3px;
+    height: 15px;
+    border-right: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    font-size        : 10pt;
+    text-align: right;
+}
+
+
+.reportGrid > TBODY > TR > TH, .reportGridSmall > TBODY > TR > TH {
+    padding-left:3px;
+    padding-right:3px;
+	font-weight : bold;
+	font-size        : 11pt;
+	text-align: right;
+	height: 21px;
+	background-color: #eeeeee;
+	text-align: right;
+}
+
+.reportGrid > THEAD > TR > TD {
+    padding-left:3px;
+    padding-right:3px;
+	font-weight : bold;
+	font-size        : 11pt;
+	text-align: center;
+	height: 21px;
+	background-color: #eeeeee;
+}
+
+.reportGridSmall {
+	font-size:10px;
+}
+
+.reportGridSmall > THEAD > TR > TD {
+    padding-left:3px;
+    padding-right:3px;
+	font-weight : bold;
+	font-size        : 12px;
+	text-align: center;
+	height: 21px;
+	background-color: #eeeeee;
+}
+
+
+/***************************
+ * Jimbo table
+ ***************************/
+
+table.jlist, table.jform {
+	width:100%;
+	background-color: #FFFFFF;
+	color: #000000;
+	/*border: 1px solid #6393DF;*/
+}
+.breadcrumbs, table.jform .caption {
+	background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
+	COLOR: #FFFFFF;
+	FONT: 12px Verdana, Tahoma;
+	height:21px;
+	line-height:21px;
+	padding-left:4px;
+	border-right:2px solid #6393df;
+}
+
+table.filters .caption {
+	background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
+	COLOR: #FFFFFF;
+	FONT: 12px Verdana, Tahoma;
+	height:21px;
+	line-height:21px;
+	padding:0 0 0 4px;
+	border-right:2px solid #6393df;
+}
+
+.jcol { 
+	BACKGROUND: #80A9EA url(../images/skin/table/tabledescbg.gif) REPEAT-X TOP LEFT;
+	COLOR: #333333;
+	FONT: 11px Verdana, Tahoma;
+	padding-left:4px;
+}
+
+.ka_table{
+       border: 2px solid #6393DF;
+       background: #D1DCEB;
+       color: #FFFFFF;
+       FONT-FAMILY: Arial, Helvetica;
+       font-size:15px;
+}
+
+.ka_row, .ka_row_today {
+       BACKGROUND-COLOR: #EDF4FF;
+       COLOR: #000000;
+       height: 24px;
+       FONT-FAMILY: Verdana, Arial, Helvetica;
+       font-size:11px;
+}
+
+.ka_link {
+       COLOR: #222222;
+       FONT-FAMILY: Verdana, Arial, Helvetica;
+       font-size:12px;
+       text-decoration: none;
+}
+
+.ka_header {
+       COLOR: #222222;
+       FONT-FAMILY: Verdana, Arial, Helvetica;
+       font-size:16px;
+       text-decoration:none;
+}
+
+
+.ka_row_today TD {
+       font-weight: bold;
+       color: #222222;
+}
+.ka_row A {
+       COLOR: black;
+       text-decoration: none;
+}
+.ka_row_today A {
+       font-weight: bold;
+       color: #222222;
+       text-decoration: none;
+}
+
+.ka_row A:hover, .ka_row_today A:hover  {
+       text-decoration: underline;
+}
+.ka_hiliight {
+       background-color: #FFF8E9;
+}
+.ka_odd {
+       BACKGROUND-COLOR:#F7FAFF;
+}
+/**/
+
+.clear {
+	clear:right;
+	visibility:hidden; 
+	height:0px;
+}
+
+.menucontainerbottom  div.grouped {
+	float:left; 
+	width:320px; 
+	height: 32px;
+}
+
+.menucontainerbottom  div.grouped span {
+	display:block; 
+	margin-top:2px;
+}
+
+.menucontainerbottom  div.backlink {
+	float:left;  
+	height: 32px;
+	padding-top:12px;
+}
+
+.menucontainerbottom  div.pager {
+	float:right;  
+	height:40px;
+}
+
+.menucontainerbottom  div.pager span {
+	display:block; 
+	margin-top:3px;
+}
+
+.menucontainerbottom  div.pager span span {
+	font-size:10px;
+}
+
+.menucontainerbottom  div.perpage {
+	float:right;  
+	height:40px;
+}
+
+.menucontainerbottom  div.perpage span {
+	display:block; 
+	margin-top:8px;
+}
+
+.menucontainertop {
+	border-top:1px solid #FAFAFF; /*IE Fix*/
+}
+
+.menucontainertop .action {
+	float:right; 
+	padding-top: 3px;
+}
+
+.action img {
+	vertical-align: middle;
+}
+
+.menucontainertop  div {
+width:240px;
+height: 24px;
+float:right;
+border: 2px solid #6393df;
+border-bottom: 0px;
+BACKGROUND-COLOR: #81b1fd;
+text-align:center;
+vertical-align: middle;
+font-size:14px;
+font-family: verdana;
+background: #81b1fd url(../images/skin/menu/menusection2.gif) repeat-x top left;
+
+}
+
+.menucontainerbottom  div {
+width:240px;
+height: 24px;
+float:right;
+border: 2px solid #6393df;
+border-top: 0px;
+BACKGROUND-COLOR: #c8dbf7;
+text-align:center;
+vertical-align: middle;
+font-size:14px;
+font-family: verdana;
+background: #c8dbf7 url(../images/skin/menu/menusection2.gif) repeat-x top left;	
+}
+
+
+.header_link {
+	color: black;
+	font-weight: bold;
+}
+
+.formRows {
+	overflow-y: scroll; 
+	height: 450px;
+}
+
+.popmsg {
+	width:440px;
+	text-align: right; 
+	line-height:20px;
+}
+
+table.filters {
+	width:450px;
+	border-collapse: collapse;
+	border:1px solid #6393DF;
+	
+}

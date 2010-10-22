@@ -1,0 +1,4 @@
+#dialog .ui-helper-zfix { filter:alpha(opacity=0); }
+#dialog.ui-dialog .ui-dialog-content { zoom: 1; }
+#dialog.ui-widget-content .ui-priority-secondary { filter:Alpha(Opacity=70); }
+#dialog.ui-widget-content .ui-state-disabled { filter:Alpha(Opacity=35); }

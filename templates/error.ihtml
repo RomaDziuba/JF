@@ -1,0 +1,5 @@
+<center>
+<p style="color: red; width: 80%; font-weight: bold; border: 2px solid red">
+<br>{$message}
+<br></p>
+</center>

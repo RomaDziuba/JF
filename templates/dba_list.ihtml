@@ -1,0 +1,284 @@
+{literal}
+<script>
+
+jQuery(document).ready(function() { 
+
+	var selectedColor = '#FEE5FC';
+	$("#tbllist>tbody>tr:nth-child(odd)").addClass("ka_odd");
+	$("#filters>tbody>tr:nth-child(odd)").addClass("ka_odd");
+	$("#picker").css('background-color', selectedColor);
+
+
+$("#tbllist>tbody>tr").click(function() {             
+	if ($(this).css('background-color') != $("#picker").css('background-color')) {
+		$(this).css('background-color', selectedColor);
+	} else {
+		$(this).css('background-color', $(this).css('xxx-background-color'));
+	}
+});
+
+$("#tbllist tr").hover(
+	function() {
+		if ($(this).css('background-color') != $("#picker").css('background-color')) {
+			$(this).css('xxx-background-color', $(this).css('background-color'));
+			$(this).css('background-color', '#FFF8E9');
+		}
+	},
+	function() {
+		if ($(this).css('background-color') != $("#picker").css('background-color')) {
+			$(this).css('background-color', $(this).css('xxx-background-color'));
+		}
+	}
+);
+
+$('a[rel="actionbutton"]').click(function() { 
+	return false;
+});
+
+$('#filtersButton').click(function() {
+	var filterContainer = document.getElementById('filters');
+	filterContainer.style.display = (filterContainer.style.display == '') ? 'none' : '';
+	
+	return false;
+});
+
+});
+
+
+</script>
+{/literal}
+
+
+<div id="statusMessage" style="padding:0px; margin:0px;"></div>
+{if $info.filter == 'top' && !empty($filters)}
+<table class="filters" style="display:none;" id="filters" cellpadding="3" align="center">
+	<thead>
+		<tr>
+			<td class="caption" colspan="2">{$lang.FILTERS}</td>
+		</tr>
+	</thead>
+	<tbody>
+	{foreach from=$filters value=item key=key}
+		{if !empty($item)}
+		<tr class="ka_row">
+			<td width="140" align="right">{$info.fields[$key].caption}:</td>
+			<td>{$item}</td>
+		</tr>
+		{/if}
+	{/foreach}
+	<tr class="ka_row">
+		<td colspan="2" align="center" >
+			<input type="submit" class="sbutton" value="OK" style="vertical-align: middle" />
+		</td>
+	</tr>
+	</tbody>
+</table>
+<br />
+{/if}
+
+<div class="menucontainertop"> 	
+
+{if $info.insert != ''}
+		
+		<div class="action">
+		<img src="{$info.baseurl}images/add.png" width="16" height="16"  border="0" hspace="3" />	
+		<a href="#" onClick="openWindow('?action=insert&popup=true')" class="db_link">{$info.insert}</a>
+		</div>
+	{/if}
+	{if $info.excel != ''}
+		<div class="action">
+		<img src="{$info.baseurl}images/excel.png" width="16" height="16"  border="0" hspace="3" />	
+		<a href="?action=excel" class="db_link">{$info.excel}</a>
+		</div>
+	{/if}
+	{ if $info.parent != '' }
+		<div class="action">
+		<img src="{$info.baseurl}images/dbadmin_top.gif" hspace="3" border="0" />
+		<a href="?action=parent" class="db_link">{$info.parent}</a>
+		</div>
+	{/if}
+	
+</div><div class="clear"></div> 
+
+
+<div class="breadcrumbs"><b>{$info.caption}</b></div>
+<table border="0" cellpadding="5" cellspacing="1" width="100%" id="tbllist" class="ka_table">
+<form style="display:inline" method="POST" id="tbl_form" name="test">
+
+	<input type="hidden" name="picker" id="picker" />
+	<input type="hidden" name="filter_wtd" id="filter_wtd" value="apply" />
+
+<thead>
+		<tr>
+		{if $info.grouped}
+			<td width="15px" class="jcol">&nbsp;</td>
+		{/if}
+		{foreach from=$info.fields value=field}
+			<td class="jcol" width="{$field.width}" {if $field.align}align="{$field.align}"{/if} nowrap>
+				<A HREF="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}" class="db_link">{$field.caption}</A>
+				{if ($info.sorting.field eq $field.name)}
+					&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
+				{/if}
+			</td>
+		{/foreach}
+		
+		{if $data.0.actions || !empty($filters)}
+		<td class="jcol" style="padding:0pc; margin:0px;" align="center">
+			{if $info.filter == 'top' && !empty($filters)}
+				<input id="filtersButton" type="button" class="sbutton" value="{$lang.FILTERS}" style="vertical-align: middle;" />
+			{/if}
+		</td>
+		{/if}
+		
+		
+		{if $info.filter != 'top' && !empty($filters)}	
+			<TR height="25" valign="top" class="ka_row">
+				
+				{if $info.grouped}
+				<td width="15px">&nbsp;</td>
+				{/if}
+				
+				{ foreach value=item from=$filters }
+						<TD ALIGN="LEFT">{$item}</TD>
+				{/foreach}
+				<td align="center"><input type="submit" class="sbutton" value="OK" style="vertical-align: middle"></td>
+			</TR>
+		{/if}
+		
+
+	</thead>
+	</form>
+	
+	<form method="POST" target="_systemfr">
+	<input type="hidden" name="performPost" value="insert">
+	{if $info.token} 
+		<input type="hidden" name="__token" value="{$info.token}">
+	{/if}
+
+	<tbody>
+		{if $info.fastAdd}
+			<TR height="25" valign="top" class="ka_row">
+				
+				{if $info.grouped}
+				<td width="15px">&nbsp;</td>
+				{/if}
+				
+				{ foreach value=item from=$info.fieldInputs }
+						<TD align="left">{$item}</TD>
+				{/foreach}
+				<td align="center"><input type="submit" class="sbutton" value="+" style="vertical-align: middle"></td>
+			</TR>
+		{/if}
+		
+		{foreach from=$data value=line}
+			{if $line._group_caption}
+				{if $line._group_total}
+					<tr class="ka_row">
+						{if $info.grouped}
+							<TD>&nbsp;</TD>
+						{/if}
+			
+						{foreach value=sitem from=$line._group_total}
+							<td align="right"><b>{$sitem}</b></td>
+						{/foreach}
+						
+						{if $data.0.actions or $filters}
+							<TD>&nbsp;</TD>
+						{/if}
+				{/if}
+
+			<tr class="ka_row">
+				<td colspan="50"><b>{$line._group_caption}</b></td>
+			</tr>
+			{/if}
+			<tr class="ka_row">
+				{if $info.grouped}
+					<TD><input type="checkbox" name="grouped_cb[]" value="{$line.id}"></TD>
+				{/if}
+
+				{foreach value=item from=$line.data}
+					<td {if $item.align}align="{$item.align}"{/if}>{$item.value}</td>
+				{/foreach}
+				
+				{if !empty($line.actions)}
+					<TD align="center" nowrap>
+						{ foreach value=action from=$line.actions }
+							{if $action.popup}
+								&nbsp;<A HREF="#" onClick='{$action.popupFunction}("{$action.href}&popup=true"); return false;' title="{$action.alt}" rel="actionbutton"><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0"></A>&nbsp;
+							{else}
+								&nbsp;<A HREF="{$action.href}" title="{$action.alt}" {$action.addon} {$action.target rel="actionbutton"}><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0" rel="actionbutton"></A>&nbsp;
+							{/if}
+    					{/foreach}
+    					
+					</TD>
+				{elseif $filters}
+					<td>&nbsp;</td>
+				{/if}
+				
+			</tr>
+		{/foreach}
+		
+		{if $info.subtotals}
+			<tr class="ka_row">
+				{if $info.grouped}
+					<TD>&nbsp;</TD>
+				{/if}
+
+				{foreach value=item from=$info.subtotals}
+					<td align="right"><b>{$item}</b></td>
+				{/foreach}
+				
+				{if $data.0.actions or $filters}
+					<TD>&nbsp;</TD>
+				{/if}
+		{/if}
+	</tbody>
+	</form>
+</table>
+
+<div class="menucontainerbottom">
+  
+  {if $info.grouped}
+  	<div class="backlink" style="width:300px;">{$info.grouped}</div>
+  {/if}
+  
+  {if $info.backlink != '' }
+  	<div class="backlink" >
+  	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
+  	<a href="{$info.backlink}" class="db_link">{$lang.BUTTON_BACK}</a></div>
+  {/if}
+
+  
+  {if isset($info.pager)}
+  <div class="pager">
+  	<span>{$info.pager}</span>
+  	<span><span>[{$lang.TOTAL_ITEMS}: {$info.totalRows}]</span></span>
+ 	</div>
+ {/if}
+
+ <div class="perpage">
+ <span>
+  {$lang.ITEMSOERPAGE}: <select OnChange="addPager(this.value)">
+  {foreach key=key value=value from=$info.limitOptions}
+    <option value="{$key}" {if $key eq $info.rowsPerPage}selected{/if}>{$value}</option>
+  {/foreach}
+  </select>
+  </span>
+  </div>
+
+</div>
+
+
+</FORM>
+
+<script>
+{if $info.highlight}
+        {foreach value=value from=$info.highlight}
+                {literal}${/literal}("#TR_{$value}").css('background-color', '#FFF0CF');
+        {/foreach}
+{/if}
+</script>
+
+<br/><br/>
+
+<iframe name="_systemfr" style="display:none"></iframe>

@@ -1,0 +1,102 @@
+.aw-quirks * {
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+	}
+	
+/********************************************************************
+	Grid
+********************************************************************/
+
+/*	you may skip grid id (#myGrid) in all other rules
+	- if the rule applies to all grids
+	- if you have only one grid on your page */
+
+	#myGrid { width: 400px}
+
+/********************************************************************
+	Rows
+********************************************************************/
+
+	#myGrid .aw-grid-row {height: 20px; border-bottom: 1px solid #ccc}
+
+	/* box model fix for strict doctypes, safari */
+	.aw-strict #myGrid .aw-grid-row {padding-bottom: 3px;}
+
+/*	#myGrid .aw-row-1 {color: blue} */
+
+	/*	Alternate row colors */
+	#myGrid .aw-alternate-even {background: #fff;}
+	#myGrid .aw-alternate-odd {background: #eee;}
+
+	/*#myGrid .aw-alternate-even .aw-column-1 {background: #eee;}
+	#myGrid .aw-alternate-odd .aw-column-1 {background: #ddd;}*/
+
+	/*	Highlight on mouseover, mousedown */
+/*	#myGrid .aw-mouseover-row {background: #ccc;} */
+/*	#myGrid .aw-mousedown-row {background: #999;} */
+
+/*	#myGrid .aw-mouseover-row .aw-column-1 {background: #bbb;} */
+/*	#myGrid .aw-mousedown-row .aw-column-1 {background: #888;} */
+
+	/* Selected rows */
+	#myGrid .aw-rows-selected {background: #316ac5;}
+	#myGrid .aw-rows-selected .aw-column-1 {background: #316ac5;}
+	
+/********************************************************************
+	Headers
+********************************************************************/
+
+	#myGrid .aw-grid-headers {
+		/*color: blue; */
+		text-align:center !important;
+	}
+	/*#myGrid .aw-grid-headers .aw-column-1 {font-weight: bold}*/
+
+	/*	Highlight on mouseover, mousedown */
+	#myGrid .aw-mouseover-header {color: red;}
+	#myGrid .aw-mousedown-header {color: yellow;}
+	
+	#myGrid .aw-grid-cell {border-right: 1px dashed #ccc} /* all columns */
+	#myGrid .aw-column-0  {border-right: 1px solid #999} /* one column */ 
+
+	/*#myGrid .aw-header-1 {background: #def}*/
+
+
+/********************************************************************
+	Columns
+********************************************************************/
+
+	#myGrid .aw-column-0 {width: 100px; border-right: 1px dotted #ccc;}
+	#myGrid .aw-column-1 {width: 100px; border-right: 1px dotted #ccc; text-align:center;}	
+
+	/* box model fix for strict doctypes, safari */
+	.aw-strict #myGrid .aw-column-0 {padding-bottom: 3px;}
+	.aw-strict #myGrid .aw-column-1 {padding-bottom: 3px;}
+
+
+/********************************************************************
+	Cells
+********************************************************************/
+
+/*	#myGrid .aw-row-2 .aw-column-1 {color: red; font-style: italic} */
+
+	/*	Highlight on mouseover, mousedown */
+/*	#myGrid .aw-mouseover-cell {color: red;} 		*/
+/*	#myGrid .aw-mousedown-cell {background: #666;}	*/
+
+	/* Selected cells */
+	#myGrid .aw-grid-row .aw-cells-selected {background: #316ac5;}
+
+
+/********************************************************************
+	Row selectors
+********************************************************************/
+
+	#myGrid .aw-row-selector {width: 30px; text-align: center}
+	#myGrid .aw-row-2 .aw-row-selector {font-weight: bold}
+	#myGrid .aw-mouseover-row .aw-row-selector {color: red;}
+
+	/*	Highlight on mouseover, mousedown */
+	#myGrid .aw-mouseover-selector {background: green;}
+	#myGrid .aw-mousedown-selector {background: yellow;}

@@ -1,0 +1,122 @@
+<?php
+include_once "./config.php";
+
+include_once "libs/class.tableDefinition.php";
+include_once "libs/class.dbAction.php";
+include_once "libs/class.dbDisplayer.php";
+include_once "libs/class.dbLogic.php";
+include_once "libs/FormFields/common.php";
+include_once "libs/FormFields/custom.php";
+
+include_once "libs/templates/class.template.php";
+
+
+$tpl = dbDisplayer::getTemplateInstance(TPL_ROOT);
+
+// Fetch URL
+if (substr($_SERVER['PATH_INFO'], -1, 1) != '/') {
+	$_SERVER['PATH_INFO'] .= '/';
+	$_SERVER['PHP_SELF'] .= '/';
+}
+
+$tmp = explode("/", $_SERVER['PATH_INFO']);
+if (count($tmp) == 3) {
+	$currentTable = $tmp[1];
+	$currentToken = 'zero';
+} elseif (count($tmp) == 4) {
+	$currentTable = $tmp[2];
+	$currentToken = $tmp[1];
+} else {
+	$currentTable = DEFAULT_TABLE;
+	$currentToken = 'zero';
+}
+
+$_sessionData['DB_CURRENT_TABLE'] = $currentTable;
+$_sessionData['DBA_SCRIPT'] = '/jimbo/';
+
+$_dictionary = $db->getAssoc("SELECT ident, value_".LANG." FROM dictionary");
+
+/**
+// Session Fork
+if ($_GET['wtd'] == 'fork') {
+	do {
+		$token = substr(md5(microtime()), 4, 8);
+	} while (isset($_SESSION['dbadmin'][$token]));
+	$_SESSION['dbadmin'][$token] = unserialize($_SESSION['dbadmin'][$currentToken]['snapshot']);
+	if ($currentToken == 'zero') {
+		$url = str_replace("/$currentTable/", "/$token/$currentTable/", $_SESSION['dbadmin'][$currentToken]['lastURI']);
+	} else {
+		$url = str_replace("/$currentToken/", "/$token/", $_SESSION['dbadmin'][$currentToken]['lastURI']);
+	}
+	// Set window name and do redirect
+	if ($_SERVER['PHP_SELF'] == $url) {
+		$tpl->setVar('JSHEADER', "window.name='$token';");
+	} else {
+		echo "<script>window.name='$token'; document.location.replace('$url');</script>"; die;
+	}
+}
+
+// Session snapshot
+if (empty($_SESSION['dbadmin'][$currentToken])) {
+	$_SESSION['dbadmin'][$currentToken] = array();
+}
+unset($_SESSION['dbadmin'][$currentToken]['snapshot']);
+$snapshot = serialize($_SESSION['dbadmin'][$currentToken]);
+$_SESSION['dbadmin'][$currentToken]['snapshot'] = $snapshot;
+$_SESSION['dbadmin'][$currentToken]['lastURI'] = $_SERVER['REQUEST_URI'];
+
+$_sessionData =& $_SESSION['dbadmin'][$currentToken];
+*/
+
+
+$allowEditButtons = true;
+
+
+$perms = $db->getOne("select dbdrive_perms.value from dbdrive_tables join dbdrive_perms on (id_table = dbdrive_tables.id) where caption='$currentTable' and id_role=".$_sessionData['auth_role']);
+
+$tblAction = new dbAction($db, $currentTable);
+
+if (($perms & 8) == 8) {
+	// exec
+	include_once FS_LIBS."dbadmin_perms.php";
+	dbadmin_perms($currentTable, $tblAction);
+	
+} elseif (($perms & 4) == 4) {
+	// write
+} elseif (($perms & 2) == 2) {
+	// read
+	$allowEditButtons = false;
+} else {
+	displayError('Нет доступа к таблице: '.$currentTable, "/");
+}
+
+
+if (!$allowEditButtons) {
+	foreach ($tblAction->tableDefinition->actions as $key => $value) {
+		if (in_array($key, array('edit', 'insert', 'remove', 'orderedit'))) {
+			unset($tblAction->tableDefinition->actions[$key]);
+		}
+	}
+
+}
+
+
+$displayer = new dbDisplayer($tblAction);
+$dbLogic = new dbLogic();
+
+$doAction = $dbLogic->detectPerformAction($tblAction);
+$status = $tblAction->performAction($doAction);
+
+$viewAction = $dbLogic->detectViewAction($tblAction, $status);
+
+$content = $displayer->performDisplay($viewAction);
+
+if (isset($_GET['popup'])) {
+	$template =  'light.ihtml';
+} else {
+	$template = 'main.ihtml';
+}
+
+basicDisplay($content, $template);
+
+?>
