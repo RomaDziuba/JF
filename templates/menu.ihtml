@@ -33,9 +33,6 @@ $('#support_contacts').click(function() {
 
 <table width="100%" height="53px" cellpadding="0" cellspacing="0">
 <tr valign="top">
-<td nowrap width="1px">
-<img src="/images/{$info.logo}" height="53px" />
-</td>
 <td>
 <div id="{$name}" class="fixerr" >
 	<ul class="tabs-nav">
@@ -67,29 +64,3 @@ $('#support_contacts').click(function() {
 
 </table>
 
-<div style="position:absolute; right:4px; top:1px;">
-<span style="font-size:12px; display: block;">
-<a href="/help.phtml" onclick="javascript:opnewWin('/help.phtml?url={$tpl.SERVER.REQUEST_URI}', 800, 550, 1, ',scrollbars=1'); return false" style="color:white; font-weight: bold;"><img src="/images/icon_help.png" width="24px" height="24px" border="0px" alt="Help"></a> &nbsp; 
-&nbsp; &nbsp;
-<a href="https://siteheart.com/webconsultation/25280?byhref=1" target="siteheart_sitewindow_25280" onclick="o=window.open;o('https://siteheart.com/webconsultation/25280', 'siteheart_sitewindow_25280', 'width=650,height=400,top=30,left=30,resizable=yes'); return false;"><img src="https://siteheart.com/webindicator/image/1275658867?ent=25280&company=25280"  border="0" alt="SiteHeart" height="24px" width="24px"/></a>
-&nbsp;
-
-{if (!empty($supportContacts))}
-<a id="support_contacts" href="#" style="vertical-align: top" title="Техподдержка"><img src="/images/icon_contact.png" width="24px" height="24px" border="0px" alt="Техподдержка"></a> &nbsp;
-<div id="support_contacts_details" style="display:none;" title="Техподдержка">{$supportContacts}</div>
-{/if}
-<a href="#" style="vertical-align: top" onclick='openWindow("/jimbo/user_profile/?action=edit&ID={$userId}&popup=true"); return false;' title="Профайл"><img src="/images/icon_profile.png" width="24px" height="24px" border="0px" alt="Профайл"></a> &nbsp;
-<a href="/logout.phtml" style="vertical-align: top" title="Выход"><img src="/images/icon_logout.png" width="24px" height="24px" border="0px" alt="Выход"></a>
-&nbsp;
-
-
-</span>
-</div>
-
-
-
-<div style="position:absolute; right:4px; top:35px;">
-<span style="color: black; font-size:12px; margin-top:3px;display: none;" id="dinfo">
-</span>
-</div>
-<div id="tooltip_container"></div>

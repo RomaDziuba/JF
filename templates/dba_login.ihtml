@@ -1,0 +1,21 @@
+<div id="content" align="center">
+    <div id="form" align="left">
+        <div id="form_inner">
+            <div style="position:relative; right:-20px;" align="right" class="label"></div>
+        <form method="post" id="account_form">
+            <label for="email">Логин:</label>
+                <div style="margin-bottom: 20px;"><input name="login" id="email" class="text_field" value="" type="text" style="width:100%"></div>
+                <label for="password">Пароль:</label>
+                <div style="margin-bottom: 30px;"><input name="password" class="text_field" type="password"  style="width:100%"></div>
+                <div style="height: 40px;">
+                    <div style="float: left; color: red; padding: 5px;" style="label">
+                        <b><?=$error_message; ?></b>
+                    </div>
+                    <div style="float: right;">
+                        <input value="Войти" class="big_button" type="submit">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

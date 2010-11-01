@@ -1,0 +1,5 @@
+*~
+templates/compiled/*.php
+*.bak
+.svn
+.gitmodules

@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv=Content-Type content="text/html; charset={$info.charset}" >
+    <title>{$info.title}</title>
+
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/dbadmin.css">
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/site.css">
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}calendar/calendar.css">
+
+    <script type="text/javascript" src="{$info.basehttp}calendar/calendar.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}calendar/lang/calendar-en.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}calendar/calendar_add.js"></script>
+
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.qtip.js"></script>
+
+    <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.custom.min.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.tabs.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.clickmenu.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.cookie.js"></script>
+    
+    {if $info.css}
+        {foreach from=$info.css item=path}
+            <link rel="stylesheet" type="text/css" href="{$info.basehttp}{$path}" />
+        {/foreach}
+    {/if}
+    
+    <script type="text/javascript" src="{$info.basehttp}js/jimbo.js"></script>
+    
+
+
+
+<script type="text/javascript" src="{$info.basehttp}js/functions.js"></script>
+
+<script type="text/javascript" src="{$info.basehttp}js/jquery.tooltip.js"></script> 
+
+<link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs.css" type="text/css" media="print, projection, screen">
+
+<link rel="stylesheet" type="text/css" href="{$info.basehttp}css/jquery.tooltip.css" />
+
+<!--[if lte IE 7]>
+<link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs-ie.css" type="text/css" media="projection, screen">
+<![endif]-->
+<!--[if lte IE 8]>
+<link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs-ie.css" type="text/css" media="projection, screen">
+<![endif]-->
+<!--[if IE ]>
+<link rel="stylesheet" href="{$info.basehttp}css/site-ie.css" type="text/css" media="projection, screen">
+<![endif]-->
+
+</HEAD>
+<BODY bgcolor="White">
+
+{literal}
+<script>
+function doSelectTo(obj, id) {
+	document.getElementById(id).value = obj.value;
+}
+
+function tbl_check_all(namef, status) {
+	frm = document.getElementById('tbl_form');
+	for (i = 0; i < frm.elements.length; i++) {
+		el = frm.elements[i];
+		if (el.name.substr(0, namef.length) == namef) {
+			el.checked = status;
+		}
+	}
+}
+
+function dbaForeignKeyLoad(f1, f2, val) {
+	var url = '?action=foreignKeyLoad&ajaxChild=' + f1 + '&ajaxParent=' + f2 + '&value=' + escape(val);
+	document.getElementById('db_system').src = url;
+}
+
+</script>
+{/literal}
+
+
+{$menu}
+
+<div style="margin:11px;">
+
+{$content}
+
+</div>
+<br/><br/>
+</BODY></HTML>

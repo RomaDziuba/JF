@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<table charset="UTF-8" name="dbdrive_tables" primaryKey="id"
+defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
+
+	<relations/>
+	
+    <fields>
+		<field type="text" caption="Таблица" name="caption" trim="60" width="30%" required="true" sorting="true"/>
+		<field type="text" caption="Комментарий" name="comment" trim="60" width="65%" required="true" sorting="true"/>
+		<field type="many2many" caption="Доступ" linkTable="dbdrive_perms" linkField="id_table" linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true">
+			<option id="1">r</option>
+			<option id="2">w</option>
+			<option id="3">x</option>
+		</field>
+	</fields>
+	
+	
+	<filters/>
+	
+	<actions>
+		<action type="list" caption="Таблицы" />
+		<action type="insert" caption="Добавить позицию" />
+		<action type="edit" caption="Отредактировать позицию" />
+		<action type="remove" caption="Удалить позицию" />
+	</actions> 
+	
+</table>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<table charset="UTF-8" name="dbdrive_menu" primaryKey="id"
+defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
+
+    <relations/>
+    
+    <fields>
+        <field type="readonly" caption="ID" name="id" trim="60" width="10%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="caption" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Url" name="url" trim="60" width="30%"  sorting="true"/>
+        <field type="text" caption="id_parent" name="id_parent" trim="60" width="30%" sorting="true"/>
+        
+        <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true" />
+    </fields>
+    
+    
+    <filters/>
+    
+    <actions>
+        <action type="list" caption="Таблицы" />
+        <action type="insert" caption="Добавить позицию" />
+        <action type="edit" caption="Отредактировать позицию" />
+        <action type="remove" caption="Удалить позицию" />
+    </actions> 
+    
+</table>
