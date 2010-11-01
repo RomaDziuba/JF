@@ -29,7 +29,7 @@ if(PEAR::isError($res)) {
 //  Jimbo
 //////////////////////////////
 
-require_once 'jimbo/class.Jimbo.php';
+require_once 'jimbo/class.Controller.php';
 
 if(!defined('CHARSET')) {
     throw new Exception(_('Undefined CHARSET const'));
@@ -39,7 +39,7 @@ session_start();
 
 $GLOBALS['_sessionData'] = &$_SESSION[AUTH_DATA][AUTH_TOKEN];
 
-$jimbo = Jimbo::getInstance($db, $GLOBALS['config']);
+$jimbo = Controller::getInstance($db, $GLOBALS['config']);
 
 $jimbo->user = new JimboUser($GLOBALS['_sessionData']);
 

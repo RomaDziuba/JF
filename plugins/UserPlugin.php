@@ -29,7 +29,7 @@ class UserPlugin extends Plugin
             'auth' => 'yes', 
             'auth_id' => 1, 
             'auth_login' => 'test', 
-            'auth_group' => 8
+            'auth_role' => 8
         );
         
         $jimbo->user->doLogin($params);

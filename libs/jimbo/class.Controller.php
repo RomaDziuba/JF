@@ -12,7 +12,7 @@ require_once 'jimbo/FormFields/custom.php';
 require_once 'jimbo/class.JimboUser.php';
 require_once 'jimbo/class.Plugin.php';
 
-class Jimbo
+class Controller
 {
     private $store = array();
     
@@ -137,7 +137,7 @@ class Jimbo
         
         $info += $this->properties;
         
-        $tpl->assign('menu', $this->getMenu());
+        $tpl->assign('menu', $this->call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         return $tpl->fetch($template);
@@ -169,68 +169,8 @@ class Jimbo
         return true;
     } // end addProperties
     
-    public function getMenu()
-    {
-        if(!$this->user->isLogin()) {
-            return false;
-        }
-        
-        $id_group = $this->user->getGroup();
-        
-        $sql = "SELECT 
-                    m.* 
-                FROM 
-                    dbdrive_menu_perms p
-                    INNER JOIN dbdrive_menu m ON (p.id_menu = m.id)
-                WHERE
-                    p.id_role = ".$this->db->quote($id_group)."
-                ORDER BY 
-                    m.id_parent, m.order_n";
-        $tmp = $this->db->getAll($sql);
-        
-        if(PEAR::isError($tmp)) {
-            throw new DatabaseException($tmp->getMessage());    
-        }
-
-        $menu = array();
-        $parents = array();
-
-        foreach ($tmp as $item) {
-            
-            $parents[$item['id']] = $item['id_parent'];
-            if (empty($item['id_parent'])) {
-            
-                $menu[$item['id']] = array(
-                'caption' => $item['caption'],
-                'href' => $this->getUrl($item['url']),
-                'level' => 1,
-                'items' => array()
-                );
-            } elseif(isset($menu[$item['id_parent']]['level']) && $menu[$item['id_parent']]['level'] == 1) {
-            
-                $menu[$item['id_parent']]['items'][$item['id']] = array(
-                'caption' => $item['caption'],
-                'href' => $this->getUrl($item['url']),
-                'level' => 2,
-                'id_parent' => $item['id_parent'],
-                'items' => array()
-                );
-            } else {
     
-                $parent = $item['id_parent'];
-                $top = $parents[$parent];
-                $menu[$top]['items'][$parent]['items'][] = array(
-                'caption' => $item['caption'],
-                'href' => $this->getUrl($item['url'])
-                );
-            }
-        }
-        $menu = new dbMenu($menu);
-        
-        return $menu->getHTML();
-    } // end getMenu
-    
-    private function getUrl($url)
+    public function getUrl($url)
     {
         if(preg_match('#^(www|http)#Umis', $url)) {
             return $url;

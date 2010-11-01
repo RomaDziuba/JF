@@ -3,7 +3,7 @@ class JimboUser
 {
     private $_sessionData;
     
-    private $requiredFields = array('auth', 'auth_id', 'auth_login', 'auth_group');
+    private $requiredFields = array('auth', 'auth_id', 'auth_login', 'auth_role');
     
     public function __construct(&$_sessionData) 
     {
@@ -30,9 +30,9 @@ class JimboUser
 		return isset($this->_sessionData["auth"]) && $this->_sessionData["auth"] == "yes";
 	}
 	
-	public function getGroup()
+	public function getRole()
 	{
-	    return $this->get('auth_group');
+	    return $this->get('auth_role');
 	}
 	
 	public function get($name) 

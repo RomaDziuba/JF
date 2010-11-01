@@ -23,7 +23,7 @@ class JimboPlugin extends Plugin
                     INNER JOIN dbdrive_tables on (id_table = dbdrive_tables.id) 
                 WHERE 
                     caption= ".$jimbo->db->quote($table)." 
-                    AND id_role = ".$jimbo->user->getGroup();
+                    AND id_role = ".$jimbo->user->getRole();
         
         $perms = $jimbo->db->getOne($sql);    
         
@@ -85,6 +85,70 @@ class JimboPlugin extends Plugin
         }
         exit();
     } // end getFile
+    
+    public function getMenu()
+    {
+        global $jimbo;
+        if(!$jimbo->user->isLogin()) {
+            return false;
+        }
+        
+        $id_group = $jimbo->user->getRole();
+        
+        $sql = "SELECT 
+                    m.* 
+                FROM 
+                    dbdrive_menu_perms p
+                    INNER JOIN dbdrive_menu m ON (p.id_menu = m.id)
+                WHERE
+                    p.id_role = ".$jimbo->db->quote($id_group)."
+                ORDER BY 
+                    m.id_parent, m.order_n";
+        $tmp = $jimbo->db->getAll($sql);
+        
+        if(PEAR::isError($tmp)) {
+            throw new DatabaseException($tmp->getMessage());    
+        }
+
+        $menu = array();
+        $parents = array();
+
+        foreach ($tmp as $item) {
+            
+            $parents[$item['id']] = $item['id_parent'];
+            if (empty($item['id_parent'])) {
+            
+                $menu[$item['id']] = array(
+                'caption' => $item['caption'],
+                'href' => $jimbo->getUrl($item['url']),
+                'level' => 1,
+                'items' => array()
+                );
+            } elseif(isset($menu[$item['id_parent']]['level']) && $menu[$item['id_parent']]['level'] == 1) {
+            
+                $menu[$item['id_parent']]['items'][$item['id']] = array(
+                'caption' => $item['caption'],
+                'href' => $jimbo->getUrl($item['url']),
+                'level' => 2,
+                'id_parent' => $item['id_parent'],
+                'items' => array()
+                );
+            } else {
+    
+                $parent = $item['id_parent'];
+                $top = $parents[$parent];
+                $menu[$top]['items'][$parent]['items'][] = array(
+                'caption' => $item['caption'],
+                'href' => $jimbo->getUrl($item['url'])
+                );
+            }
+        }
+        $menu = new dbMenu($menu);
+        
+        return $menu->getHTML();
+    } // end getMenu
+    
+   
     
 }
 
