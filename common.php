@@ -6,16 +6,6 @@ ini_set('include_path', ini_get('include_path').':'.FS_ROOT.':.:'.FS_ROOT.'libs:
 require_once "templates/class.template.php";
 
 //////////////////////////////
-//  Jimbo
-//////////////////////////////
-
-require_once 'jimbo/class.Jimbo.php';
-
-if(!defined('CHARSET')) {
-    throw new Exception(_('Undefined CHARSET const'));
-}
-
-//////////////////////////////
 //  Database connection
 //////////////////////////////
 
@@ -33,6 +23,16 @@ $res = $db->query('SET NAMES utf8');
 
 if(PEAR::isError($res)) {
     throw new Exception(_('Database connection error'));
+}
+
+//////////////////////////////
+//  Jimbo
+//////////////////////////////
+
+require_once 'jimbo/class.Jimbo.php';
+
+if(!defined('CHARSET')) {
+    throw new Exception(_('Undefined CHARSET const'));
 }
 
 session_start();

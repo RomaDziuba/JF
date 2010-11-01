@@ -17,7 +17,7 @@ $systemRules = array(
     '~^/logout/$~' => array('User', 'logout'),
 );
 
-$rules = $systemRules;
+$rules = $GLOBALS['pluginRules'] + $systemRules;
 
 try {
     foreach($rules as $regExp => $call) {

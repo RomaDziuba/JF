@@ -40,23 +40,8 @@ $GLOBALS['config']['paths'] = array(
     'plugins' => FS_ROOT.'plugins/' 
 );
 
+$GLOBALS['pluginRules'] = array();
+
 include_once FS_ROOT."common.php";
-
-
-
-
-/*
-
-$ddcPerms = new simplePermissions();
-$_sessionData['DB_alowed_groups'] = join(", ", (array)$ddcPerms->getOpStatus('DDC_DINFO_READ'));
-
-if (defined('DDC_VENDOR_ID')) {
-	$_sessionData['DDC_VENDOR_ID'] = DDC_VENDOR_ID;
-} else {
-	$_sessionData['DDC_VENDOR_ID'] = -1;
-}
-
-*/
-
 
 ?>
