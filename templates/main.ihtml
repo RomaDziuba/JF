@@ -12,10 +12,14 @@
     <script type="text/javascript" src="{$info.basehttp}calendar/lang/calendar-en.js"></script>
     <script type="text/javascript" src="{$info.basehttp}calendar/calendar_add.js"></script>
 
-    <script type="text/javascript" src="{$info.basehttp}js/jquery.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="{$info.basehttp}js/jquery.qtip.js"></script>
 
-    <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.custom.min.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.5.custom.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/redmond/jquery.ui.all.css" />
+    
+    
     <script type="text/javascript" src="{$info.basehttp}js/jquery.tabs.js"></script>
     <script type="text/javascript" src="{$info.basehttp}js/jquery.clickmenu.js"></script>
     <script type="text/javascript" src="{$info.basehttp}js/jquery.cookie.js"></script>
@@ -27,17 +31,20 @@
     {/if}
     
     <script type="text/javascript" src="{$info.basehttp}js/jimbo.js"></script>
-    
+    <script type="text/javascript" src="{$info.basehttp}js/functions.js"></script>
+    <link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs.css" type="text/css" media="print, projection, screen">
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/jquery.tooltip.css" />
 
-
-
-<script type="text/javascript" src="{$info.basehttp}js/functions.js"></script>
-
-<script type="text/javascript" src="{$info.basehttp}js/jquery.tooltip.js"></script> 
-
-<link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs.css" type="text/css" media="print, projection, screen">
-
-<link rel="stylesheet" type="text/css" href="{$info.basehttp}css/jquery.tooltip.css" />
+    {literal}
+    <script>
+        var jimbo = {
+        {/literal}
+            mode: "{$tpl.CONST.JIMBO_POPUP_MODE}",
+            dialogWidth: 640
+        {literal}
+        };
+    </script>
+    {/literal}
 
 <!--[if lte IE 7]>
 <link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs-ie.css" type="text/css" media="projection, screen">
@@ -49,7 +56,7 @@
 <link rel="stylesheet" href="{$info.basehttp}css/site-ie.css" type="text/css" media="projection, screen">
 <![endif]-->
 
-</HEAD>
+</head>
 <BODY bgcolor="White">
 
 {literal}
@@ -79,10 +86,8 @@ function dbaForeignKeyLoad(f1, f2, val) {
 
 {$menu}
 
-<div style="margin:11px;">
+<div style="margin:11px;">{$content}</div>
+<div id="loader"></div>
 
-{$content}
-
-</div>
 <br/><br/>
 </BODY></HTML>

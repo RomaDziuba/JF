@@ -55,10 +55,29 @@ class JimboPlugin extends Plugin
         
         $content = $displayer->performDisplay($viewAction);
         
-        $template = isset($_GET['popup']) ? 'light.ihtml' : 'main.ihtml';
+        $template = $this->getTemplateName();
+        
+        if(!$template) {
+            echo $content;
+            exit();
+        }
         
         $jimbo->display($content, $template);
     } // end main
+    
+    /**
+     * Returns the name of the main template
+     */
+    private function getTemplateName()
+    {
+        $template = 'main.ihtml';
+        
+        if(isset($_GET['popup'])) {
+            $template = JIMBO_POPUP_MODE == 'popup' ? 'light.ihtml' : false;
+        }
+        
+        return $template;
+    } // end getTemplateName
     
     public function getFile($table, $filed, $id)
     {

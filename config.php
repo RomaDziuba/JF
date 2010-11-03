@@ -19,6 +19,9 @@ define('SITE_CHARSET', CHARSET);
 
 define('JIMBO_VERSION', '3.1');
 
+// popup | jquery
+define('JIMBO_POPUP_MODE', 'jquery');
+
 define('FS_ROOT', dirname(__FILE__)."/");
 
 define('TPL_ROOT', FS_ROOT.'/templates/');

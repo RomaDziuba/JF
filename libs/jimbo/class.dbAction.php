@@ -402,48 +402,43 @@ class dbAction {
 		if (isset($this->tableDefinition->attributes['customLocation'])) {
 			$newLocation = $this->tableDefinition->attributes['customLocation'];
 		} else {
-			$newLocation = $_SERVER['PHP_SELF'].$baseURL;
+			$newLocation = $_SERVER['REDIRECT_URL'].$baseURL;
 		}
-
+		
 		if (!$status) {
-			$message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
-			header('Content-Type: text/html; charset='.SITE_CHARSET);
-			echo '
-			<HTML><HEAD>
-			<META http-equiv=Content-Type content="text/html; charset='.SITE_CHARSET.'">
-			</HEAD>
-			<BODY>
-			<script>parent.document.getElementById("statusMessage").innerHTML = "<font class=\'error_messages\'>'.htmlspecialchars($message).'</font>";</script>';
-			die;
-
+		    header('Content-Type: text/html; charset='.SITE_CHARSET);
+		    $message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
+            
+            $response = array(
+                'type' => 'error',
+                'message' => $message
+            );
+            
+            // TODO: Move to root logic
+            $json = json_encode($response);
+            echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+            exit();
 		}
-
+		
 		if ($wasCommit) {
 			if (isset($customHandler) && method_exists ($customHandler, 'afterCommit')) {
 				$customHandler->afterCommit($this->updateInfo);
 			}
-			if (isset($_GET['popup']) && ($_GET['popup'] == 'true')) {
-				$processCode = '
-				if (typeof(parent.window.opener) != "undefined") {
-					parent.window.opener.location.reload(false);
-				}
-				
-				if (typeof(dialogArguments) != "undefined") {
-				dialogArguments.window.location.reload(false);
-				}
-				
-				setTimeout("parent.close();", 1200);
-				';
-			} else {
-				$processCode = 'setTimeout("parent.document.location.replace(\''.$newLocation.'\')", 1200);';
-			}
-			echo '<script>
-			if (parent.document.getElementById("statusMessage") != null && typeof(parent.document.getElementById("statusMessage")) != "undefined") {
-				parent.document.getElementById("statusMessage").innerHTML = "<font class=\'success_messages\'>'.$this->locale['STATUS_SUCCESS'].'</font>";
-			}
-		'.$processCode.'
-		</script>';
-			die;
+			
+			// for compatibility with the old versions
+			$isPoupMode = (int) isset($_GET['popup']) && ($_GET['popup'] == 'true');
+			    
+			$response = array(
+                'type' => 'success',
+                'message' => $this->locale['STATUS_SUCCESS'],
+                'url' => $newLocation,
+                'isPoupMode' => $isPoupMode
+			);
+			
+			// TODO: Move to root logic
+            $json = json_encode($response);
+            echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+            exit();
 		}
 
 		if ($needRedirect) {

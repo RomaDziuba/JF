@@ -10,6 +10,23 @@ defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
         <field type="text" caption="Url" name="url" trim="60" width="30%"  sorting="true"/>
         <field type="text" caption="id_parent" name="id_parent" trim="60" width="30%" sorting="true"/>
         
+        <field type="text" caption="Название" name="f_1" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_2" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_3" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_4" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_5" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_6" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_7" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_8" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_9" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_10" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_11" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_12" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_13" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_14" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_15" trim="60" width="30%" required="true" sorting="true"/>
+        <field type="text" caption="Название" name="f_16" trim="60" width="30%" required="true" sorting="true"/>
+        
         <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true" />
     </fields>
     

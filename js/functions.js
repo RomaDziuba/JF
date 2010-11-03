@@ -182,19 +182,6 @@ function fixTableByHeader(headerId, tableId, headerCellType, mainWidthType) {
 	document.getElementById('data_table_container').style.maxHeight = (screen.height - 410) + "px";
 }
 
-function openWindow(uri) {
-
-    if (navigator.appName == 'Microsoft Internet Explorer') {
-        window.showModelessDialog(uri, window, "dialogWidth=650px;dialogHeight=575px;resizable=no;scroll=no;status=no;toolbar=no;menubar=no;location=no;titlebar=no;directories=no");
-    } else {
-        var popW = 650;
-        var popH = 575;
-        var left = (screen.width/2) - (popW/2);
-        var top = (screen.height/2) - (popH/2);
-        window.open(uri, '', "width="+popW+",height="+popH+",top="+top+",left="+left+",status=no,toolbar=no,menubar=no,location=no,titlebar=no,resizable=no,directories=no,scroll=no");
-    }
-}
-
 function openFullWindow(uri) {
 
     if (navigator.appName == 'Microsoft Internet Explorer') {
@@ -261,7 +248,7 @@ function chooseCorrespondingProduct(sku_code) {
 function checkImportProductionForm(formObj) {
 	var distr = document.getElementById('group').value;
 	if (distr == "") {
-		alert("Выберите дистрибьютора");
+		alert("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 		return false;
 	}
 	return true;

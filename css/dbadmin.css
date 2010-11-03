@@ -164,7 +164,9 @@ INPUT {
 .lbutton {
 	WIDTH: 120px; 
 	padding-top: 3px; 
-	BACKGROUND: URL(../images/skin/button/yellowbuttonbg.gif) no-repeat; 
+	BACKGROUND: URL(../images/skin/button/yellowbuttonbg.gif) no-repeat;
+	border:0px;
+	margin-right:3px;
 }
 
 .sbutton {
@@ -199,6 +201,7 @@ TEXTAREA {
 	font-size: 12px;
 	font-weight: bold;
 	color: green;
+	line-height:20px;
 
 }
 
@@ -405,7 +408,7 @@ textarea.thin {
 
 table.jlist, table.jform {
 	width:100%;
-	background-color: #FFFFFF;
+	/*background-color: #FFFFFF;*/
 	color: #000000;
 	/*border: 1px solid #6393DF;*/
 }
@@ -588,8 +591,8 @@ background: #c8dbf7 url(../images/skin/menu/menusection2.gif) repeat-x top left;
 }
 
 .formRows {
-	overflow-y: scroll; 
-	height: 450px;
+	overflow-y: scroll;
+	overflow-x: hidden;
 }
 
 .popmsg {
@@ -602,5 +605,23 @@ table.filters {
 	width:450px;
 	border-collapse: collapse;
 	border:1px solid #6393DF;
-	
 }
+
+.errorlog {
+	width:360px; 
+	height:20px; 
+	margin-top:8px;
+	border:0px;
+	color:#FF0000;
+	font-weight:bold;
+}
+
+#form_actions {
+	height:40px;
+}
+
+#form_actions td div {
+	float:right;
+	margin-right:25px;
+}
+
