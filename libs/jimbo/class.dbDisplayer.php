@@ -306,6 +306,7 @@ class dbDisplayer {
 			// потенциально можно запретить некоторые операции
 
 			$line['actions'] = array();
+			$line['action_lists'] = array();
 			foreach ($tableDefinition->actions as $type => $action) {
 				if (in_array($type, $this->generalActions)) continue;
 				if (!in_array($type, $alowedActions)) continue;
@@ -320,15 +321,19 @@ class dbDisplayer {
 					$popupFunction = 'openWindow';
 				}
 
-				$line['actions'][] = array(
-				'src' => HTTP_ROOT.'images/dbadmin_'.$type.'.gif',
-				'alt' => $action['caption'],
-				'href' => $link,
-				'addon' => $external ? ' target="_blank" ' : '',
-				'target' => $target,
-				'popup' => $external,
-				'popupFunction' => $popupFunction
-				);
+				$item = array(
+                    'src' => HTTP_ROOT.'images/dbadmin_'.$type.'.gif',
+                    'alt' => $action['caption'],
+                    'href' => $link,
+                    'addon' => $external ? ' target="_blank" ' : '',
+                    'target' => $target,
+                    'popup' => $external,
+                    'popupFunction' => $popupFunction
+                );
+				
+                $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
+				
+				$line[$lineKey][] = $item;
 			}
 
 			$data[] = $line;

@@ -202,6 +202,16 @@ $('#filtersButton').click(function() {
 				
 				{if !empty($line.actions)}
 					<TD align="center" nowrap>
+					
+					   {if !empty($line.action_lists)}
+                            <select onchange="dbaListActions(this);">
+                                <option></option>
+                            { foreach value=action from=$line.action_lists }
+                                <option value="{$action.href}" {if $action.popup}popup="1"{/if}>{$action.alt}</option>
+                            {/foreach}
+                            </select>
+                        {/if}
+					
 						{ foreach value=action from=$line.actions }
 							{if $action.popup}
 								&nbsp;<A HREF="#" onClick='{$action.popupFunction}("{$action.href}&popup=true"); return false;' title="{$action.alt}" rel="actionbutton"><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0"></A>&nbsp;

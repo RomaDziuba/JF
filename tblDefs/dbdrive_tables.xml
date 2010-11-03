@@ -22,6 +22,11 @@ defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
 		<action type="insert" caption="Добавить позицию" />
 		<action type="edit" caption="Отредактировать позицию" />
 		<action type="remove" caption="Удалить позицию" />
+		
+		<action type="add_clients" caption="Клиенты" lists="true" link="/clients/?parent_id=%ID%" />
+		<action type="add_clients2" caption="Клиенты1" lists="true" link="/clients1/?parent_id=%ID%" />
+		<action type="add_clients3" caption="Клиенты2" lists="true" link="/clients2/?parent_id=%ID%" />
+		
 	</actions> 
 	
 </table>

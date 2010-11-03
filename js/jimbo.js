@@ -232,6 +232,22 @@ function initPopup()
 	
 } // end initPopup
 
+function dbaListActions(select)
+{
+	option = select.options[select.selectedIndex];
+    if(option == undefined) {
+        return false;
+    }
+    
+    if(option.getAttribute('popup') == 1) {
+        openWindow(option.value + "&popup=true");
+    }  else {
+        window.location = option.value;
+    }
+    
+    select.selectedIndex = 0;
+} // end dbaListActions
+
 function loadContent(url, id) 
 {
 	id = (id == undefined) ? 'loader' : id;
