@@ -553,16 +553,7 @@ class dbDisplayer {
 
 
 	function displayErrorMessage($message = '') {
-		echo $message; die;
-		$tpl = new Template_PHPLIB("./templates/");
-		$tpl->setFile('OUT', 'error.ihtml');
-		if (!empty($tpl->_lastError)) {
-			echo $message;
-			return;
-		}
-		$tpl->setVar('MESSAGE', $message);
-		$tpl->parse('RESULT', 'OUT');
-		echo $tpl->get('RESULT');
+        echo $this->displayError($message);
 	}
 
 
