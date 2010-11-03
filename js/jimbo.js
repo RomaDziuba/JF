@@ -133,6 +133,10 @@ function openJqueryPopup(id)
 		widthDelta += 50;
 	}
 	
+	if(jimbo.dialogWidth == undefined) {
+		jimbo.dialogWidth = 640;
+	}
+	
 	obj.dialog({
 		modal: true,
         resizable: true,
