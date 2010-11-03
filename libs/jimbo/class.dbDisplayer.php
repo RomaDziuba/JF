@@ -380,7 +380,7 @@ class dbDisplayer {
 			$info['grouped'] = $gSelect;
 		}
 
-		include 'jimbo/'.$this->getLangFile();
+		include dirname(__FILE__).'/'.$this->getLangFile();
 		$tpl->assign('lang', $dbAdminMessages);
 
 		if (isset($_group_field)) {
@@ -410,7 +410,7 @@ class dbDisplayer {
 
     function addListFilters () {
         global $_sessionData;
-        include 'jimbo/'.$this->getLangFile();
+        include dirname(__FILE__).'/'.$this->getLangFile();
 
         // Строим фильтры
         $tableDefinition =& $this->tblAction->tableDefinition;
