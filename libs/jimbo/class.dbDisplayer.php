@@ -558,7 +558,7 @@ class dbDisplayer {
 
 
 	function displayForm($what) {
-		include 'jimbo/'.$this->getLangFile();
+		include dirname(__FILE__).'/'.$this->getLangFile();
 		global $_dictionary;
 		
 		$tableDefinition = $this->tblAction->tableDefinition;
