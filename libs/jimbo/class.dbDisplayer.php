@@ -16,8 +16,12 @@ class dbDisplayer {
 	var $generalActions = array('list', 'insert', 'child', 'parent', 'excel');
 	var $tblAction;
 
-	function dbDisplayer(&$tblAction) {
+	private static $tpl;
+	
+	function dbDisplayer(&$tblAction, &$tpl = null) {
 		$this->tblAction = &$tblAction;
+		
+		self::$tpl = $tpl;
 	}
 
 	function performDisplay($action) {
@@ -65,18 +69,34 @@ class dbDisplayer {
 		return $content;
 	}
 
-	function getTemplateInstance($tplRoot = TPL_ROOT) {
-		$tpl = new Template_Lite;
+	function &getTemplateInstance($tplRoot = false) {
+	    
+        if(!is_null(self::$tpl)) {
+            return self::$tpl;
+	    }
+	    
+	    if(!$tplRoot) {
+            $tplRoot = realpath(dirname(__FILE__).'/../../templates');
+	    }
+	    
+        if(!is_dir($tplRoot)) {
+            throw new Exception('Not found template directory');
+        }
+	    
+		$tpl = new Template_Lite();
 		$tpl->template_dir = $tplRoot;
 		$tpl->compile_dir = $tplRoot.'/compiled/';
 		$tpl->force_compile = true;
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
-		return $tpl;
+		
+		self::$tpl = $tpl;
+		
+		return self::$tpl;
 	}
 
 	function displayError($message) {
-		$tpl = dbDisplayer::getTemplateInstance();
+		$tpl = self::getTemplateInstance();
 		$tpl->assign('message', $message);
 		return $tpl->fetch('error.ihtml');
 	}
@@ -136,11 +156,11 @@ class dbDisplayer {
 		$tableDefinition =& $this->tblAction->tableDefinition;
 		$tblName = $tableDefinition->name;
 		$tableData = $this->tblAction->loadTableData();
-		$tpl = $this->getTemplateInstance(FS_TEMPLATES);
+		$tpl = self::getTemplateInstance();
 
 		$info = array();
-
-		if (is_file(FS_TEMPLATES."_".$tblName."_list.ihtml")) {
+		
+		if (is_file($tpl->template_dir."/".$tblName."_list.ihtml")) {
 			$customTemplate = true;
 			$tplFile = $tblName."_list.ihtml";
 		} else {
@@ -576,7 +596,7 @@ class dbDisplayer {
 			$token = $this->tblAction->createInsertToken();
 		}
 
-		$tpl = $this->getTemplateInstance(FS_TEMPLATES);
+		$tpl = self::getTemplateInstance();
 		if ($what == 'insert') {
 			$info = array('caption' => $tableDefinition->actions['insert']['caption'], 'action' => 'insert');
 		} elseif ($what == 'info') {
