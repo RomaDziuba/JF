@@ -97,7 +97,11 @@ class tableDefinition {
 				}
 			}
 
-			$this->fields[] = $field;
+            if (!empty($field->name) && !isset($this->fields[$field->name])) {
+                $this->fields[$field->name] = $field;
+            } else {
+                $this->fields[] = $field;
+            }
 			unset($field);
 		}
 		unset($fieldsNodes);

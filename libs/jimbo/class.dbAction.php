@@ -468,11 +468,20 @@ class dbAction {
 	}
 
 
-	function prepareAddonWhere($value) {
-		global $_sessionData;
-		$value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
-		return $value;
-	}
+    function prepareAddonWhere($value, $currentValue = false) {
+        global $_sessionData;
+        $value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
+        if ($currentValue !== false) {
+            if (is_null($currentValue)) {
+                $currentValue = -9999999999;
+            }
+            $value = str_replace("%VALUE%", $currentValue, $value);
+        }
+        if (strpos($value, '%VALUE%')) {
+            $value = str_replace("%VALUE%", -1, $value);
+        }
+        return $value;
+    }
 
 	function loadForeignKeys($exactly = false) {
 
@@ -531,9 +540,9 @@ class dbAction {
 			$sql .= " AND $table.".$keyField.' = "'.$this->currentRow[$item->name].'"';
 		} else {
 			if ($where = $item->getAttribute('valuesWhere')) {
-				$sql .= ' AND '.$this->prepareAddonWhere($where);
+				$sql .= ' AND '.$this->prepareAddonWhere($where, $this->currentRow[$item->name]);
 			} elseif ($where = $item->getAttribute('where')) {
-				$sql .= ' AND '.$this->prepareAddonWhere($where);
+				$sql .= ' AND '.$this->prepareAddonWhere($where, $this->currentRow[$item->name]);
 			}
 
 
@@ -627,7 +636,11 @@ class dbAction {
 			$sql .= ' AND '.$this->prepareAddonWhere($relation['valuesWhere']);
 		}
 
-		$sql .= " ORDER BY $sqlForeignValueField";
+        if (!empty($relation['valuesOrder'])) {
+            $sql .= " ORDER BY ".$relation['valuesOrder'];
+        } else {
+            $sql .= " ORDER BY $sqlForeignValueField";
+        }
 
 		// SQL for all values
 		$dataRes = $this->dbDriver->query($sql);
@@ -699,19 +712,18 @@ class dbAction {
 			}
 		}
 
-		// TODO: переписать
-		/**
-		// Удаляем данные для связи много ко многим
-		if (isset($this->tableDefinition->actions['many2many'])) {
-			$relation = $relation = $this->tableDefinition->relations[$this->tableDefinition->actions['many2many']['relation']];
-			$sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
-			$dbRes = $this->dbDriver->query($sql);
-			if (PEAR::isError($dbRes)) {
-				$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
-				return false;
-			}
-		}
-		*/
+        // Удаляем данные для связи много ко многим
+        foreach ($this->tableDefinition->fields as $field) {
+            if ($field->attributes['type'] == 'many2many') {
+                $relation = $field->attributes;
+                $sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
+                $dbRes = $this->dbDriver->query($sql);
+                if (PEAR::isError($dbRes)) {
+                    $this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+                    return false;
+                }
+            }
+        }
 
 		// Удаляем саму строку
 		$sql = 'DELETE FROM '.$this->tableDefinition->name;
@@ -1080,8 +1092,13 @@ class dbAction {
 			$_sessionData['DB__'.$relationAlias.'__PARENT'] = $this->currentRow[$relation['field']];
 
 			if (!empty($relation['treeCaption'])) {
-				// Необходимо использовать заголовок
-				$_capt = $this->currentRow[$relation['treeCaption']];
+                // Необходимо использовать заголовок
+                if ($this->tableDefinition->fields[$relation['treeCaption']]->attributes['type'] == 'foreignKey') {
+                    $this->loadForeignKeyValues($this->tableDefinition->fields[$relation['treeCaption']]);
+                    $_capt = $this->tableDefinition->fields[$relation['treeCaption']]->keyData[$this->currentRow[$relation['treeCaption']]];
+                } else {
+                    $_capt = $this->currentRow[$relation['treeCaption']];
+                }
 				if (strlen($_capt) > 24) {
 					$trimPos = (int)strpos($_capt, ' ', 20);
 					if ($trimPos > 0) {

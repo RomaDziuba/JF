@@ -408,132 +408,148 @@ class dbDisplayer {
 		return trim($tpl->fetch($tplFile));
 	}
 
-	function addListFilters () {
-		global $_sessionData;
-		include 'jimbo/'.$this->getLangFile();
+    function addListFilters () {
+        global $_sessionData;
+        include 'jimbo/'.$this->getLangFile();
 
-		// Строим фильтры
-		$tableDefinition =& $this->tblAction->tableDefinition;
-		$tblName = $tableDefinition->name;
+        // Строим фильтры
+        $tableDefinition =& $this->tblAction->tableDefinition;
+        $tblName = $tableDefinition->name;
 
-		$filters = array();
-		$filtersCnt = 0;
+        $filters = array();
+        $filtersCnt = 0;
 
-		foreach ($tableDefinition->fields as $key => $field) {
-			if ($field->getAttribute('hide')) {
-				continue;
-			}
+        foreach ($tableDefinition->fields as $key => $field) {
+            if ($field->getAttribute('hide')) {
+                continue;
+            }
 
-			if (!$filterType = $field->getAttribute('filter')) {
-				// не задан тип фильтра
-				$filters[] = '';
-				continue;
-			}
+            if (!$filterType = $field->getAttribute('filter')) {
+                // не задан тип фильтра
+                $filters[] = '';
+                continue;
+            }
 
-			// Cчетчик количества фильтров
-			$filtersCnt++;
+            // Cчетчик количества фильтров
+            $filtersCnt++;
 
-			$filterName = $tblName.'_'.$field->name;
-			if (isset($_sessionData['DB_FILTERS'][$filterName])) {
-				$value = $_sessionData['DB_FILTERS'][$filterName];
-			} else {
-				$value = null;
-			}
+            $filterName = $tblName.'_'.$field->name;
+            if (isset($_sessionData['DB_FILTERS'][$filterName])) {
+                $value = $_sessionData['DB_FILTERS'][$filterName];
+            } else {
+                $value = null;
+            }
 
-			if (strtolower($filterType) == 'select') {
-				$this->tblAction->loadForeignKeys();
-				$values = ($field->getAttribute('type') == 'select') ? $field->valuesList : (array)$tableDefinition->fields[$key]->keyData;
-				$html = '<select name="filter['.$filterName.']" style="width:100%">';
-				$html .= '<option value="">  ...';
-				foreach ($values as $fKey => $fValue) {
-					$selected = (isset($value) && ($value == $fKey) ) ? 'selected' : '';
-					$fValue = mb_substr($fValue, 0, 25, CHARSET);
-					$html .= "<option value='$fKey' $selected>$fValue</option> \n";
-				}
-				$html .= '</select>';
-				$filters[] = $html;
-			} elseif (strtolower($filterType) == 'range') {
-				if ($field->getAttribute('type') == 'datetime') {
-					$filters[]  = '
-					<table>
-					<tr>
-					<td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" id="filter['.$filterName.'][0]" value="'.$value[0].'" size="10" style="vertical-align: top">
-					<input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_f" name="'.$field->name.'_cal_f"> 
-					<script type="text/javascript">
-					    Calendar.setup({
-					        inputField     :    "filter['.$filterName.'][0]",
-					        ifFormat       :    "%Y-%m-%d",
-					        showsTime      :    false,
-					        button         :    "'.$field->name.'_cal_f",
-					        step           :    1
-					    });
-					</script>
-					</td>
-					</tr>
-					<tr>
-					<td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" id="filter['.$filterName.'][1]" value="'.$value[1].'" size="10" style="vertical-align: top">
-					<input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_t" name="'.$field->name.'_cal_t"> 
-					<script type="text/javascript">
-					    Calendar.setup({
-					        inputField     :    "filter['.$filterName.'][1]",
-					        ifFormat       :    "%Y-%m-%d",
-					        showsTime      :    false,
-					        button         :    "'.$field->name.'_cal_t",
-					        step           :    1
-					    });
-					</script>
-					</td>
-					</tr>
-					</table>';
-				} else {
-					$filters[]  = '
-					<table>
-					<tr>
-					<td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" value="'.$value[0].'" size="5" style="vertical-align: top"></td>
-					</tr>
-					<tr>
-					<td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" value="'.$value[1].'" size="5" style="vertical-align: top"></td>
-					</tr>
-					</table>';
-				}
-			} else {
+            if (strtolower($filterType) == 'select') {
+                if ($field->getAttribute('type') == 'select') {
+                    $values = $field->valuesList;
+                } elseif ($field->getAttribute('type') == 'foreignKey') {
+                    $values = false;
+                    if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
+                        $values = $this->customHandler->getFilterValues($field->name);
+                    }
+                    if ($values === false) {
+                        $this->tblAction->loadForeignKeys();
+                        $values =  (array)$tableDefinition->fields[$key]->keyData;
+                    }
 
-				if ($field->getAttribute('type') == 'checkbox') {
-					$html = '<select name="filter['.$filterName.']">';
-					$html .= '<option value="">  ...';
-					$selected = (isset($value) && ($value == 1) ) ? 'selected' : '';
-					$html .= "<option value='1' $selected>checked</option> \n";
-					$selected = (isset($value) && ($value == 0) ) ? 'selected' : '';
-					$html .= "<option value='0' $selected>none</option> \n";
-					$html .= '</select>';
-					$filters[] = $html;
-				} elseif ($field->getAttribute('type') == 'datetime') {
-					$html = '
-					<input type="text" name="filter['.$filterName.']" id="filter['.$filterName.']" value="'.$value.'" size="10" style="vertical-align: top">
-					<input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal" name="'.$field->name.'_cal"> 
-					<script type="text/javascript">
-					    Calendar.setup({
-					        inputField     :    "filter['.$filterName.']",
-					        ifFormat       :    "%Y-%m-%d",
-					        showsTime      :    false,
-					        button         :    "'.$field->name.'_cal",
-					        step           :    1
-					    });
-					</script>';
-					$filters[] = $html;
-				} else {
-					$inputSize = $field->getAttribute('inputSize');
-					if (empty($inputSize)) {
-						$inputSize = 20;
-					}
-					$filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" size="'.$inputSize.'">';
-				}
-			}
-		}
+                } else {
+                    $values = array();
+                }
+                if (!$length = $field->getAttribute('filterLength')) {
+                    $length = 25;
+                }
+                $html = '<select name="filter['.$filterName.']" style="width:100%">';
+                $html .= '<option value="">  ...';
+                foreach ($values as $fKey => $fValue) {
+                    $selected = (isset($value) && ($value == $fKey) ) ? 'selected' : '';
+                    $fValue = mb_substr($fValue, 0, $length, CHARSET);
+                    $html .= "<option value='$fKey' $selected>$fValue</option> \n";
+                }
+                $html .= '</select>';
+                $filters[] = $html;
+            } elseif (strtolower($filterType) == 'range') {
+                if ($field->getAttribute('type') == 'datetime') {
+                    $filters[]  = '
+                    <table>
+                    <tr>
+                    <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" id="filter['.$filterName.'][0]" value="'.$value[0].'" size="10" style="vertical-align: top">
+                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_f" name="'.$field->name.'_cal_f"> 
+                    <script type="text/javascript">
+                        Calendar.setup({
+                            inputField     :    "filter['.$filterName.'][0]",
+                            ifFormat       :    "%Y-%m-%d",
+                            showsTime      :    false,
+                            button         :    "'.$field->name.'_cal_f",
+                            step           :    1
+                        });
+                    </script>
+                    </td>
+                    </tr>
+                    <tr>
+                    <td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" id="filter['.$filterName.'][1]" value="'.$value[1].'" size="10" style="vertical-align: top">
+                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_t" name="'.$field->name.'_cal_t"> 
+                    <script type="text/javascript">
+                        Calendar.setup({
+                            inputField     :    "filter['.$filterName.'][1]",
+                            ifFormat       :    "%Y-%m-%d",
+                            showsTime      :    false,
+                            button         :    "'.$field->name.'_cal_t",
+                            step           :    1
+                        });
+                    </script>
+                    </td>
+                    </tr>
+                    </table>';
+                } else {
+                    $filters[]  = '
+                    <table>
+                    <tr>
+                    <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" value="'.$value[0].'" size="5" style="vertical-align: top"></td>
+                    </tr>
+                    <tr>
+                    <td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" value="'.$value[1].'" size="5" style="vertical-align: top"></td>
+                    </tr>
+                    </table>';
+                }
+            } else {
 
-		return $filtersCnt > 0 ? $filters : false;
+                if ($field->getAttribute('type') == 'checkbox') {
+                    $html = '<select name="filter['.$filterName.']">';
+                    $html .= '<option value="">  ...';
+                    $selected = (isset($value) && ($value == 1) ) ? 'selected' : '';
+                    $html .= "<option value='1' $selected>checked</option> \n";
+                    $selected = (isset($value) && ($value == 0) ) ? 'selected' : '';
+                    $html .= "<option value='0' $selected>none</option> \n";
+                    $html .= '</select>';
+                    $filters[] = $html;
+                } elseif ($field->getAttribute('type') == 'datetime') {
+                    $html = '
+                    <input type="text" name="filter['.$filterName.']" id="filter['.$filterName.']" value="'.$value.'" size="10" style="vertical-align: top">
+                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal" name="'.$field->name.'_cal"> 
+                    <script type="text/javascript">
+                        Calendar.setup({
+                            inputField     :    "filter['.$filterName.']",
+                            ifFormat       :    "%Y-%m-%d",
+                            showsTime      :    false,
+                            button         :    "'.$field->name.'_cal",
+                            step           :    1
+                        });
+                    </script>';
+                    $filters[] = $html;
+                } else {
+                    $inputSize = $field->getAttribute('inputSize');
+                    if (empty($inputSize)) {
+                        $inputSize = 20;
+                    }
+                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" size="'.$inputSize.'">';
+                }
+            }
+        }
 
-	}
+        return $filtersCnt > 0 ? $filters : false;
+
+    }
 
 
 	function displayErrorMessage($message = '') {

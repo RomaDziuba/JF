@@ -46,7 +46,7 @@ class abstractFormField {
 
 	function getEditInput($value = '', $inline = false) {
 		$value = htmlspecialchars($value);
-		$width = $inline ? "width:150px;" : "width:400px;";
+		$width = $this->getWidth($inline);
 		return "<input style='{$width}' type='text' name='{$this->name}' value='{$value}' class='thin'>";
 	}
 
@@ -70,9 +70,10 @@ class abstractFormField {
 		return $value;
 	}
 
-	function displayRow($value) {
-		return '<input style="width:400px" type="text" readonly disabled name="'.$this->name.'" value="'.$value.'" class="thin">';
-	}
+    function displayRow($value) {
+        $width = $this->getWidth();
+        return '<input style="'.$width.'" type="text" readonly disabled name="'.$this->name.'" value="'.$value.'" class="thin">';
+    }
 
 	function DisplayRO($value) {
 		return nl2br($value);
@@ -85,6 +86,18 @@ class abstractFormField {
 			return substr($string, $from, $to);
 		}
 	}
+	
+	
+    function getWidth($inline = false, $default = '380px') {
+        $width = $this->getAttribute('inputWidth');
+        if ($inline) {
+            $width = '150px';
+        } elseif (empty($width)) {
+            $width = $default;
+        }
+        return 'width:'.$width.';';
+    }
+	
 }
 
 
@@ -130,7 +143,7 @@ class textFormField extends abstractFormField {
 	function getEditInput($value = '', $inline = false) {
 		$value = htmlspecialchars($value);
 		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
-		$width = $inline ? "width:150px;" : "width:400px;";
+		$width = $this->getWidth($inline);
 		return '<input style="'.$width.'" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin" '.$readonly.'>';
 	}
 
@@ -187,14 +200,14 @@ class timestampFormField extends abstractFormField {
 	function readItself($node) {
 		parent::readItself($node);
 		$length = $this->getAttribute('length');
-		if (!in_array($length, array(10, 16, 19)))  {
+		if (!in_array($length, array(5, 10, 16, 19)))  {
 			$this->attributes['length'] = 19;
 		}
 	}
 
 	function getEditInput($value = '', $inline = false) {
 		$value = substr(date("Y-m-d H:i:s"), 0, $this->getAttribute('length'));
-		$width = $inline ? "width:150px;" : "width:400px;";
+		$width = $this->getWidth($inline, '350px');
 		return '<input style="'.$width.'" type="text" name="'.$this->name.'" value="'.$value.'" class="thin">';
 	}
 
@@ -202,80 +215,89 @@ class timestampFormField extends abstractFormField {
 
 class datetimeFormField extends abstractFormField {
 
-	function readItself($node) {
-		parent::readItself($node);
-		$length = $this->getAttribute('length');
-		if (!in_array($length, array(10, 16, 19)))  {
-			$this->attributes['length'] = 19;
-		}
-	}
+    function readItself($node) {
+        parent::readItself($node);
+        $length = $this->getAttribute('length');
+        if (!in_array($length, array(5, 10, 16, 19)))  {
+            $this->attributes['length'] = 19;
+        }
+    }
 
-	function getEditInput($value = '', $inline = false) {
-		if (!empty($this->attributes['readonly'])) {
-			return $this->displayRO($value)	;
-		}
+    function getEditInput($value = '', $inline = false) {
+        if (!empty($this->attributes['readonly'])) {
+            return $this->displayRO($value) ;
+        }
 
-		if (empty($value)) {
-			if (isset($this->attributes['default'])) {
-				$value = $this->attributes['default'];
-			} else {
-				$value = date("Y-m-d");
-			}
-		}
-		$value = substr($value, 0, $this->getAttribute('length'));
-		if ($value == '0000-00-00') {
-			$value = '';
-		}
+        if (empty($value)) {
+            if (isset($this->attributes['default'])) {
+                $value = $this->attributes['default'];
+            } else {
+                if ($this->getAttribute('length') != 5) {
+                    $value = date("Y-m-d");
+                } else {
+                    $value = date("H:i");
+                }
+            }
+        }
+        $value = substr($value, 0, $this->getAttribute('length'));
+        if ($value == '0000-00-00') {
+            $value = '';
+        }
 
-		
-		if (in_array($this->getAttribute('length'), array(16, 19)))  {
-			$needTime = 'true';
-			$format = ' %H:%m';
-		} else {
-			$needTime = 'false';
-			$format = '';
-		}
+        
+        if (in_array($this->getAttribute('length'), array(16, 19)))  {
+            $needTime = 'true';
+            $format = '%Y-%m-%d %H:%M';
+        } elseif (in_array($this->getAttribute('length'), array(5)))  {
+            $needTime = 'true';
+            $format = '%H:%M';
+        } else {
+            $needTime = 'false';
+            $format = '%Y-%m-%d';
+        }
 
-		$width = $inline ? "width:100px;" : "width:350px;";
-		
-		return '<input style="'.$width.' vertical-align:top;" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'">
-		<input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$this->name.'_cal" name="'.$this->name.'_cal"> 
-		<script type="text/javascript">
+        $width = $this->getWidth($inline, '350px');
+        
+        return '<input style="'.$width.' vertical-align:top;" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'">
+        <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$this->name.'_cal" name="'.$this->name.'_cal"> 
+        <script type="text/javascript">
     Calendar.setup({
         inputField     :    "'.$this->name.'",           //*
-        ifFormat       :    "%Y-%m-%d'.$format.'",
+        ifFormat       :    "'.$format.'",
         showsTime      :    '.$needTime.',
         button         :    "'.$this->name.'_cal",        //*
         step           :    1
     });
 </script>
-		';
-		return $value;
-	}
+        ';
+        return $value;
+    }
 
-	function displayValue($value) {
-		$length = $this->getAttribute('length');
-		if (!in_array($length, array(10, 16, 19)))  {
-			$this->attributes['length'] = 10;
-		}
-		$value = substr($value, 0, $length);
-		return $value;
-	}
+    function displayValue($value) {
+        $length = $this->getAttribute('length');
+        if (!in_array($length, array(5, 10, 16, 19)))  {
+            $this->attributes['length'] = 10;
+        }
+        $value = substr($value, 0, $length);
+        return $value;
+    }
 
-	
+    
 }
 
 
 class textareaFormField extends abstractFormField {
-	function getEditInput($value = '') {
-		return '<textarea style="width:400px" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
-	}
+    function getEditInput($value = '') {
+        $width = $this->getWidth();
+        return '<textarea style="'.$width.'" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
+    }
 }
 
 class readonlyFormField extends abstractFormField {
-	function getEditInput($value = '') {
-		return '<input style="width:400px" type="text" name="'.$this->name.'" value="'.$value.'" class="thin" readonly>';
-	}
+    function getEditInput($value = '') {
+        $width = $this->getWidth();
+        return '<input style="width:'.$width.'" type="text" name="'.$this->name.'" value="'.$value.'" class="thin" readonly>';
+    }
 
 }
 
@@ -305,14 +327,13 @@ class selectFormField extends abstractFormField {
 			return $this->displayRO($value)	;
 		}
 		
-		$width = $inline ? "width:150px;" : "width:400px;";
-		
+		$width = $this->getWidth($inline);
 		$select = '<select style="'.$width.'" class="thin" name="'.$this->name.'" >';
 		foreach ($this->valuesList as $key => $val) {
 			$selected = ($key == $value) ? 'selected' : '';
 			$select .= '<option value="'.$key.'" '.$selected.'>'.$val;
 		}
-		$select .= '</SELECT>';
+		$select .= '</select>';
 		return $select;
 	}
 
@@ -329,35 +350,36 @@ class selectFormField extends abstractFormField {
 }
 
 class foreignKeyFormField extends abstractFormField {
-	var $foreignKey = true;
-	var $keyData = array();
+    var $foreignKey = true;
+    var $keyData = array();
 
-	function getEditInput($value = false) {
-		if (!empty($this->attributes['readonly'])) {
-			return $this->displayRO($value)	;
-		}
-		
-		$ajaxHtml = empty($this->attributes['ajaxChild']) ? '' : ' onChange="dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', this.name, this.value)" ';
-		$ajaxHtml2 = empty($this->attributes['ajaxChild']) ? '' : '<option '.($value === false ? ' selected ' : '').' value="-999">';
-		$result = '<select style="width:400px;" class="thin" name="'.$this->name.'" id="'.$this->name.'" '.$ajaxHtml.'>' . $ajaxHtml2;
-		if ($this->attributes['allowEmpty']) {
-			$result .= '<option value="0"></option>';
-		}
-		foreach ($this->keyData as $key => $val) {
-			$selected = ($key == $value) ? 'selected' : '';
-			$result .= '<option value="'.$key.'" '.$selected.'>'.$val."\n";
-		}
-		$result .= '</select>';
-		if ( (!empty($this->attributes['ajaxChild'])) && (!empty($value)) ) {
-			//$GLOBALS['dba_afetrpatyjs'] .= '<script>dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', "'.$this->name.'", "'.$value.'")</script>';
-		}
-		return $result;
-	}
+    function getEditInput($value = false) {
+        if (!empty($this->attributes['readonly'])) {
+            return $this->displayRO($value) ;
+        }
+        
+        $ajaxHtml = empty($this->attributes['ajaxChild']) ? '' : ' onChange="dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', this.name, this.value)" ';
+        $ajaxHtml2 = empty($this->attributes['ajaxChild']) ? '' : '<option '.($value === false ? ' selected ' : '').' value="-999">';
+        $width = $this->getWidth();
+        $result = '<select style="'.$width.'" class="thin" name="'.$this->name.'" id="'.$this->name.'" '.$ajaxHtml.'>' . $ajaxHtml2;
+        if ($this->attributes['allowEmpty']) {
+            $result .= '<option value="0"></option>';
+        }
+        foreach ($this->keyData as $key => $val) {
+            $selected = ($key == $value) ? 'selected' : '';
+            $result .= '<option value="'.$key.'" '.$selected.'>'.$val."\n";
+        }
+        $result .= '</select>';
+        if ( (!empty($this->attributes['ajaxChild'])) && (!empty($value)) ) {
+            //$GLOBALS['dba_afetrpatyjs'] .= '<script>dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', "'.$this->name.'", "'.$value.'")</script>';
+        }
+        return $result;
+    }
 
-	function displayRO($value) {
-		$value = $this->keyData[$value];
-		return $value;
-	}
+    function displayRO($value) {
+        $value = $this->keyData[$value];
+        return $value;
+    }
 }
 
 
