@@ -114,6 +114,23 @@ class Controller
         exit();
     } // end redirect
     
+    public function json($data = array(), $type = false)
+    {
+        $json = json_encode($data);
+        
+        switch($type) {
+            case 'iframe':
+                header('Content-Type: text/html; charset='.CHARSET);
+                echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+                break;
+            default:
+                header('Content-type: application/json'); 
+                echo $json;       
+        }
+        
+        exit();        
+    } // end json
+    
     public function display($content, $template = 'main.ihtml', $vars = false, $tplPath = false) 
     {
         echo $this->fetch($content, $template, $vars, $tplPath);

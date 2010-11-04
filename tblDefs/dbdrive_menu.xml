@@ -9,6 +9,7 @@ defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
         <field type="text" caption="Название" name="caption" trim="60" width="30%" required="true" sorting="true"/>
         <field type="text" caption="Url" name="url" trim="60" width="30%"  sorting="true"/>
         <field type="text" caption="id_parent" name="id_parent" trim="60" width="30%" sorting="true"/>
+        <field type="datetime" caption="f_1" name="f_1" trim="60" width="30%"  sorting="true"/>
         <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true" />
     </fields>
     

@@ -625,3 +625,6 @@ table.filters {
 	margin-right:25px;
 }
 
+.calendar {
+	z-index:1050;
+}

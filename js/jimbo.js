@@ -13,6 +13,13 @@ function jsonResponse(data)
 		case 'success':
 			dbaUpdateSuccess(data);
 			break;
+			
+		case 'alert':
+			showMessages(data['title'], data['message']);
+			if(data['url'] != undefined) {
+				setTimeout("document.location.replace('"+data['url']+"')", 1200);
+			}
+			break;
 	}
 	
 	return true;
@@ -131,6 +138,10 @@ function openJqueryPopup(id)
 	if(viewHeight < height) { 
 		height = viewHeight;
 		widthDelta += 50;
+	}
+	
+	if(jimbo.dialogWidth == undefined) {
+		jimbo.dialogWidth = 640;
 	}
 	
 	obj.dialog({
