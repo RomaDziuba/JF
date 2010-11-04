@@ -114,10 +114,20 @@ class Controller
         exit();
     } // end redirect
     
-    public function json($data = array())
+    public function json($data = array(), $type = false)
     {
-        header('Content-type: application/json');
-        echo json_encode($data);
+        $json = json_encode($data);
+        
+        switch($type) {
+            case 'iframe':
+                header('Content-Type: text/html; charset='.CHARSET);
+                echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+                break;
+            default:
+                header('Content-type: application/json'); 
+                echo $json;       
+        }
+        
         exit();        
     } // end json
     
