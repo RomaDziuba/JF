@@ -411,7 +411,7 @@ class dbAction {
             
             $response = array(
                 'type' => 'error',
-                'message' => $message
+                'message' => iconv('windows-1251', 'UTF-8', $message)
             );
             
             // TODO: Move to root logic
@@ -430,7 +430,7 @@ class dbAction {
 			    
 			$response = array(
                 'type' => 'success',
-                'message' => $this->locale['STATUS_SUCCESS'],
+                'message' => iconv('windows-1251', 'UTF-8', $this->locale['STATUS_SUCCESS']),
                 'url' => $newLocation,
                 'isPoupMode' => $isPoupMode
 			);
