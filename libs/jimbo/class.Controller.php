@@ -114,6 +114,13 @@ class Controller
         exit();
     } // end redirect
     
+    public function json($data = array())
+    {
+        header('Content-type: application/json');
+        echo json_encode($data);
+        exit();        
+    } // end json
+    
     public function display($content, $template = 'main.ihtml', $vars = false, $tplPath = false) 
     {
         echo $this->fetch($content, $template, $vars, $tplPath);

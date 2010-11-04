@@ -13,6 +13,13 @@ function jsonResponse(data)
 		case 'success':
 			dbaUpdateSuccess(data);
 			break;
+			
+		case 'alert':
+			showMessages(data['title'], data['message']);
+			if(data['url'] != undefined) {
+				setTimeout("document.location.replace('"+data['url']+"')", 1200);
+			}
+			break;
 	}
 	
 	return true;
@@ -107,16 +114,16 @@ function openJqueryPopup(id)
 		}
 	});
 	
+	if(submitCaption) {
+		buttons.submit = function() {
+			$(obj).find('form').submit();
+        };
+	}
+	
 	if(cancelCaption) {
 		buttons.cancel = function() {
             $(this).dialog('destroy');
             $('#' + id).remove();
-        };
-	}
-	
-	if(submitCaption) {
-		buttons.submit = function() {
-			$(obj).find('form').submit();
         };
 	}
 	
