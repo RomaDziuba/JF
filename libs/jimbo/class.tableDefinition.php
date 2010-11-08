@@ -42,16 +42,17 @@ class tableDefinition {
 			$this->raiseError("Cant open file $file for reading!");
 			return false;
 		}
-
-
+		
+		try {
+            $info = Controller::call('Jimbo', 'definition');
+		} catch( Exception $exp) {
+		    $info = array();
+		}
+		
 		$tpl = dbDisplayer::getTemplateInstance();
-		//Goliath:
-		//$GLOBALS['db']->query('set names utf8');
-		$tpl->assign('_dictionary', $GLOBALS['db']->getAssoc("SELECT ident, value_".LANG." FROM dictionary"));
-		//$GLOBALS['db']->query('set names cp1251');
-		$tableDef = trim($tpl->fetch($file));
-
-		//		echo $tableDef; die;
+        $tpl->assign('info', $info);
+        
+        $tableDef = trim($tpl->fetch($file));
 
 		$xmlObj = simplexml_load_string($tableDef);
 		if(!$xmlObj) {

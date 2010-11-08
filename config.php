@@ -20,7 +20,7 @@ define('SITE_CHARSET', CHARSET);
 define('JIMBO_VERSION', '3.1');
 
 // popup | jquery
-define('JIMBO_POPUP_MODE', 'jquery');
+define('JIMBO_POPUP_MODE', 'popup');
 
 define('FS_ROOT', dirname(__FILE__)."/");
 

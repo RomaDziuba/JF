@@ -188,11 +188,7 @@ function openPopup(uri)
 	if (navigator.appName == 'Microsoft Internet Explorer') {
 		window.showModelessDialog(uri, window, "dialogWidth=650px;dialogHeight=575px;resizable=no;scroll=no;status=no;toolbar=no;menubar=no;location=no;titlebar=no;directories=no");
 	} else {
-		var popW = 650;
-        var popH = 575;
-        var left = (screen.width/2) - (popW/2);
-        var top = (screen.height/2) - (popH/2);
-        window.open(uri, '', "width="+popW+",height="+popH+",top="+top+",left="+left+",status=no,toolbar=no,menubar=no,location=no,titlebar=no,resizable=yes,directories=no,scroll=no");
+		window.open(uri, '', "width=650,height=575,status=no,toolbar=no,menubar=no,location=no,titlebar=no,resizable=yes,directories=no,scroll=no");
     }
 }
 
@@ -226,6 +222,10 @@ function initPopup()
 			$('.formRows').css('height', viewHeight + 'px');
 		}
 		
+		posY = (screen.height - window.outerHeight) / 2;
+		posX = (screen.width - window.outerWidth) / 2;
+		
+		window.moveTo(posX, posY);
 	} else {
 		// for IE
 		window.dialogHeight = height + 'px';
@@ -237,6 +237,12 @@ function initPopup()
 			width = parseInt(window.dialogWidth) + 20;
 			window.dialogWidth = width + 'px';
 	    }
+	    
+	    posY = (screen.height - parseInt(window.dialogHeight)) / 2;
+		posX = (screen.width - parseInt(window.dialogWidth)) / 2;
+		
+	    window.dialogTop = posY + 'px';
+	    window.dialogLeft = posX + 'px';
 	}
 	
 	$('.jform').css('height', '100%');
