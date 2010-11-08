@@ -33,7 +33,6 @@ define('IMAGEMAGIC_BIN', '/usr/local/bin/convert');
 define("FS_TEMPLATES", FS_ROOT."templates/");
 define("FS_LIBS", FS_ROOT."libs/");
 define('HTTP_ROOT', "/jimbo/");
-define('LANG', 'ru');
 define('ENGINE_URL', 'jimbo');
 
 define('AUTH_DATA', 'dbadmin');

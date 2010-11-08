@@ -71,10 +71,6 @@ class dbDisplayer {
 
 	function &getTemplateInstance($tplRoot = false) {
 	    
-        if(!is_null(self::$tpl)) {
-            return self::$tpl;
-	    }
-	    
 	    if(!$tplRoot) {
             $tplRoot = realpath(dirname(__FILE__).'/../../templates');
 	    }
@@ -90,9 +86,7 @@ class dbDisplayer {
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
 		
-		self::$tpl = $tpl;
-		
-		return self::$tpl;
+		return $tpl;
 	}
 
 	function displayError($message) {
