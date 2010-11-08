@@ -85,11 +85,19 @@ class Controller
         return preg_replace('#^'.$prefix.'#Umis', '/', $url);
     } // end getCurrentURL
     
-    public function call($plugin, $method, $params = array(), $classPrefix = 'Plugin')
+    public static function call($plugin, $method, $params = array(), $options = array())
     {
+        $classPrefix = !isset($options['classPrefix']) ?  'Plugin' : $classPrefix;
+        
         $className = $plugin.$classPrefix;
         
-        $classFile = $this->config['paths']['plugins'].$className.'.php';
+        if(!isset($options['path'])) {
+            $path = realpath(dirname(__FILE__).'/../../plugins').'/';
+        } else {
+            $path = $options['path'];
+        }
+        
+        $classFile = $path.$className.'.php';
                           
         if (!file_exists($classFile)) {
             throw new SystemException(sprintf(_('File "%s" for plugin "%s" was not found.'), $classFile, $plugin));
@@ -100,7 +108,7 @@ class Controller
             throw new SystemException(sprintf(_('Class "%s" was not found in file "%s".'), $className, $classFile));
         }
             
-        $obj = new $className($this->tpl);
+        $obj = new $className(dbDisplayer::getTemplateInstance());
         if (!is_callable(array($obj, $method))) {
             throw new SystemException(sprintf(_('Method "%s" was not found in module "%s".'), $method, $plugin));
         }

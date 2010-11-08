@@ -167,6 +167,11 @@ class JimboPlugin extends Plugin
         return $menu->getHTML();
     } // end getMenu
     
+    public function definition()
+    {
+        
+    }
+    
    
     
 }
