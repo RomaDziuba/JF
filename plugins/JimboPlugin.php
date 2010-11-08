@@ -108,6 +108,9 @@ class JimboPlugin extends Plugin
     public function getMenu()
     {
         global $jimbo;
+        
+        require_once 'jimbo/class.dbMenu.php';
+        
         if(!$jimbo->user->isLogin()) {
             return false;
         }

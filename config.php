@@ -22,6 +22,10 @@ define('JIMBO_VERSION', '3.1');
 // popup | jquery
 define('JIMBO_POPUP_MODE', 'popup');
 
+if(!defined('LANG')) {
+    define('LANG', 'ru');
+}
+
 define('FS_ROOT', dirname(__FILE__)."/");
 
 define('TPL_ROOT', FS_ROOT.'/templates/');
