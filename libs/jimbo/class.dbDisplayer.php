@@ -577,10 +577,11 @@ class dbDisplayer {
 		
 		$tableDefinition = $this->tblAction->tableDefinition;
 		$primaryKey = $tableDefinition->getAttribute('primaryKey');
+		
+		$customTemplate = $tableDefinition->getAttribute('customForm');
 
 		// При удалении мы подгружаем не дропдаун, а конкретное значение
 		$this->tblAction->loadForeignKeys($what == 'remove');
-
 
 		if ($what != 'insert') {
 			$currentRow = $this->tblAction->currentRow;
@@ -590,7 +591,9 @@ class dbDisplayer {
 			$token = $this->tblAction->createInsertToken();
 		}
 
-		$tpl = self::getTemplateInstance();
+		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false; 
+        $tpl = self::getTemplateInstance($path);
+		
 		if ($what == 'insert') {
 			$info = array('caption' => $tableDefinition->actions['insert']['caption'], 'action' => 'insert');
 		} elseif ($what == 'info') {
@@ -687,7 +690,7 @@ class dbDisplayer {
 			}
 		}
 
-		$customTemplate = $tableDefinition->getAttribute('customForm');
+		
 		if (empty($customTemplate)) {
 			return trim($tpl->fetch('dba_form.ihtml'));
 		} else {

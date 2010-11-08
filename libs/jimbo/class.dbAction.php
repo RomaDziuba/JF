@@ -411,7 +411,7 @@ class dbAction {
             
             $response = array(
                 'type' => 'error',
-                'message' => iconv('windows-1251', 'UTF-8', $message)
+                'message' => $this->getText($message)
             );
             
             // TODO: Move to root logic
@@ -430,7 +430,7 @@ class dbAction {
 			    
 			$response = array(
                 'type' => 'success',
-                'message' => iconv('windows-1251', 'UTF-8', $this->locale['STATUS_SUCCESS']),
+                'message' => $this->getText($this->locale['STATUS_SUCCESS']),
                 'url' => $newLocation,
                 'isPoupMode' => $isPoupMode
 			);
@@ -1219,6 +1219,16 @@ class dbAction {
 		return $value;
 
 	}
+	
+	private function getText($text)
+	{
+	    if(strtolower(CHARSET) == 'utf-8') {
+	        return $text;
+	    }
+	    
+	    return iconv(CHARSET, 'UTF-8', $text);
+	}
+	
 }
 
 ?>
