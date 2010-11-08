@@ -43,15 +43,13 @@ class tableDefinition {
 			return false;
 		}
 		
+		$tpl = dbDisplayer::getTemplateInstance();
 		try {
-            $info = Controller::call('Jimbo', 'definition');
+            $info = Controller::call('TblDefinition', 'definition', array(&$tpl));
 		} catch( Exception $exp) {
 		    $info = array();
 		}
 		
-		$tpl = dbDisplayer::getTemplateInstance();
-        $tpl->assign('info', $info);
-        
         $tableDef = trim($tpl->fetch($file));
 
 		$xmlObj = simplexml_load_string($tableDef);
