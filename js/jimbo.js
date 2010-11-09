@@ -172,6 +172,11 @@ function openWindow(uri)
 	
 	switch(mode) {
 		case 'jquery':
+			obj = $("#loader");
+			if(obj.length == 0) {
+				$('body').append('<div id="loader"></div>');
+			}
+			obj = $("#loader");
 			$("#loader").load(uri, function() {
 				openJqueryPopup('dba_form');
 			});
@@ -275,7 +280,13 @@ function loadContent(url, id)
 {
 	id = (id == undefined) ? 'loader' : id;
 	
-	$("#" + id).load(url, function() {
+	obj = $("#" + id);
+	if(obj.length == 0) {
+		$('body').append('<div id="'+id+'"></div>');
+	}
+	obj = $("#" + id);
+	
+	obj.load(url, function() {
 	});
 } // end loadContent
 

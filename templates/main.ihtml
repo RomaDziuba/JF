@@ -87,7 +87,6 @@ function dbaForeignKeyLoad(f1, f2, val) {
 {$menu}
 
 <div style="margin:11px;">{$content}</div>
-<div id="loader"></div>
 
 <br/><br/>
 </BODY></HTML>
