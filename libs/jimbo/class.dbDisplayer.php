@@ -342,7 +342,8 @@ class dbDisplayer {
                     'addon' => $external ? ' target="_blank" ' : '',
                     'target' => $target,
                     'popup' => $external,
-                    'popupFunction' => $popupFunction
+                    'popupFunction' => $popupFunction,
+				    'js' => isset($action['js']) ? $action['js'] : false, 
                 );
 				
                 $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
