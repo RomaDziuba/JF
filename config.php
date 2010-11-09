@@ -20,7 +20,7 @@ define('SITE_CHARSET', CHARSET);
 define('JIMBO_VERSION', '3.1');
 
 // popup | jquery
-define('JIMBO_POPUP_MODE', 'popup');
+define('JIMBO_POPUP_MODE', 'jquery');
 
 if(!defined('LANG')) {
     define('LANG', 'ru');

@@ -412,6 +412,11 @@ table.jlist, table.jform {
 	color: #000000;
 	/*border: 1px solid #6393DF;*/
 }
+
+.breadcrumbs {
+	clear:both;
+}
+
 .breadcrumbs, table.jform .caption {
 	background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
 	COLOR: #FFFFFF;
@@ -445,6 +450,10 @@ table.filters .caption {
        color: #FFFFFF;
        FONT-FAMILY: Arial, Helvetica;
        font-size:15px;
+}
+
+.ka_table td{
+	padding:5px;
 }
 
 .ka_row, .ka_row_today {
@@ -496,9 +505,10 @@ table.filters .caption {
 /**/
 
 .clear {
-	clear:right;
+	clear:both;
 	visibility:hidden; 
 	height:0px;
+	display:hidden;
 }
 
 .menucontainerbottom  div.grouped {
@@ -563,11 +573,11 @@ border: 2px solid #6393df;
 border-bottom: 0px;
 BACKGROUND-COLOR: #81b1fd;
 text-align:center;
-vertical-align: middle;
+
 font-size:14px;
 font-family: verdana;
 background: #81b1fd url(../images/skin/menu/menusection2.gif) repeat-x top left;
-
+margin:0px;
 }
 
 .menucontainerbottom  div {

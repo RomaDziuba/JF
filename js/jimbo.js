@@ -4,7 +4,6 @@ function jsonResponse(data)
 		eval(data['eval']);
 	}
 	
-	
 	switch(data['type']) {
 		case 'error':
 			dbaUpdateError(data);
@@ -173,6 +172,11 @@ function openWindow(uri)
 	
 	switch(mode) {
 		case 'jquery':
+			obj = $("#loader");
+			if(obj.length == 0) {
+				$('body').append('<div id="loader"></div>');
+			}
+			obj = $("#loader");
 			$("#loader").load(uri, function() {
 				openJqueryPopup('dba_form');
 			});
@@ -185,10 +189,16 @@ function openWindow(uri)
 
 function openPopup(uri)
 {
+	defaultWidth = 650;
+	defaultHeight = 575;
+	
+	posY = (screen.height - defaultHeight) / 2;
+	posX = (screen.width - defaultWidth) / 2;
+	
 	if (navigator.appName == 'Microsoft Internet Explorer') {
-		window.showModelessDialog(uri, window, "dialogWidth=650px;dialogHeight=575px;resizable=no;scroll=no;status=no;toolbar=no;menubar=no;location=no;titlebar=no;directories=no");
+		window.showModelessDialog(uri, window, "dialogWidth=" + defaultWidth + "px;dialogHeight=" + defaultHeight + "px;left=" + posX + "px;top=" +posY + "px;resizable=no;scroll=no;status=no;toolbar=no;menubar=no;location=no;titlebar=no;directories=no");
 	} else {
-		window.open(uri, '', "width=650,height=575,status=no,toolbar=no,menubar=no,location=no,titlebar=no,resizable=yes,directories=no,scroll=no");
+		window.open(uri, '', "width=" + defaultWidth + ",height=" + defaultHeight +",left=" + posX + "px,top=" +posY + "px,status=no,toolbar=no,menubar=no,location=no,titlebar=no,resizable=yes,directories=no,scroll=no");
     }
 }
 
@@ -228,6 +238,7 @@ function initPopup()
 		window.moveTo(posX, posY);
 	} else {
 		// for IE
+		height += $('#form_actions>td').outerHeight() + 5;
 		window.dialogHeight = height + 'px';
 	    realHeight = $.getViewHeight() + 120;
 	    
@@ -269,7 +280,13 @@ function loadContent(url, id)
 {
 	id = (id == undefined) ? 'loader' : id;
 	
-	$("#" + id).load(url, function() {
+	obj = $("#" + id);
+	if(obj.length == 0) {
+		$('body').append('<div id="'+id+'"></div>');
+	}
+	obj = $("#" + id);
+	
+	obj.load(url, function() {
 	});
 } // end loadContent
 
