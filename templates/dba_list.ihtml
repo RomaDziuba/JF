@@ -102,7 +102,7 @@ $('#filtersButton').click(function() {
 
 <div class="breadcrumbs"><b>{$info.caption}</b></div>
 <table id="tbllist" class="ka_table" border="0" width="100%"  cellpadding="0" cellspacing="1">
-<form style="display:inline;" method="post" id="tbl_form" name="test">
+<form style="display:inline;" method="post" name="test">
 
 	<input type="hidden" name="picker" id="picker" />
 	<input type="hidden" name="filter_wtd" id="filter_wtd" value="apply" />

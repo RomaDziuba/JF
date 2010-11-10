@@ -202,10 +202,15 @@ function openPopup(uri)
     }
 }
 
-function initPopup()
+function initPopup(custome)
 {	
 	$("#tblform>tbody>tr:nth-child(odd)").addClass("ka_odd");
-	mode = (jimbo.mode == undefined) ? 'popup' : jimbo.mode;
+	
+	if(custome == undefined) {
+		mode = (jimbo.mode == undefined) ? 'popup' : jimbo.mode;
+	} else {
+		mode = custome;
+	} 
 	
 	if(mode != 'popup') {
 		return false;
@@ -228,7 +233,7 @@ function initPopup()
 		
 		if(deltaWidth > 0) {
 			// TODO: Fix height in Safari
-			viewHeight = $.getViewHeight() - $('#form_actions>td').outerHeight()- $('.caption').outerHeight();
+			viewHeight = getViewHeight() - $('#form_actions>td').outerHeight()- $('.caption').outerHeight();
 			$('.formRows').css('height', viewHeight + 'px');
 		}
 		
@@ -240,10 +245,10 @@ function initPopup()
 		// for IE
 		height += $('#form_actions>td').outerHeight() + 5;
 		window.dialogHeight = height + 'px';
-	    realHeight = $.getViewHeight() + 120;
+	    realHeight = getViewHeight() + 120;
 	    
 	    if(realHeight >= screen.height) {
-	    	viewHeight = $.getViewHeight() - $('#form_actions>td').outerHeight()- $('.caption').outerHeight();
+	    	viewHeight = getViewHeight() - $('#form_actions>td').outerHeight()- $('.caption').outerHeight();
 			$('.formRows').css('height', viewHeight + 'px');
 			width = parseInt(window.dialogWidth) + 20;
 			window.dialogWidth = width + 'px';
@@ -303,6 +308,31 @@ $.getViewHeight = function() {
 
 	 return viewportheight;
 }; // end getViewHeight
+
+function doSelectTo(obj, id) {
+	document.getElementById(id).value = obj.value;
+}
+
+function tbl_check_all(namef, status) 
+{	
+	elements = $('input[name^=' + namef + ']');
+	if(elements.length == 0) {
+		return false;
+	}
+	
+	for (i = 0; i < elements.length; i++) {
+		el = elements[i];
+		if (el.name.substr(0, namef.length) == namef) {
+			el.checked = status;
+		}
+	}
+} // end tbl_check_all
+
+function dbaForeignKeyLoad(f1, f2, val) {
+	var url = '?action=foreignKeyLoad&ajaxChild=' + f1 + '&ajaxParent=' + f2 + '&value=' + escape(val);
+	document.getElementById('db_system').src = url;
+}
+
 
 
 

@@ -59,30 +59,6 @@
 </head>
 <BODY bgcolor="White">
 
-{literal}
-<script>
-function doSelectTo(obj, id) {
-	document.getElementById(id).value = obj.value;
-}
-
-function tbl_check_all(namef, status) {
-	frm = document.getElementById('tbl_form');
-	for (i = 0; i < frm.elements.length; i++) {
-		el = frm.elements[i];
-		if (el.name.substr(0, namef.length) == namef) {
-			el.checked = status;
-		}
-	}
-}
-
-function dbaForeignKeyLoad(f1, f2, val) {
-	var url = '?action=foreignKeyLoad&ajaxChild=' + f1 + '&ajaxParent=' + f2 + '&value=' + escape(val);
-	document.getElementById('db_system').src = url;
-}
-
-</script>
-{/literal}
-
 
 {$menu}
 

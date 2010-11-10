@@ -469,8 +469,8 @@ class many2manyFormField extends abstractFormField {
 		}
 		$html .= '
 		</div>
-		<input type="checkbox" style="vertical-align: middle; margin-left:5px" onClick="tbl_check_all(\'m2m_'.$this->attributes['linkTable'].'\', this.checked)">
-		<b>'.$tblAction->locale['FORM_CHECK_ALL'].'</b>';
+		<label><input type="checkbox" style="vertical-align: middle; margin-left:5px" onClick="tbl_check_all(\'m2m_'.$this->attributes['linkTable'].'\', this.checked)">
+		<b>'.$tblAction->locale['FORM_CHECK_ALL'].'</b></label>';
 		return $html;
 	}
 }
