@@ -30,21 +30,24 @@
         {/foreach}
     {/if}
     
-    <script type="text/javascript" src="{$info.basehttp}js/jimbo.js"></script>
-    <script type="text/javascript" src="{$info.basehttp}js/functions.js"></script>
-    <link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs.css" type="text/css" media="print, projection, screen">
-    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/jquery.tooltip.css" />
-
     {literal}
     <script>
         var jimbo = {
         {/literal}
             mode: "{$tpl.CONST.JIMBO_POPUP_MODE}",
-            dialogWidth: 640
+            dialogWidth: 640,
+            base: "{$info.basehttp}"
         {literal}
         };
     </script>
     {/literal}
+    
+    <script type="text/javascript" src="{$info.basehttp}js/jimbo.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/functions.js"></script>
+    <link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs.css" type="text/css" media="print, projection, screen">
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/jquery.tooltip.css" />
+
+    
 
 <!--[if lte IE 7]>
 <link rel="stylesheet" href="{$info.basehttp}css/jquery.tabs-ie.css" type="text/css" media="projection, screen">

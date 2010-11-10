@@ -177,7 +177,11 @@ function openWindow(uri)
 				$('body').append('<div id="loader"></div>');
 			}
 			obj = $("#loader");
+			
+			showLoadingBar();
+			
 			$("#loader").load(uri, function() {
+				hideLoadingBar();
 				openJqueryPopup('dba_form');
 			});
 			break;
@@ -308,6 +312,32 @@ $.getViewHeight = function() {
 
 	 return viewportheight;
 }; // end getViewHeight
+
+function showLoadingBar()
+{
+	base = jimbo.base == undefined ? '/' : jimbo.base;
+	obj = $("#loadingBar");
+	if(obj.length == 0) {
+		$('body').append('<div id="loadingBar" align="center"><img src="' + base + 'images/load.gif" /></div>');
+	}
+	obj = $("#loadingBar");
+	
+	$("#loadingBar").dialog({
+	    width:50,
+	    height:90,
+	    modal: true,
+	    draggable:false,
+	    resizable:false,
+	    closeOnEscape: false,
+	    open: function(event, ui) { $("#loadingBar").prev().hide();}
+	});
+	
+}
+
+function hideLoadingBar()
+{
+	$("#loadingBar").dialog("destroy");
+}
 
 function doSelectTo(obj, id) {
 	document.getElementById(id).value = obj.value;
