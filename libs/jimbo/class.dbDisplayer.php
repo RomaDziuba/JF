@@ -553,11 +553,8 @@ class dbDisplayer {
                     </script>';
                     $filters[] = $html;
                 } else {
-                    $inputSize = $field->getAttribute('inputSize');
-                    if (empty($inputSize)) {
-                        $inputSize = 20;
-                    }
-                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" size="'.$inputSize.'">';
+  					$width = $field->getWidth(true);
+                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
                 }
             }
         }
