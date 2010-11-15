@@ -205,7 +205,15 @@ class Controller
         return $url;
     }
     
+    public function addParam($key, $value)
+    {
+        $_SESSION[$key] = $value;
+    }
     
+    public function getParam($key)
+    {
+        return isset($_SESSION[$key]) ? $_SESSION[$key] : false;
+    }
 }
 
 //FIXME:
