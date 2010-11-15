@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
 * DB Admin
 *
@@ -8,7 +8,7 @@
 * @version 2.0
 */
 
-class dbAction {
+class dbAction { 
 
 	public $tableDefinition;
 	public $lastErrorMessage;
@@ -1228,6 +1228,14 @@ class dbAction {
 	    
 	    return iconv(CHARSET, 'UTF-8', $text);
 	}
+	
+	/**
+	 * Returns current http jimbo path
+	 */
+	public function getHttpPath()
+	{
+	    return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
+	} // end getHttpPath
 	
 }
 

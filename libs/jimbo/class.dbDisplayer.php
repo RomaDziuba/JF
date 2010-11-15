@@ -608,8 +608,8 @@ class dbDisplayer {
 		$info['hint'] = $tableDefinition->getAttribute('hint');
 
 		$info['httproot'] = HTTP_ROOT;
-
-
+		$info['url'] = $this->tblAction->getHttpPath();
+		
 		$items = array();
 		$qtips = array();
 
