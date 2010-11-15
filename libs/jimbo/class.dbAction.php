@@ -402,7 +402,7 @@ class dbAction {
 		if (isset($this->tableDefinition->attributes['customLocation'])) {
 			$newLocation = $this->tableDefinition->attributes['customLocation'];
 		} else {
-			$newLocation = $_SERVER['REDIRECT_URL'].$baseURL;
+			$newLocation = $this->getHttpPath().$baseURL;
 		}
 		
 		if (!$status) {
@@ -1135,9 +1135,10 @@ class dbAction {
 			}
 		}
 
-		$url = str_replace("/".$GLOBALS['currentTable']."/", "/".$relation['foreignTable']."/", $_SERVER['PHP_SELF']);
+		$url = str_replace("/".$_sessionData['DB_CURRENT_TABLE']."/", "/".$relation['foreignTable']."/", $this->getHttpPath());
+		
 		header("Location: ".$url);
-		die;
+		die();
 	}
 
 
@@ -1228,6 +1229,15 @@ class dbAction {
 	    
 	    return iconv(CHARSET, 'UTF-8', $text);
 	}
+	
+	/**
+	 * Returns current http jimbo path
+	 */
+	private function getHttpPath()
+	{
+	    return $_SERVER['REDIRECT_URL'];
+	} // end getHttpPath
+	
 	
 }
 
