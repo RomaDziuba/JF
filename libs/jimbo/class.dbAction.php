@@ -742,7 +742,7 @@ class dbAction {
 	// ------------------------------------------
 	// ------- Добавление записи в базу  --------
 	// ------------------------------------------
-	function insertDBItem() {
+    function insertDBItem() {
 		global $_sessionData;
 		$primaryKey = $this->tableDefinition->getAttribute('primaryKey');
 		$sql = 'INSERT INTO '.$this->tableDefinition->name.' ';
@@ -764,24 +764,24 @@ class dbAction {
 					continue;
 				}
 
-				$value = "'".$_FILES[$info->name]['name'].';0;'.$_FILES[$info->name]['type']."'";
+				$value = $_FILES[$info->name]['name'].';0;'.$_FILES[$info->name]['type'];
 				$toUpload[] = $info;
 			} elseif ( ($info->attributes['type'] == 'md5') && (strlen($_POST[$info->name]) != 32) ) {
 				// пароль MD5
 				if (empty($_POST[$info->name])) {
 					$emptyValue = true;
 				}
-				$value = "'".md5($_POST[$info->name])."'";
+				$value = md5($_POST[$info->name]);
 			} elseif ( isset($info->attributes['isnull']) && (empty($_POST[$info->name])) ) {
 				// Поле которое принимает либо корректное значение, либо NULL
 				$value = 'NULL';
 				$emptyValue = true;
 			} else {
-				if ($_POST[$info->name] == "") {
+				if ( empty($_POST[$info->name]) ) {
 					$emptyValue = true;
-					$value = "''";
+					$value = "";
 				} else {
-					$value = "'".mysql_escape_string($_POST[$info->name])."'";
+					$value = $_POST[$info->name];
 				}
 			}
 
@@ -794,25 +794,23 @@ class dbAction {
 				$this->lastErrorMessage = $this->locale['ERR_REQUIRED']." '".$info->attributes['caption']."'";
 				return false;
 			}
-			$st_1[] = $info->name;
-			$st_2[] = $value;
+			$st_1[] = $this->dbDriver->escape($info->name);
+			$st_2[] = $this->dbDriver->quote($value);
 		}
-
+		
 		if (isset($_POST['__token'])) {
 			if (isset($_sessionData['insert'][$_POST['__token']])) {
 				$tokenData = $_sessionData['insert'][$_POST['__token']];
 				foreach ($tokenData as $key => $value) {
-					$st_1[] = $key;
+					$st_1[] = $this->dbDriver->escape($key);
 					$st_2[] = $value;
 				}
 			} else {
 				$this->wasError = true;
 				$this->lastErrorMessage = "Wrong token key";
 				return false;
-
 			}
 		}
-
 
 		$sql .= " (".join(", ", $st_1).") values (".$this->prepareAddonWhere(join(", ", $st_2)).") ";
 
