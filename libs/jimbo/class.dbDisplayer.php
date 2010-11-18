@@ -71,6 +71,10 @@ class dbDisplayer {
 
 	function &getTemplateInstance($tplRoot = false) {
 	    
+	    if(!is_null(self::$tpl) && !$tplRoot) {
+            return self::$tpl;
+	    }
+	    
 	    if(!$tplRoot) {
             $tplRoot = realpath(dirname(__FILE__).'/../../templates');
 	    }
@@ -230,7 +234,9 @@ class dbDisplayer {
 				}
 			}
 		}
-
+		 
+        $info['generalActions'] = $this->getGeneralActions();
+		
 		foreach($tableData as $tdRow) {
 			// HotFix: для полей которые могут от этого зависеть
 			$ID = $tdRow[$tableDefinition->getAttribute('primaryKey')];
@@ -346,7 +352,7 @@ class dbDisplayer {
 				    'js' => isset($action['js']) ? $action['js'] : false, 
                 );
 				
-                $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
+                $lineKey = (isset($action['view']) && $action['view'] == "list") ? 'action_lists' : 'actions';
 				
 				$line[$lineKey][] = $item;
 			}
@@ -377,16 +383,21 @@ class dbDisplayer {
 			'linkClass' => 'page',
 			'spacesBeforeSeparator' => 1,
 			'spacesAfterSeparator' => 1,
+			'append' => false,
+			'path' => substr($this->tblAction->getHttpPath(), 0, strlen($this->tblAction->getHttpPath()) - 1),
+			'fileName' => '?pageID=%d',
 			);
+			
 			$pager = Pager::factory($params);
 			$links = $pager->getLinks();
 			$info['pager'] = $links['all'];
 		}
 
 		if (!empty($tableDefinition->grouped)) {
-			$gSelect = '<input type="checkbox" style="margin-left:29px; vertical-align:bottom" title="Select all items" onClick="tbl_check_all(\'grouped_cb\', this.checked)">
+			$gSelect = '
 			<select class="thin" style="width:160px" name="gSelect" id="gSelect"><option value=0>Select action:';
 			foreach ($tableDefinition->grouped as $item) {
+			    $item['link'] = !isset($item['link']) ? '' : $item['link'];
 				$gSelect .= '<option value="'.$item['link'].'">&nbsp;--&nbsp;'.$item['caption'];
 			}
 			$gSelect .= '</select>
@@ -423,6 +434,33 @@ class dbDisplayer {
 		return trim($tpl->fetch($tplFile));
 	}
 
+	/**
+	 * Returns a list of actions for the table. That displays at the top of the table
+	 */
+	private function getGeneralActions()
+	{
+	    $generalActions = array();
+	    foreach ($this->tblAction->tableDefinition->actions as $type => $action) {
+		    if( !isset($action['view']) || $action['view'] != 'top' ) {
+		        continue;
+		    }
+		    
+		    $link = isset($action['link']) ? $action['link'] : '?action='.$type;
+		    
+		    $item = array(
+				'caption' => $action['caption'],
+				'href' => $link,
+				'js' => isset($action['js']) ? $action['js'] : false, 
+            );
+		    
+		    $generalActions[$type] = $item;
+		    
+		    unset($this->tblAction->tableDefinition->actions[$type]);
+		}
+	    
+	    return $generalActions;
+	} // end getGeneralActions
+	
     function addListFilters () {
         global $_sessionData;
         include dirname(__FILE__).'/'.$this->getLangFile();
@@ -553,8 +591,11 @@ class dbDisplayer {
                     </script>';
                     $filters[] = $html;
                 } else {
-  					$width = $field->getWidth(true);
-                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
+                    $inputSize = $field->getAttribute('inputSize');
+                    if (empty($inputSize)) {
+                        $inputSize = 20;
+                    }
+                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" size="'.$inputSize.'">';
                 }
             }
         }
@@ -608,8 +649,8 @@ class dbDisplayer {
 		$info['hint'] = $tableDefinition->getAttribute('hint');
 
 		$info['httproot'] = HTTP_ROOT;
-		$info['url'] = $this->tblAction->getHttpPath();
-		
+
+
 		$items = array();
 		$qtips = array();
 

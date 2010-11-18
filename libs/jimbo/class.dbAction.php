@@ -12,11 +12,13 @@ class dbAction {
 
 	public $tableDefinition;
 	public $lastErrorMessage;
+	public $wasError;
 	public $dbDriver;
 	public $currentRow;
 
 	function dbAction($dsn, $tblName, $tblPath = './tblDefs/') {
-		//print_r($_SESSION);
+        global $dbAdminMessages;
+        
 		// подгружаем языковые сообщения
 		include dbDisplayer::getLangFile();
 		$this->locale = $dbAdminMessages;
@@ -467,6 +469,52 @@ class dbAction {
 		}
 	}
 
+	private function prepareQueryParams()
+	{
+	    $primaryKey = $this->tableDefinition->getAttribute('primaryKey');
+	    
+	    $columns   = array();
+	    $values    = array();
+	    $many2many = array();
+		$toUpload  = array();
+
+		foreach ($this->tableDefinition->fields as $info) {
+		    
+			switch($info->attributes['type']) {
+			    case 'many2many': {
+			        $many2many[] = $info;
+				    continue;
+			    } break;
+			    
+			    case 'file': {
+    			    if (empty($_FILES[$info->name]['name'])) {
+    					continue;
+    				}
+    				
+    				$value =  $info->getValue();
+    				$toUpload[] = $info;
+			    } break;
+			    
+			    default: 
+                    $value = $info->getValue($_POST);
+			} // end switch
+			
+			if($value === false) {
+                $this->wasError = true;
+                $this->lastErrorMessage = $info->lastErrorMessage;
+                return false;
+            }
+			
+		    if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
+				continue;
+			}
+            
+			$columns[] = $this->dbDriver->escape($info->name);
+			$values[] = $this->dbDriver->quote($value);
+		} // end foreach
+		
+		return array($columns, $values, $many2many, $toUpload);
+	} // end prepareQueryParams
 
     function prepareAddonWhere($value, $currentValue = false) {
         global $_sessionData;
@@ -742,68 +790,23 @@ class dbAction {
 	// ------------------------------------------
 	// ------- Добавление записи в базу  --------
 	// ------------------------------------------
-    function insertDBItem() {
+    function insertDBItem() 
+    {
 		global $_sessionData;
-		$primaryKey = $this->tableDefinition->getAttribute('primaryKey');
-		$sql = 'INSERT INTO '.$this->tableDefinition->name.' ';
-
-		$many2many = array();
-		$toUpload = array();
-
-		foreach ($this->tableDefinition->fields as $info) {
-
-			$emptyValue = false;
-
-			if ($info->attributes['type'] == 'many2many') {
-				// Связь много ко многим, обрабатываем позже
-				$many2many[] = $info;
-				continue;
-			} elseif ($info->attributes['type'] == 'file') {
-				// Файл. Подменяем значение и обрабатываем позже
-				if (empty($_FILES[$info->name]['name'])) {
-					continue;
-				}
-
-				$value = $_FILES[$info->name]['name'].';0;'.$_FILES[$info->name]['type'];
-				$toUpload[] = $info;
-			} elseif ( ($info->attributes['type'] == 'md5') && (strlen($_POST[$info->name]) != 32) ) {
-				// пароль MD5
-				if (empty($_POST[$info->name])) {
-					$emptyValue = true;
-				}
-				$value = md5($_POST[$info->name]);
-			} elseif ( isset($info->attributes['isnull']) && (empty($_POST[$info->name])) ) {
-				// Поле которое принимает либо корректное значение, либо NULL
-				$value = 'NULL';
-				$emptyValue = true;
-			} else {
-				if ( empty($_POST[$info->name]) ) {
-					$emptyValue = true;
-					$value = "";
-				} else {
-					$value = $_POST[$info->name];
-				}
-			}
-
-			if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
-				continue;
-			}
-
-			if (isset($info->attributes['required']) && $emptyValue) {
-				$this->wasError = true;
-				$this->lastErrorMessage = $this->locale['ERR_REQUIRED']." '".$info->attributes['caption']."'";
-				return false;
-			}
-			$st_1[] = $this->dbDriver->escape($info->name);
-			$st_2[] = $this->dbDriver->quote($value);
+		
+		$result = $this->prepareQueryParams();
+		if($this->wasError) {
+		    return false;
 		}
+
+		list($columns, $values, $many2many, $toUpload) = $result;
 		
 		if (isset($_POST['__token'])) {
 			if (isset($_sessionData['insert'][$_POST['__token']])) {
 				$tokenData = $_sessionData['insert'][$_POST['__token']];
 				foreach ($tokenData as $key => $value) {
-					$st_1[] = $this->dbDriver->escape($key);
-					$st_2[] = $value;
+					$columns[] = $this->dbDriver->escape($key);
+					$values[] = $this->dbDriver->quote($value);
 				}
 			} else {
 				$this->wasError = true;
@@ -812,7 +815,8 @@ class dbAction {
 			}
 		}
 
-		$sql .= " (".join(", ", $st_1).") values (".$this->prepareAddonWhere(join(", ", $st_2)).") ";
+		$sql = 'INSERT INTO '.$this->tableDefinition->name.' ';
+		$sql .= " (".join(", ", $columns).") values (".$this->prepareAddonWhere(join(", ", $values)).") ";
 
 		$result = $this->dbDriver->query($sql);
 		if (PEAR::isError($result)) {
@@ -830,10 +834,9 @@ class dbAction {
 			$this->setMany2Many($info, $id);
 		}
 
-
 		return true;
-	}
-
+	} // end insertDBItem
+	
 	function createInsertToken() {
 		global $_sessionData;
 
@@ -927,73 +930,26 @@ class dbAction {
 		}
 	}
 
-	function updateDBItem() {
-		$primaryKey = $this->tableDefinition->getAttribute('primaryKey');
+	function updateDBItem() 
+	{
 		if (!is_numeric($_GET['ID'])) {
 			return false;
 		}
 		$id = $_GET['ID'];
 
-		$many2many = array();
-		$toUpload = array();
-
-		$sql = 'UPDATE '.$this->tableDefinition->name.' SET ';
-		foreach ($this->tableDefinition->fields as $info) {
-
-
-			if (!empty($info->attributes['readonly'])) {
-				continue;
-			}
-
-			if ($info->attributes['type'] == 'many2many') {
-				// Связь много ко многим, обрабатываем позже
-				$many2many[] = $info;
-				continue;
-			}
-
-			if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
-				continue;
-			}
-
-
-			$emptyValue = false;
-
-			if ($info->attributes['type'] == 'file') {
-				// Файл. Подменяем значение и обрабатываем позже
-				if (empty($_FILES[$info->name]['name'])) {
-					continue;
-				}
-
-				$value = "'".$_FILES[$info->name]['name'].';0;'.$_FILES[$info->name]['type']."'";
-				$toUpload[] = $info;
-			} elseif ( ($info->attributes['type'] == 'md5') && (strlen($_POST[$info->name]) != 32) ) {
-				// пароль MD5
-				if (empty($_POST[$info->name])) {
-					$emptyValue = true;
-				}
-				$value = "'".md5($_POST[$info->name])."'";
-			} elseif ( isset($info->attributes['isnull']) && (empty($_POST[$info->name])) ) {
-				// Поле которое принимает либо корректное значение, либо NULL
-				$value = 'NULL';
-				$emptyValue = true;
-			} else {
-				if ($_POST[$info->name] == "") {
-					$emptyValue = true;
-					$value = "''";
-				} else {
-					$value = "'".mysql_escape_string($_POST[$info->name])."'";
-				}
-			}
-
-
-			if (isset($info->attributes['required']) && $emptyValue) {
-				$this->wasError = true;
-				$this->lastErrorMessage = $this->locale['ERR_REQUIRED']." '".$info->attributes['caption']."'";
-				return false;
-			}
-			$sql .= $info->name . " = ". $value.", ";
+		$result = $this->prepareQueryParams();
+		if($this->wasError) {
+		    return false;
 		}
-		$sql = substr($sql, 0, -2);
+
+		list($columns, $values, $many2many, $toUpload) = $result;
+		
+		$rows = array();
+		foreach($columns as $index => $column) {
+            $rows[] = $column . " = ".$values[$index];
+		}
+		
+		$sql = 'UPDATE '.$this->tableDefinition->name.' SET '.join(', ', $rows);
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.(int)$id;
 		$result = $this->dbDriver->query($sql);
 
@@ -1013,7 +969,7 @@ class dbAction {
 		$this->uploadFiles($toUpload, $id);
 
 		return true;
-	}
+	} // end updateDBItem
 
 	function setMany2Many($item, $id) {
 		global $db;
