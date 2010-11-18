@@ -8,7 +8,7 @@
 * @version 2.0
 */
 
-class dbAction { 
+class dbAction {
 
 	public $tableDefinition;
 	public $lastErrorMessage;
@@ -65,162 +65,177 @@ class dbAction {
 		$join = array();
 		$tables = array();
 		$fields = array($tblName.".".$this->tableDefinition->getAttribute('primaryKey'));
-		
+
 		if ($groupby = $this->tableDefinition->getAttribute('groupBy')) {
 			$fields[] = $groupby.' AS _group_field';
 		}
 
-		// Обрабатываем все поля - строим запрос
-		foreach ($this->tableDefinition->fields as $item) {
+		if ($customSQL = $this->tableDefinition->getAttribute('customSQL')) {
 
-			// Если у нас экспорт в ексель - показываем все поля
-			if ($item->getAttribute('hide') && $action != 'excel') {
-				// Данное поле мы не отображаем в списке
-				continue;
-			}
+		} else {
 
-			if (empty($item->name)) continue;
+			// Обрабатываем все поля - строим запрос
+			foreach ($this->tableDefinition->fields as $item) {
 
-
-			// Обрабатываем внешний ключ
-			if (isset($item->foreignKey)) {
-				// Возможно таблица по алиасу
-				$foreignValueField = $item->getAttribute('foreignValueField');
-				$foreignTable = $item->getAttribute('foreignTable');
-
-				//Goliath:
-				$foreignTableName = $foreignTable;
-				if (preg_match("/\sas\s(.+)$/", $foreignTable, $tmp)) {
-					$foreignTableName = $tmp[1];
+				// Если у нас экспорт в ексель - показываем все поля
+				if ($item->getAttribute('hide') && $action != 'excel') {
+					// Данное поле мы не отображаем в списке
+					continue;
 				}
 
+				if (empty($item->name)) continue;
 
-				// Внешний ключ может быть сложным, признак - наличие скобок
-				$foreignValueField = $this->getFieldString($foreignValueField, $foreignTableName, $item->name);
 
-				$singleWhere = $tblName.".".$item->name.' = '.$foreignTableName.".".$item->getAttribute('foreignKeyField');
-				$fields[] = $foreignValueField;
-				if (in_array($item->getAttribute('filter'), array('select', 'exact'))) {
-					$filterFieldName = $foreignTableName.".".$item->getAttribute('foreignKeyField');
-				} else {
-					$filterFieldName = $this->getFieldString($item->getAttribute('foreignValueField'), $foreignTableName);
-				}
-				$fields[] = $foreignValueField;
+				// Обрабатываем внешний ключ
+				if (isset($item->foreignKey)) {
+					// Возможно таблица по алиасу
+					$foreignValueField = $item->getAttribute('foreignValueField');
+					$foreignTable = $item->getAttribute('foreignTable');
 
-				$joinType = $item->getAttribute('join');
-
-				if ($joinType == 'true') {
-					// Необходимо отработать JOIN
-					$singleJoin = ' left join '.$foreignTable.' ON ('.$singleWhere;
-
-					if ($addWhere = $item->getAttribute('where')) {
-						// Поле может иметь собственное условие
-						$singleJoin .= ' AND ' .$this->prepareAddonWhere($addWhere);
+					//Goliath:
+					$foreignTableName = $foreignTable;
+					if (preg_match("/\sas\s(.+)$/", $foreignTable, $tmp)) {
+						$foreignTableName = $tmp[1];
 					}
-					$singleJoin .= ')';
 
-					$join[] = $singleJoin;
-				} else {
-					// Добавить внешний ключ к запросу
-					$where[]  = $singleWhere;
-					$tables[] = $item->getAttribute('foreignTable');
 
-					// Поле может иметь собственное условие
-					if ($addWhere = $item->getAttribute('where')) {
+					// Внешний ключ может быть сложным, признак - наличие скобок
+					$foreignValueField = $this->getFieldString($foreignValueField, $foreignTableName, $item->name);
+
+					$singleWhere = $tblName.".".$item->name.' = '.$foreignTableName.".".$item->getAttribute('foreignKeyField');
+					$fields[] = $foreignValueField;
+					if (in_array($item->getAttribute('filter'), array('select', 'exact'))) {
+						$filterFieldName = $foreignTableName.".".$item->getAttribute('foreignKeyField');
+					} else {
+						$filterFieldName = $this->getFieldString($item->getAttribute('foreignValueField'), $foreignTableName);
+					}
+					$fields[] = $foreignValueField;
+
+					$joinType = $item->getAttribute('join');
+
+					if ($joinType == 'true') {
+						// Необходимо отработать JOIN
+						$singleJoin = ' left join '.$foreignTable.' ON ('.$singleWhere;
+
+						if ($addWhere = $item->getAttribute('where')) {
+							// Поле может иметь собственное условие
+							$singleJoin .= ' AND ' .$this->prepareAddonWhere($addWhere);
+						}
+						$singleJoin .= ')';
+
+						$join[] = $singleJoin;
+					} else {
+						// Добавить внешний ключ к запросу
+						$where[]  = $singleWhere;
+						$tables[] = $item->getAttribute('foreignTable');
+
 						// Поле может иметь собственное условие
+						if ($addWhere = $item->getAttribute('where')) {
+							// Поле может иметь собственное условие
+							$where[] = $this->prepareAddonWhere($addWhere);
+						}
+
+						if (!empty($joinType)) {
+							$join[] = $joinType;
+						}
+
+					}
+				} else {
+					if (isset($item->isTimestamp)) {
+						$fields[] = 'LEFT(FROM_UNIXTIME('.$tblName.".".$item->name.'), '.$item->getAttribute('length').') AS '.$item->name;
+					} else {
+						if ($item->getAttribute('type') == 'sql') {
+							$fields[] = $item->getAttribute('sql') .' as '.$item->name;
+							$filterFieldName = $item->getAttribute('sql');
+						} elseif (strpos($item->name, ')')) {
+							// У нас вычисляемая функция
+							$fields[] = $item->name;
+							$filterFieldName = $item->name;
+						} else {
+							$fields[] = $tblName.".".$item->name;
+							$filterFieldName = $tblName.".".$item->name;
+						}
+					}
+					if ($_join = $this->prepareAddonWhere($item->getAttribute('join'))) {
+						$join[] = $_join;
+					}
+					if ($addWhere = $item->getAttribute('where')) {
 						$where[] = $this->prepareAddonWhere($addWhere);
 					}
-
-					if (!empty($joinType)) {
-						$join[] = $joinType;
-					}
-
 				}
+
+				$filterName = $tblName.'_'.$item->name;
+				if ($filterType = $item->getAttribute('filter')) {
+					// Возможно у нас установлен пользовательский фильтр по полю
+					if (isset($_sessionData['DB_FILTERS'][$filterName]) && ($_sessionData['DB_FILTERS'][$filterName] != '')) {
+						$filterValue = $_sessionData['DB_FILTERS'][$filterName];
+						if (in_array($filterType, array('select', 'exact'))) {
+							$where[] = $filterFieldName." = '".mysql_escape_string($filterValue)."'";
+						} else {
+							$where[] = $filterFieldName.' '.$item->getSearchFilter($filterValue);
+						}
+					}
+				} // конец "фильтр по полю"
+
+			}
+
+			// Предустановленные фильтры
+			if (!empty($this->tableDefinition->filters)) {
+				foreach ($this->tableDefinition->filters as $field => $value) {
+					if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
+						$value = $_sessionData[$tmp[1]];
+					}
+					if (isset($value)) {
+						$where[] = $tblName.".".$field." IN ($value)";
+					}
+				}
+			}
+
+			// ParentID влияет на выборку
+			if (isset($this->tableDefinition->actions['parent'])) {
+				$relation = $this->tableDefinition->relations['parent'][$this->tableDefinition->actions['parent']['relation']];
+				if (isset($relation['foreignTable']) && isset($relation['foreignField'])) {
+					$tmpName = "DB__".$this->alias.'__PARENT';
+					// Инициализируем переменную для первого захода
+					if (empty($_sessionData[$tmpName])) {
+						$where[] = "( {$tblName}.{$relation['field']} = 0 or {$tblName}.{$relation['field']} is NULL)";
+					} else {
+						$where[]  = $tblName.".".$relation['field']." = '".mysql_escape_string($_sessionData[$tmpName])."'";
+					}
+				}
+			}
+
+			$this->fields = $fields;
+
+			if ($additionalWhere = $this->tableDefinition->getAttribute('additionalWhere')) {
+				$where[] = $additionalWhere;
+			}
+
+			if ($customFrom = $this->tableDefinition->getAttribute('customFrom')) {
+				$fromSection = $customFrom;
 			} else {
-				if (isset($item->isTimestamp)) {
-					$fields[] = 'LEFT(FROM_UNIXTIME('.$tblName.".".$item->name.'), '.$item->getAttribute('length').') AS '.$item->name;
-				} else {
-					if ($item->getAttribute('type') == 'sql') {
-						$fields[] = $item->getAttribute('sql') .' as '.$item->name;
-						$filterFieldName = $item->getAttribute('sql');
-					} elseif (strpos($item->name, ')')) {
-						// У нас вычисляемая функция
-						$fields[] = $item->name;
-						$filterFieldName = $item->name;
-					} else {
-						$fields[] = $tblName.".".$item->name;
-						$filterFieldName = $tblName.".".$item->name;
-					}
-				}
-				if ($_join = $this->prepareAddonWhere($item->getAttribute('join'))) {
-					$join[] = $_join;
-				}
-				if ($addWhere = $item->getAttribute('where')) {
-					$where[] = $this->prepareAddonWhere($addWhere);
-				}
+				$join = (count($join) > 0) ? join(' ', $join) : '';
+				// Добавляем саму таблицу и джойны на нее
+				array_unshift ($tables, $tblName.' '.$join);
+				$fromSection = join(', ', $tables);
+
 			}
 
-			$filterName = $tblName.'_'.$item->name;
-			if ($filterType = $item->getAttribute('filter')) {
-				// Возможно у нас установлен пользовательский фильтр по полю
-				if (isset($_sessionData['DB_FILTERS'][$filterName]) && ($_sessionData['DB_FILTERS'][$filterName] != '')) {
-					$filterValue = $_sessionData['DB_FILTERS'][$filterName];
-					if (in_array($filterType, array('select', 'exact'))) {
-						$where[] = $filterFieldName." = '".mysql_escape_string($filterValue)."'";
-					} else {
-						$where[] = $filterFieldName.' '.$item->getSearchFilter($filterValue);
-					}
-				}
-			} // конец "фильтр по полю"
+			$whereSection = (count($where) > 0) ? join(' AND ', $where) : '1';
+			$fields = join(', ', $fields);
 
-		}
-
-		// Предустановленные фильтры
-		if (!empty($this->tableDefinition->filters)) {
-			foreach ($this->tableDefinition->filters as $field => $value) {
-				if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
-					$value = $_sessionData[$tmp[1]];
-				}
-				if (isset($value)) {
-					$where[] = $tblName.".".$field." IN ($value)";
-				}
+			$sql = "SELECT count(*) as cnt FROM $fromSection WHERE $whereSection";
+			$countRow = $this->dbDriver->getRow($sql);
+			if (PEAR::isError($countRow)) {
+				print_r($sql);
+				$this->raiseError('SQL Exception: '.$countRow->getMessage());
+				return false;
+			} else {
+				$this->totalRows = $countRow['cnt'];
 			}
 		}
-
-		// ParentID влияет на выборку
-		if (isset($this->tableDefinition->actions['parent'])) {
-			$relation = $this->tableDefinition->relations['parent'][$this->tableDefinition->actions['parent']['relation']];
-			if (isset($relation['foreignTable']) && isset($relation['foreignField'])) {
-				$tmpName = "DB__".$this->alias.'__PARENT';
-				// Инициализируем переменную для первого захода
-				if (empty($_sessionData[$tmpName])) {
-					$where[] = "( {$tblName}.{$relation['field']} = 0 or {$tblName}.{$relation['field']} is NULL)";
-				} else {
-					$where[]  = $tblName.".".$relation['field']." = '".mysql_escape_string($_sessionData[$tmpName])."'";
-				}
-			}
-		}
-
-		$this->fields = $fields;
-
-		$where = (count($where) > 0) ? ' WHERE '.join(' AND ', $where) : '';
-		$join = (count($join) > 0) ? join(' ', $join) : '';
-
-		// Добавляем саму таблицу и джойны на нее
-		array_unshift ($tables, $tblName.' '.$join);
-
-		$fields = join(', ', $fields);
-		$tables = join(', ', $tables);
-
-		$sql = 'SELECT count(*) as cnt FROM '.$tables.' '.$where;
-		$countRow = $this->dbDriver->getRow($sql);
-		if (PEAR::isError($countRow)) {
-			print_r($sql);
-			$this->raiseError('SQL Exception: '.$countRow->getMessage());
-			return false;
-		} else {
-			$this->totalRows = $countRow['cnt'];
-		}
+		
+		// common code for both ways
 
 
 		if (isset($_GET['pager']) && (is_numeric($_GET['pager']) || $_GET['pager'] == 'all')) {
@@ -252,7 +267,7 @@ class dbAction {
 		}
 
 
-		if ($currentID >= $this->totalRows) {
+		if ((!empty($customSQL)) && ($currentID >= $this->totalRows)) {
 			if ($this->totalRows <= $rowsPerPage) {
 				$currentID = 0;
 			} else {
@@ -261,17 +276,28 @@ class dbAction {
 		}
 		$this->currentRowN = $currentID;
 
-		$order = $this->getOrderDirection();
+		if (empty($customSQL)) {
+			$sql = "SELECT $fields FROM $fromSection WHERE $whereSection";
+		} else {
+			$sql = $customSQL;
+		}
+		
+		$sql .= ' '. $this->getOrderDirection();
 
-		$sql = 'SELECT '.$fields.' FROM '.$tables.' '.$where.' '.$order;
 		if ($action != 'excel') {
 			$sql .= " LIMIT $currentID, $rowsPerPage";
 		}
+
 		$dataRes = $this->dbDriver->query($sql);
 		if (PEAR::isError($dataRes)) {
 			print_r($sql);
 			$this->raiseError('SQL Exception: '.$dataRes->getMessage());
 			return false;
+		}
+		
+		if (!empty($customSQL)) {
+			$sql = "SELECT FOUND_ROWS()";
+			$this->totalRows = $this->dbDriver->getOne($sql);
 		}
 
 		$this->dbData = array();
@@ -404,41 +430,41 @@ class dbAction {
 		} else {
 			$newLocation = $_SERVER['REDIRECT_URL'].$baseURL;
 		}
-		
+
 		if (!$status) {
-		    header('Content-Type: text/html; charset='.SITE_CHARSET);
-		    $message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
-            
-            $response = array(
-                'type' => 'error',
-                'message' => $this->getText($message)
-            );
-            
-            // TODO: Move to root logic
-            $json = json_encode($response);
-            echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
-            exit();
+			header('Content-Type: text/html; charset='.SITE_CHARSET);
+			$message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
+
+			$response = array(
+			'type' => 'error',
+			'message' => $this->getText($message)
+			);
+
+			// TODO: Move to root logic
+			$json = json_encode($response);
+			echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+			exit();
 		}
-		
+
 		if ($wasCommit) {
 			if (isset($customHandler) && method_exists ($customHandler, 'afterCommit')) {
 				$customHandler->afterCommit($this->updateInfo);
 			}
-			
+
 			// for compatibility with the old versions
 			$isPoupMode = (int) isset($_GET['popup']) && ($_GET['popup'] == 'true');
-			    
+
 			$response = array(
-                'type' => 'success',
-                'message' => $this->getText($this->locale['STATUS_SUCCESS']),
-                'url' => $newLocation,
-                'isPoupMode' => $isPoupMode
+			'type' => 'success',
+			'message' => $this->getText($this->locale['STATUS_SUCCESS']),
+			'url' => $newLocation,
+			'isPoupMode' => $isPoupMode
 			);
-			
+
 			// TODO: Move to root logic
-            $json = json_encode($response);
-            echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
-            exit();
+			$json = json_encode($response);
+			echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+			exit();
 		}
 
 		if ($needRedirect) {
@@ -468,20 +494,20 @@ class dbAction {
 	}
 
 
-    function prepareAddonWhere($value, $currentValue = false) {
-        global $_sessionData;
-        $value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
-        if ($currentValue !== false) {
-            if (is_null($currentValue)) {
-                $currentValue = -9999999999;
-            }
-            $value = str_replace("%VALUE%", $currentValue, $value);
-        }
-        if (strpos($value, '%VALUE%')) {
-            $value = str_replace("%VALUE%", -1, $value);
-        }
-        return $value;
-    }
+	function prepareAddonWhere($value, $currentValue = false) {
+		global $_sessionData;
+		$value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
+		if ($currentValue !== false) {
+			if (is_null($currentValue)) {
+				$currentValue = -9999999999;
+			}
+			$value = str_replace("%VALUE%", $currentValue, $value);
+		}
+		if (strpos($value, '%VALUE%')) {
+			$value = str_replace("%VALUE%", -1, $value);
+		}
+		return $value;
+	}
 
 	function loadForeignKeys($exactly = false) {
 
@@ -516,21 +542,21 @@ class dbAction {
 	function loadForeignKeyValues(&$item, $exactly = false) {
 		$keyField = $item->getAttribute('foreignKeyField');
 		$valueField = $item->getAttribute('foreignValueField');
-		
+
 		$joinType = $item->getAttribute('join');
 		$joinSQL = ( !empty($joinType) && ($joinType != 'true')) ? $joinType : '';
-		
+
 		$joinType = $item->getAttribute('joinWhere');
 		if ( !empty($joinType) && ($joinType != 'true')) {
 			$joinSQL = $joinType;
 		}
-		
+
 		$table = $item->getAttribute('foreignTable');
 
 		if (preg_match("/\sas\s(.+)$/", $table, $tmp)) {
 			$table = $tmp[1];
 		}
-		
+
 		$sql = 'select '.$table.'.'.$keyField.', '. $this->getFieldString($valueField, $table).' as capt from '.$item->getAttribute('foreignTable').' ';
 
 		$sql .= $joinSQL;
@@ -636,11 +662,11 @@ class dbAction {
 			$sql .= ' AND '.$this->prepareAddonWhere($relation['valuesWhere']);
 		}
 
-        if (!empty($relation['valuesOrder'])) {
-            $sql .= " ORDER BY ".$relation['valuesOrder'];
-        } else {
-            $sql .= " ORDER BY $sqlForeignValueField";
-        }
+		if (!empty($relation['valuesOrder'])) {
+			$sql .= " ORDER BY ".$relation['valuesOrder'];
+		} else {
+			$sql .= " ORDER BY $sqlForeignValueField";
+		}
 
 		// SQL for all values
 		$dataRes = $this->dbDriver->query($sql);
@@ -712,18 +738,18 @@ class dbAction {
 			}
 		}
 
-        // Удаляем данные для связи много ко многим
-        foreach ($this->tableDefinition->fields as $field) {
-            if ($field->attributes['type'] == 'many2many') {
-                $relation = $field->attributes;
-                $sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
-                $dbRes = $this->dbDriver->query($sql);
-                if (PEAR::isError($dbRes)) {
-                    $this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
-                    return false;
-                }
-            }
-        }
+		// Удаляем данные для связи много ко многим
+		foreach ($this->tableDefinition->fields as $field) {
+			if ($field->attributes['type'] == 'many2many') {
+				$relation = $field->attributes;
+				$sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
+				$dbRes = $this->dbDriver->query($sql);
+				if (PEAR::isError($dbRes)) {
+					$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+					return false;
+				}
+			}
+		}
 
 		// Удаляем саму строку
 		$sql = 'DELETE FROM '.$this->tableDefinition->name;
@@ -1092,13 +1118,13 @@ class dbAction {
 			$_sessionData['DB__'.$relationAlias.'__PARENT'] = $this->currentRow[$relation['field']];
 
 			if (!empty($relation['treeCaption'])) {
-                // Необходимо использовать заголовок
-                if ($this->tableDefinition->fields[$relation['treeCaption']]->attributes['type'] == 'foreignKey') {
-                    $this->loadForeignKeyValues($this->tableDefinition->fields[$relation['treeCaption']]);
-                    $_capt = $this->tableDefinition->fields[$relation['treeCaption']]->keyData[$this->currentRow[$relation['treeCaption']]];
-                } else {
-                    $_capt = $this->currentRow[$relation['treeCaption']];
-                }
+				// Необходимо использовать заголовок
+				if ($this->tableDefinition->fields[$relation['treeCaption']]->attributes['type'] == 'foreignKey') {
+					$this->loadForeignKeyValues($this->tableDefinition->fields[$relation['treeCaption']]);
+					$_capt = $this->tableDefinition->fields[$relation['treeCaption']]->keyData[$this->currentRow[$relation['treeCaption']]];
+				} else {
+					$_capt = $this->currentRow[$relation['treeCaption']];
+				}
 				if (strlen($_capt) > 24) {
 					$trimPos = (int)strpos($_capt, ' ', 20);
 					if ($trimPos > 0) {
@@ -1219,24 +1245,24 @@ class dbAction {
 		return $value;
 
 	}
-	
+
 	private function getText($text)
 	{
-	    if(strtolower(CHARSET) == 'utf-8') {
-	        return $text;
-	    }
-	    
-	    return iconv(CHARSET, 'UTF-8', $text);
+		if(strtolower(CHARSET) == 'utf-8') {
+			return $text;
+		}
+
+		return iconv(CHARSET, 'UTF-8', $text);
 	}
-	
+
 	/**
 	 * Returns current http jimbo path
 	 */
 	public function getHttpPath()
 	{
-	    return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
+		return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
 	} // end getHttpPath
-	
+
 }
 
 ?>
