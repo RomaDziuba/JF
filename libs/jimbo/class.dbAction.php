@@ -269,7 +269,7 @@ class dbAction {
 		}
 
 
-		if ((!empty($customSQL)) && ($currentID >= $this->totalRows)) {
+		if ((empty($customSQL)) && ($currentID >= $this->totalRows)) {
 			if ($this->totalRows <= $rowsPerPage) {
 				$currentID = 0;
 			} else {
@@ -832,7 +832,7 @@ class dbAction {
 				$tokenData = $_sessionData['insert'][$_POST['__token']];
 				foreach ($tokenData as $key => $value) {
 					$columns[] = $this->dbDriver->escape($key);
-					$values[] = $this->dbDriver->quote($value);
+					$values[] = $value;
 				}
 			} else {
 				$this->wasError = true;
@@ -840,10 +840,10 @@ class dbAction {
 				return false;
 			}
 		}
-
+		
 		$sql = 'INSERT INTO '.$this->tableDefinition->name.' ';
 		$sql .= " (".join(", ", $columns).") values (".$this->prepareAddonWhere(join(", ", $values)).") ";
-
+		
 		$result = $this->dbDriver->query($sql);
 		if (PEAR::isError($result)) {
 			$this->mysqlerror2text($result, 'insert');
