@@ -41,5 +41,11 @@ class JimboUser
 		
 		return $value;
 	}
+	
+	public function getData()
+	{
+	    return $this->_sessionData;
+	}
+	
 }
 ?>

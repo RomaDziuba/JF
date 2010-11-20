@@ -39,6 +39,11 @@ define("FS_LIBS", FS_ROOT."libs/");
 define('HTTP_ROOT', "/jimbo/");
 define('ENGINE_URL', 'jimbo');
 
+// adminus | indigo
+define('ENGINE_STYLE', 'indigo');
+
+define('STYLES_HTTP_ROOT', HTTP_ROOT.'styles/');
+
 define('AUTH_DATA', 'dbadmin');
 define('AUTH_TOKEN', 'zero');
 

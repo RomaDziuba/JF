@@ -1,0 +1,36 @@
+<div class="block small center login">
+	<div class="block_head">
+		<div class="bheadl"></div>
+		<div class="bheadr"></div>
+		<h2>Login</h2>
+		<ul>
+			<li class="nobg"><a href="{$tpl.CONST.SITE_HTTP_ROOT}">back to the site</a></li>
+		</ul>
+	</div>	
+				
+	<div class="block_content">
+		{if $error_message}
+			<div class="message info"><p>{$error_message}</p></div>
+		{/if}	
+		<form method="post" id="account_form">
+			<p>
+				<label for="login">Username:</label> <br />
+				<input type="text" name="login" id="login" class="text" />
+			</p>
+						
+			<p>
+				<label for="password">Password:</label> <br />
+				<input type="password" name="password" id="password" class="text" />
+			</p>
+
+			<p>
+				<input type="submit" value="Login" class="submit" /> &nbsp; 
+				<input type="checkbox" id="rememberme" checked="checked" class="checkbox"> <label for="rememberme">Remember me</label>
+			</p>
+		</form>
+	</div>
+					
+	<div class="bendl"></div>
+	<div class="bendr"></div>
+								
+</div>

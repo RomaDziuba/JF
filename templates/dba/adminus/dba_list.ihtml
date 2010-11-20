@@ -1,0 +1,280 @@
+{literal}
+<script>
+
+jQuery(document).ready(function() { 
+	$('#tbllist tr').each(function(index) {
+		className = (index % 2 == 0) ? 'odd' : 'even';
+		$(this).attr('class', className);
+	});
+});
+
+</script>
+{/literal}
+
+<div id="statusMessage" style="padding:0px; margin:0px;"></div>
+{if $info.filter == 'top' && !empty($filters)}
+<table class="filters" style="display:none;" id="filters" cellpadding="3" align="center">
+	<thead>
+		<tr>
+			<td class="caption" colspan="2">{$lang.FILTERS}</td>
+		</tr>
+	</thead>
+	<tbody>
+	{foreach from=$filters value=item key=key}
+		{if !empty($item)}
+		<tr class="ka_row">
+			<td width="140" align="right">{$info.fields[$key].caption}:</td>
+			<td>{$item}</td>
+		</tr>
+		{/if}
+	{/foreach}
+	<tr class="ka_row">
+		<td colspan="2" align="center" >
+			<input type="submit" class="sbutton" value="OK" style="vertical-align: middle" />
+		</td>
+	</tr>
+	</tbody>
+</table>
+<br />
+{/if}
+
+{*even*}
+<div class="block">
+	
+	<div class="block_head">
+		<div class="bheadl"></div>
+		<div class="bheadr"></div>
+		<h2>{$info.caption}</h2>
+					
+		<ul>
+			{if $info.generalActions}
+				{foreach from=$info.generalActions item=action key=type}
+					<li><a class="dba_action_{$type}" {if $action.js}href="#" onclick='{$action.js}("{$action.href}"); return false;'{else}href="{$action.href}"{/if} >{$action.caption}</a></li>
+				{/foreach}
+			{/if}
+			{*TODO: вынести в CSS*}
+			{if $info.excel != ''}
+				<li><a style="background-image:url('{$info.baseurl}images/excel.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=excel" >{$info.excel}</a></li>
+			{/if}
+			{ if $info.parent != '' }
+				<li><a style="background-image:url('{$info.baseurl}images/dbadmin_top.gif'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=parent" >{$info.parent}</a></li>
+			{/if}
+			{if $info.insert != ''}
+				<li><a style="background-image:url('{$info.baseurl}images/add.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="#" onClick="openWindow('?action=insert&popup=true'); return false;">{$info.insert}</a></li>
+			{/if}
+		</ul>
+	</div> {*.block_head ends *}
+				
+				
+	<div class="block_content">
+		
+		<table id="tbllist" width="100%" cellspacing="0" cellpadding="0" class="sortable">
+			<form method="post">
+				<input type="hidden" name="picker" id="picker" />
+				<input type="hidden" name="filter_wtd" id="filter_wtd" value="apply" />
+				
+				<thead>
+					<tr>
+    					{if $info.grouped}
+    						<th width="10">
+								<input type="checkbox" title="Select all items" onClick="tbl_check_all('grouped_cb', this.checked)" />
+    						</th>
+    					{/if}
+    					
+    					{foreach from=$info.fields value=field}
+    						<th class="header" width="{$field.width}" style="cursor: pointer;" nowrap="nowrap">
+    							<a href="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}">{$field.caption}</a>
+    							{if ($info.sorting.field eq $field.name)}
+    							&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
+    							{/if}
+    						</th>
+    					{/foreach}
+    					
+    					{if $data.0.actions || !empty($filters)}
+    						<th>
+    							{if $info.filter == 'top' && !empty($filters)}
+    								<input id="filtersButton" type="button" class="submit small_tiny" value="{$lang.FILTERS}" />
+								{else}
+								&nbsp;
+    							{/if}
+    						</th>
+						{/if}
+					</tr>
+					
+					{* Filters row *}
+					{if $info.filter != 'top' && !empty($filters)}	
+						<tr class="even">
+							{if $info.grouped}
+								<td>&nbsp;</td>
+							{/if}
+							{foreach value=item from=$filters }
+								<td>{if $item}{$item}{else}&nbsp;{/if}</td>
+							{/foreach}
+							<td align="center"><input type="submit" class="submit small_tiny" value="OK" style="vertical-align: middle"></td>
+						</tr>
+					{/if}
+					
+				</thead>
+			</form>
+			
+			<form id="dba_list_form" method="post" target="_systemfr">
+				<input type="hidden" name="performPost" value="insert" />
+				{if $info.token} 
+					<input type="hidden" name="__token" value="{$info.token}" />
+				{/if}
+				
+				<tbody>
+					{if $info.fastAdd}
+    					<tr class="odd">
+    					{if $info.grouped}
+    						<td>&nbsp;</td>
+    					{/if}
+    					{foreach value=item from=$info.fieldInputs}
+    						<td>{$item}</td>
+    					{/foreach}
+    					<td align="center"><input type="submit" class="submit small_tiny" value="+" /></td>
+    					</tr>
+					{/if}
+		
+					{foreach from=$data value=line}
+						{if $line._group_caption}
+							{if $line._group_total}
+								<tr class="odd">
+									{if $info.grouped}
+										<td>&nbsp;</td>
+									{/if}
+			
+									{foreach value=sitem from=$line._group_total}
+										<td align="right"><b>{$sitem}</b></td>
+									{/foreach}
+						
+									{if $data.0.actions or $filters}
+										<td>&nbsp;</td>
+									{/if}
+								</tr>
+							{/if}
+							<tr class="odd">
+								<td colspan="50"><b>{$line._group_caption}</b></td>
+							</tr>
+						{/if}
+						<tr class="odd">
+							{if $info.grouped}
+								<td><input type="checkbox" name="grouped_cb[]" value="{$line.id}" /></td>
+							{/if}
+
+							{foreach value=item from=$line.data}
+								<td {if $item.align}align="{$item.align}"{/if}>{if $item.value}{$item.value}{else}&nbsp;{/if}</td>
+							{/foreach}
+				
+							{if !empty($line.actions)}
+								<td align="center" nowrap="nowrap">
+									
+									{if !empty($line.action_lists)}
+                            			<select onchange="dbaListActions(this);">
+                                			<option></option>
+                            				{ foreach value=action from=$line.action_lists }
+                                				<option value="{$action.href}" {if $action.popup}popup="1"{/if}>{$action.alt}</option>
+                            				{/foreach}
+                            			</select>
+                        			{/if}
+					
+									{foreach value=action from=$line.actions}
+										{if $action.popup}
+											&nbsp;<A href="#" onClick='{if $action.js}{$action.js}{else}{$action.popupFunction}{/if}("{$action.href}&popup=true"); return false;' title="{$action.alt}" rel="actionbutton"><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0"></A>&nbsp;
+										{else}
+											&nbsp;<A href="{$action.href}" {if $action.js}onClick='{$action.js}("{$action.href}"); return false;'{/if} title="{$action.alt}" {$action.addon} {$action.target rel="actionbutton"}><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0" rel="actionbutton"></A>&nbsp;
+										{/if}
+    								{/foreach}
+								</td>
+							{elseif $filters}
+								<td>&nbsp;</td>
+							{/if}
+						</tr>
+					{/foreach}
+				</tbody>
+			</form>
+		</table>
+						
+		
+		{if $info.grouped}
+			<div class="tableactions">{$info.grouped}</div>
+		{/if}
+						
+		{if isset($info.pager)}
+    		<div class="pagination right">
+    			{$info.pager} <span>[{$lang.TOTAL_ITEMS}: {$info.totalRows}]</span>
+    		</div>
+		{/if}
+		
+		<div class="pagination right">
+			{$lang.ITEMSOERPAGE}: 
+			<select OnChange="addPager(this.value)">
+				{foreach key=key value=value from=$info.limitOptions}
+    				<option value="{$key}" {if $key eq $info.rowsPerPage}selected{/if}>{$value}</option>
+  				{/foreach}
+  			</select>
+		</div>
+	
+	</div> {*.block_content ends *}
+				
+	<div class="bendl"></div>
+	<div class="bendr"></div>
+</div>
+
+<iframe name="_systemfr" style="display:none"></iframe>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+
+
+
+
+
+
+
+
+
+
+<table id="tbllist" class="ka_table" border="0" width="100%"  cellpadding="0" cellspacing="1">
+
+	
+	
+
+
+
+<div class="menucontainerbottom">
+  
+  
+  
+  {if $info.backlink != '' }
+  	<div class="backlink" >
+  	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
+  	<a href="{$info.backlink}" class="db_link">{$lang.BUTTON_BACK}</a></div>
+  {/if}
+
+  
+  
+
+ 
+
+</div>
+
+
+</FORM>
+
+
+

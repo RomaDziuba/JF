@@ -1,0 +1,21 @@
+<ul id="nav">
+	{foreach from=$items item=first}
+		<li><a {if $first.href}href="{$first.href}"{else} href="#" onclick="return false;"{/if}">{$first.caption}</a>
+		{if !empty($first.items)}
+			<ul>
+			{foreach from=$first.items item=second}
+				<li><a {if $second.href}href="{$second.href}"{else} href="#" onclick="return false;"{/if}">{$second.caption}</a>
+				{if !empty($second.items)}
+        			<ul>
+        			{foreach from=$second.items item=last}
+        				<li><a {if $last.href}href="{$last.href}"{else} href="#" onclick="return false;"{/if}">{$last.caption}</a></li>
+        			{/foreach}
+        			</ul>
+        		{/if}
+				</li>
+			{/foreach}
+			</ul>
+		{/if}
+		</li>
+	{/foreach}
+</ul>

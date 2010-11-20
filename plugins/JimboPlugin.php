@@ -45,7 +45,7 @@ class JimboPlugin extends Plugin
             throw new PermissionsException();
         }
         
-        $displayer = new dbDisplayer($tblAction);
+        $displayer = new dbDisplayer($tblAction, dbDisplayer::getTemplateInstance(TPL_ROOT.'dba/'.ENGINE_STYLE.'/') );
         $dbLogic = new dbLogic();
         
         $doAction = $dbLogic->detectPerformAction($tblAction);
@@ -62,7 +62,11 @@ class JimboPlugin extends Plugin
             exit();
         }
         
-        $jimbo->display($content, $template);
+        $vars = array(
+            '_user' => $jimbo->user->getData()
+        );
+        
+        $jimbo->display($content, $template, $vars, TPL_ROOT.'dba/');
     } // end main
     
     /**
@@ -165,7 +169,7 @@ class JimboPlugin extends Plugin
                 );
             }
         }
-        $menu = new dbMenu($menu);
+        $menu = new dbMenu($menu, dbDisplayer::getTemplateInstance(TPL_ROOT.'dba/'.ENGINE_STYLE.'/'));
         
         return $menu->getHTML();
     } // end getMenu

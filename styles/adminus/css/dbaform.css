@@ -1,0 +1,101 @@
+
+
+.dba_form_fields .odd {
+    
+}
+
+.dba_form_fields .even {
+    background: none repeat scroll 0 0 #FBFBFB;
+}
+
+.dba_form_fields tr td {
+	line-height:20px;
+}
+
+.dba_form_fields .label {
+	color:#555555;
+    font-family:"Lucida Grande",Verdana,sans-serif;
+    font-size:12px;
+    font-weight:bold;
+    padding-right:3px;
+    vertical-align:middle;
+    width:200px;
+    text-align:right;
+}
+
+.dba_form_fields td {
+	padding:3px;
+}
+
+.dba_form_fields input, .dba_form_fields select {
+	-moz-border-radius:3px 3px 3px 3px;
+	background:none repeat scroll 0 0 #FEFEFE;
+	border:1px solid #BBBBBB;
+	color:#333333;
+	font-family:"Lucida Grande",Verdana,sans-serif;
+	font-size:12px;
+	outline:medium none;
+	padding:3px;
+	vertical-align:middle;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+table.jform {
+    width:100%;
+    color: #000000;
+	margin-top:5px;
+}
+
+table.jform .caption {
+    background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
+    COLOR: #FFFFFF;
+    FONT: 12px Verdana, Tahoma;
+    height:21px;
+    line-height:21px;
+    padding-left:4px;
+    border-right:2px solid #6393df;
+}
+
+#form_actions {
+    height:40px;
+}
+
+#form_actions td div {
+    float:right;
+    margin-right:25px;
+}
+
+.calendar {
+    z-index:1050;
+}
+
+.formRows {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+
+.errorlog {
+    width:360px; 
+    height:25px; 
+    margin-top:8px;
+    border:0px;
+    color:#FF0000;
+    font-weight:bold;
+}

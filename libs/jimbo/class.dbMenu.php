@@ -5,9 +5,9 @@ class dbMenu {
 	protected $items;
 	protected $name;
 	
-	function __construct($items, $name = 'rootMenu') {
+	function __construct($items, $tpl = false,  $name = 'rootMenu') {
 		$this->items = $items;
-		$this->tpl = dbDisplayer::getTemplateInstance();
+		$this->tpl = $tpl ? $tpl : dbDisplayer::getTemplateInstance();
 		$this->name = $name;
 	}
 	

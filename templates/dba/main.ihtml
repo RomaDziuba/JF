@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv=Content-Type content="text/html; charset={$info.charset}" >
+    <title>{$info.title}</title>
+
+	<link rel="stylesheet" type="text/css" href="{$tpl.CONST.STYLES_HTTP_ROOT}{$tpl.CONST.ENGINE_STYLE}.css">
+    
+    <link rel="stylesheet" type="text/css" href="{$info.basehttp}js/calendar/calendar.css">
+    <script type="text/javascript" src="{$info.basehttp}js/calendar/calendar.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/calendar/lang/calendar-en.js"></script>
+    <script type="text/javascript" src="{$info.basehttp}js/calendar/calendar_add.js"></script>
+
+    <script type="text/javascript" src="{$info.basehttp}js/jquery-1.4.2.min.js"></script>
+    
+    <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.5.custom.min.js"></script>
+    
+    <script type="text/javascript" src="{$info.basehttp}js/jquery.qtip.js"></script>
+	
+    {if $info.css}
+        {foreach from=$info.css item=path}
+            <link rel="stylesheet" type="text/css" href="{$info.basehttp}{$path}" />
+        {/foreach}
+    {/if}
+    
+    {literal}
+    <script>
+        var jimbo = {
+        {/literal}
+            mode: "{$tpl.CONST.JIMBO_POPUP_MODE}",
+            dialogWidth: 640,
+            base: "{$info.basehttp}"
+        {literal}
+        };
+    </script>
+    {/literal}
+    
+    <script type="text/javascript" src="{$info.basehttp}js/jimbo.js"></script>
+
+</head>
+<body>
+
+<div id="hld">
+	<div class="wrapper">
+		
+		{if $_user.auth_login}
+		<div id="header">
+			<div class="hdrl"></div>
+			<div class="hdrr"></div>
+			<h1><a href="{$info.basehttp}">{$_config.site_caption}</a></h1>
+			{$menu}
+			<p class="user">Hello, <a href="#">{$_user.auth_login}</a> | <a href="{$info.basehttp}logout/">Logout</a></p>
+		</div>
+		{/if}
+		
+		<div class="cc">{$content}</div>	
+		
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</BODY></HTML>

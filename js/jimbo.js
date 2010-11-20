@@ -131,7 +131,8 @@ function openJqueryPopup(id)
 	$(obj).find('.formRows').removeClass('formRows');
 	
 	widthDelta = 10;
-	height = $(obj).outerHeight() + 90;
+	objHeight = $(obj).outerHeight() + 10;
+	height = objHeight + 100;
 	viewHeight = $.getViewHeight() - 50;
 	
 	if(viewHeight < height) { 
@@ -151,7 +152,10 @@ function openJqueryPopup(id)
         title: title,
         buttons:buttons,
         closeOnEscape: false,
-        open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); }
+        open: function(event, ui) { 
+        	$(".ui-dialog-titlebar-close").hide();
+        	//$("#" + id).height(objHeight);
+        }
     });
 	
 	$('.ui-dialog-buttonpane>.ui-dialog-buttonset>button').each(function() {
@@ -329,7 +333,11 @@ function showLoadingBar()
 	    draggable:false,
 	    resizable:false,
 	    closeOnEscape: false,
-	    open: function(event, ui) { $("#loadingBar").prev().hide();}
+	    open: function(event, ui) { 
+	    	$("#loadingBar").prev().hide();
+	    	height = $("#loadingBar").outerHeight();
+	    	$("#loadingBar").height(height);
+	    }
 	});
 	
 }
@@ -361,6 +369,16 @@ function tbl_check_all(namef, status)
 function dbaForeignKeyLoad(f1, f2, val) {
 	var url = '?action=foreignKeyLoad&ajaxChild=' + f1 + '&ajaxParent=' + f2 + '&value=' + escape(val);
 	document.getElementById('db_system').src = url;
+}
+
+function gorupSubmit() {
+	value = $("#gSelect option:selected").val();
+	if(value == 0) {
+		return false;
+	}
+    
+	document.getElementById('dba_list_form').action = value;
+	document.getElementById('dba_list_form').submit();
 }
 
 

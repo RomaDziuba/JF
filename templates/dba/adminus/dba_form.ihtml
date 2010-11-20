@@ -1,0 +1,117 @@
+<script>
+{literal}
+jQuery(document).ready(function() { 
+    initPopup();
+});
+{/literal}
+</script>
+
+<div id="dba_form">
+    <iframe name="db_system" style="display:none" id="db_system"></iframe>
+    <form id="tbl_form" name="tbl_form"  method="post"  target="db_system" enctype="multipart/form-data" {if $tpl.CONST.JIMBO_POPUP_MODE != "popup"}action="?action={$tpl.GET.action}&ID={$tpl.GET.ID}"{/if}>
+        <input type="hidden" name="picker" id="picker" />
+        
+        <table class="jform" cellpadding="0" cellspacing="0" border="0"  width="100%" align="center">
+			<thead>
+                <tr>
+                    <td class="caption" align="left" nowrap="nowrap"><b>{$info.caption}</b></td>
+                </tr>
+            </thead>
+            <tbody>
+            	<tr>
+                	<td align="center" valign="top">
+                
+						<table class="dba_form_hint" border="0" cellspacing="0" cellpadding="0" width="100%">
+                        {if $info.hint}
+                            <tr><td colspan="2" align="center"><br/>{$info.hint}<br/><br/></td></tr>
+                            <tr><td colspan="7" height="1" bgcolor="#e2e6eb"></td></tr>
+                        {/if}
+                        <tr>
+							<td colspan="2" valign="top">
+								<div class="formRows">
+                                    <table class="dba_form_fields" border="0" cellspacing="0" cellpadding="0" width="100%"  id="tblform" align="center">
+                                        {foreach value=item from=$items }  
+                                            <tr class="odd">
+                                                <td class="label" >{$item.caption}:</td>
+                                                <td align="left">{$item.input}
+                                                    {if $item.required}
+                                                        <img src="{$info.httproot}images/required.gif" />
+                                                    {/if}
+                                                </td>
+                                            </tr>
+                                        {/foreach}
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    	</table>
+                   
+                    </td>
+				</tr>
+            	<tr id="form_actions" class="ka_odd">
+                	<td align="center">
+						<div>
+                        {if $info.actionbutton != ''}
+                            <input type="submit" class="lbutton" value="{$info.actionbutton}"  />
+                        {/if}
+                        <input type="button" class="lbutton" value="{$lang.BUTTON_BACK}" onClick="window.close()" />
+                    	</div>
+                	</td>
+            	</tr>
+            </tbody>
+        </table>
+
+        {if $info.token} 
+            <input type="hidden" name="__token" value="{$info.token}" />
+        {/if}
+    
+        <input type="hidden" name="performPost" value="{$info.action}" />
+    </form>
+</div>
+
+
+{literal}
+<script>
+
+$('.dba_form_fields tr').each(function(index) {
+	className = (index % 2 == 0) ? 'odd' : 'even';
+	$(this).attr('class', className);
+});
+
+$.fn.qtip.styles.mystyle = {
+   width: 300,
+   background: '#CCCCCC',
+   color: 'black',
+   textAlign: 'center',
+   border: {
+      width: 5,
+      radius: 3,
+      color: '#CCCCCC'
+   },
+   tip: 'bottomLeft',
+   name: 'dark' // Inherit the rest of the attributes from the preset dark style
+}
+
+function doTip(el, tip) {
+	$('#'+el).qtip({
+   content: tip,
+   show: 'focus',
+   hide: 'blur',
+   position: {
+   	 corner: {
+         target: 'topLeft',
+         tooltip: 'bottomLeft'
+      }
+   },
+	style: { 
+      name: 'mystyle'
+   }
+});
+
+}
+
+{/literal}
+{ foreach value=value key=key from=$qtips }
+doTip('{$key}', '{$value}') 
+{/foreach}
+</script>

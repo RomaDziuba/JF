@@ -164,6 +164,10 @@ class Controller
         $tpl->assign('menu', $this->call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
+        if($vars) {
+            $tpl->assign($vars);
+        }
+        
         return $tpl->fetch($template);
     } // end fetch
     
