@@ -11,9 +11,9 @@ class UserPlugin extends Plugin
         
         $jimbo->includeCss('css/dbalogin.css');
         
-        $content = $this->fetch('dba_login.ihtml');
+        $content = $this->fetch('dba/'.ENGINE_STYLE.'/dba_login.ihtml');
         
-        $jimbo->display($content);
+        $jimbo->display($content, 'main.ihtml', false, TPL_ROOT.'dba/');
     }
     
     private function auth()

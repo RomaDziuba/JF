@@ -157,6 +157,7 @@ class Controller
         $info = array(
             'basehttp' => $this->urlPrefix,
             'charset' => CHARSET,
+            'style_header' => ENGINE_STYLE.'/header.ihtml'
         );
         
         $info += $this->properties;

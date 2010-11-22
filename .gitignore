@@ -1,4 +1,5 @@
 *~
+c_*.php
 templates/compiled/*.php
 *.bak
 .svn

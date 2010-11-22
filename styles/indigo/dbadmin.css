@@ -164,7 +164,7 @@ INPUT {
 .lbutton {
 	WIDTH: 120px; 
 	padding-top: 3px; 
-	BACKGROUND: URL(../images/skin/button/yellowbuttonbg.gif) no-repeat;
+	BACKGROUND: URL(images/skin/button/yellowbuttonbg.gif) no-repeat;
 	border:0px;
 	margin-right:3px;
 }
@@ -172,7 +172,7 @@ INPUT {
 .sbutton {
 	WIDTH: 64px; 
 	padding-top: 3px; 
-	BACKGROUND: URL(../images/skin/button/yellowbuttonbg_small.gif) no-repeat; 
+	BACKGROUND: URL(images/skin/button/yellowbuttonbg_small.gif) no-repeat; 
 }
 
 .ibutton {
@@ -418,7 +418,7 @@ table.jlist, table.jform {
 }
 
 .breadcrumbs, table.jform .caption {
-	background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
+	background: #80A9EA url(images/skin/table/tablebg.gif) repeat-x top left;
 	COLOR: #FFFFFF;
 	FONT: 12px Verdana, Tahoma;
 	height:21px;
@@ -428,7 +428,7 @@ table.jlist, table.jform {
 }
 
 table.filters .caption {
-	background: #80A9EA url(../images/skin/table/tablebg.gif) repeat-x top left;
+	background: #80A9EA url(images/skin/table/tablebg.gif) repeat-x top left;
 	COLOR: #FFFFFF;
 	FONT: 12px Verdana, Tahoma;
 	height:21px;
@@ -438,7 +438,7 @@ table.filters .caption {
 }
 
 .jcol { 
-	BACKGROUND: #80A9EA url(../images/skin/table/tabledescbg.gif) REPEAT-X TOP LEFT;
+	BACKGROUND: #80A9EA url(images/skin/table/tabledescbg.gif) REPEAT-X TOP LEFT;
 	COLOR: #333333;
 	FONT: 11px Verdana, Tahoma;
 	padding-left:4px;
@@ -576,7 +576,7 @@ text-align:center;
 
 font-size:14px;
 font-family: verdana;
-background: #81b1fd url(../images/skin/menu/menusection2.gif) repeat-x top left;
+background: #81b1fd url(images/skin/menu/menusection2.gif) repeat-x top left;
 margin:0px;
 }
 
@@ -591,7 +591,7 @@ text-align:center;
 vertical-align: middle;
 font-size:14px;
 font-family: verdana;
-background: #c8dbf7 url(../images/skin/menu/menusection2.gif) repeat-x top left;	
+background: #c8dbf7 url(images/skin/menu/menusection2.gif) repeat-x top left;	
 }
 
 
@@ -638,3 +638,17 @@ table.filters {
 .calendar {
 	z-index:1050;
 }
+
+
+#header .user {
+    position:absolute;
+    top:0px;
+    right:5px;
+    display:inline;
+}
+
+#header .user a {
+	color:#000000;
+	font-weight:bold;
+}
+

@@ -1,4 +1,4 @@
-<?php /* V2.10 Template Lite 4 January 2007  (c) 2005-2007 Mark Dickenson. All rights reserved. Released LGPL. 2010-11-20 02:50:13 EET */ ?>
+<?php /* V2.10 Template Lite 4 January 2007  (c) 2005-2007 Mark Dickenson. All rights reserved. Released LGPL. 2010-11-22 08:54:37 EET */ ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -22,12 +22,16 @@ js/calendar/calendar_add.js"></script>
 
     <script type="text/javascript" src="<?php echo $this->_vars['info']['basehttp']; ?>
 js/jquery-1.4.2.min.js"></script>
-    
     <script type="text/javascript" src="<?php echo $this->_vars['info']['basehttp']; ?>
 js/jquery-ui-1.8.5.custom.min.js"></script>
-    
     <script type="text/javascript" src="<?php echo $this->_vars['info']['basehttp']; ?>
 js/jquery.qtip.js"></script>
+	
+	<?php $_templatelite_tpl_vars = $this->_vars;
+echo $this->_fetch_compile_include($this->_vars['info']['style_header'], array());
+$this->_vars = $_templatelite_tpl_vars;
+unset($_templatelite_tpl_vars);
+ ?>
 	
     <?php if ($this->_vars['info']['css']): ?>
         <?php if (count((array)$this->_vars['info']['css'])): foreach ((array)$this->_vars['info']['css'] as $this->_vars['path']): ?>
@@ -65,9 +69,11 @@ js/jimbo.js"></script>
 		<div id="header">
 			<div class="hdrl"></div>
 			<div class="hdrr"></div>
-			<h1><a href="<?php echo $this->_vars['info']['basehttp']; ?>
+			<?php if ($this->_vars['_config']['site_caption']): ?>
+				<h1><a href="<?php echo $this->_vars['info']['basehttp']; ?>
 "><?php echo $this->_vars['_config']['site_caption']; ?>
 </a></h1>
+			<?php endif; ?>
 			<?php echo $this->_vars['menu']; ?>
 
 			<p class="user">Hello, <a href="#"><?php echo $this->_vars['_user']['auth_login']; ?>

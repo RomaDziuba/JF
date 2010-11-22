@@ -1,0 +1,4 @@
+<script type="text/javascript" src="{$tpl.CONST.STYLES_HTTP_ROOT}{$tpl.CONST.ENGINE_STYLE}/js/jquery.tabs.js"></script>
+<script type="text/javascript" src="{$tpl.CONST.STYLES_HTTP_ROOT}{$tpl.CONST.ENGINE_STYLE}/js/jquery.clickmenu.js"></script>
+<script type="text/javascript" src="{$tpl.CONST.STYLES_HTTP_ROOT}{$tpl.CONST.ENGINE_STYLE}/js/jquery.cookie.js"></script>
+    

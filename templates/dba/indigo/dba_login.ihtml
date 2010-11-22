@@ -9,7 +9,7 @@
                 <div style="margin-bottom: 30px;"><input name="password" class="text_field" type="password"  style="width:100%"></div>
                 <div style="height: 40px;">
                     <div style="float: left; color: red; padding: 5px;" style="label">
-                        <b><?=$error_message; ?></b>
+                        <b>{$error_message;}</b>
                     </div>
                     <div style="float: right;">
                         <input value="Войти" class="big_button" type="submit">

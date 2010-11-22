@@ -12,10 +12,10 @@
     <script type="text/javascript" src="{$info.basehttp}js/calendar/calendar_add.js"></script>
 
     <script type="text/javascript" src="{$info.basehttp}js/jquery-1.4.2.min.js"></script>
-    
     <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.5.custom.min.js"></script>
-    
     <script type="text/javascript" src="{$info.basehttp}js/jquery.qtip.js"></script>
+	
+	{include file=$info.style_header}
 	
     {if $info.css}
         {foreach from=$info.css item=path}
@@ -47,7 +47,9 @@
 		<div id="header">
 			<div class="hdrl"></div>
 			<div class="hdrr"></div>
-			<h1><a href="{$info.basehttp}">{$_config.site_caption}</a></h1>
+			{if $_config.site_caption}
+				<h1><a href="{$info.basehttp}">{$_config.site_caption}</a></h1>
+			{/if}
 			{$menu}
 			<p class="user">Hello, <a href="#">{$_user.auth_login}</a> | <a href="{$info.basehttp}logout/">Logout</a></p>
 		</div>
