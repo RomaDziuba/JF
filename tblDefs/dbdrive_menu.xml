@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <table charset="UTF-8" name="dbdrive_menu" primaryKey="id"
-defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
+defaultOrderField="order_n" defaultOrderDirection="ASC" rowsForPage="200">
 
-    <relations/>
+    <relations>
+        <link type="parent" field="id_parent" isnull="true" foreignTable="dbdrive_menu" foreignField="id"  />
+        <link type="child" field="id" foreignTable="dbdrive_menu" foreignField="id_parent" treeCaption="caption" />
+    </relations>
     
     <fields>
-        <field type="readonly" caption="ID" name="id" trim="60" width="10%" required="true" sorting="true"/>
-        <field type="text" caption="Название" name="caption" trim="60" width="30%" required="true" sorting="true"/>
-        <field type="text" caption="Url" name="url" trim="60" width="30%"  sorting="true"/>
-        <field type="text" caption="id_parent" name="id_parent" trim="60" width="30%" sorting="true"/>
-        <field type="datetime" caption="f_1" name="f_1" trim="60" width="30%"  sorting="true"/>
-        <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true" />
+        <field type="readonly" caption="ID" name="id" trim="60" width="5%" required="true" sorting="true"/>
+        <field type="text" clicable="true" caption="Название" name="caption" trim="60" width="35%" required="true" sorting="true"/>
+        <field type="text" caption="Url" name="url" trim="60" width="50%"  sorting="true"/>
+        <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="user_types" foreignKeyField="id" foreignValueField="type" hide="true" />
+        <field type="text" caption="Order index" name="order_n" trim="60" width="10%"  sorting="true"/>
     </fields>
     
-    
-    <filters/>
-    
     <actions>
-        <action type="list" caption="Таблицы" />
-        <action type="insert" caption="Добавить позицию" />
-        <action type="edit" caption="Отредактировать позицию" />
-        <action type="remove" caption="Удалить позицию" />
+        <action type="list" caption="Menu items" />
+        <action type="insert" caption="Add item" />
+        <action type="edit" caption="Edit item" />
+        <action type="remove" caption="Remove item" />
+        <action type="parent"  caption="Parent" relation="dbdrive_menu" relationType="parent" />
+        <action type="child"  caption="Sub items" relation="dbdrive_menu" relationType="child" />
     </actions> 
     
 </table>
