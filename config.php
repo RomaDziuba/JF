@@ -17,6 +17,7 @@ define('DEFAULT_TABLE', 'dbdrive_tables');
 
 define('SITE_CHARSET', CHARSET);
 
+define('IS_JIMBO', 1);
 define('JIMBO_VERSION', '3.1');
 
 // popup | jquery
@@ -52,6 +53,10 @@ $GLOBALS['config']['paths'] = array(
 );
 
 $GLOBALS['pluginRules'] = array();
+
+if( file_exists(FS_ROOT.'config.site.php') ) {
+    require_once FS_ROOT.'config.site.php';
+}
 
 include_once FS_ROOT."common.php";
 
