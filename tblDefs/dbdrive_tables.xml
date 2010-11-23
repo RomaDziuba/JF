@@ -7,7 +7,7 @@ defaultOrderField="id" defaultOrderDirection="ASC" rowsForPage="200">
     <fields>
 		<field type="text" caption="Таблица" name="caption" trim="60" width="30%" required="true" sorting="true"/>
 		<field type="text" caption="Комментарий" name="comment" trim="60" width="65%" required="true" sorting="true"/>
-		<field type="many2many" caption="Доступ" linkTable="dbdrive_perms" linkField="id_table" linkForeignField="id_role" foreignTable="dbdrive_roles" foreignKeyField="role_id" foreignValueField="caption" hide="true">
+		<field type="many2many" caption="Доступ" linkTable="dbdrive_perms" linkField="id_table" linkForeignField="id_role" foreignTable="user_types" foreignKeyField="id" foreignValueField="type" hide="true">
 			<option id="1">r</option>
 			<option id="2">w</option>
 			<option id="3">x</option>
