@@ -43,4 +43,9 @@ $jimbo = Controller::getInstance($db, $GLOBALS['config']);
 
 $jimbo->user = new JimboUser($GLOBALS['_sessionData']);
 
+if( file_exists(FS_ROOT.'init.php') ) {
+    require_once FS_ROOT.'init.php';
+}
+
+
 ?>
