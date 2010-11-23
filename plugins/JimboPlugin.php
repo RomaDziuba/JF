@@ -13,6 +13,8 @@ class JimboPlugin extends Plugin
             $table = DEFAULT_TABLE; 
         }
         
+        define('DBADMIN_CURRENT_TABLE', $table);
+        
         $_sessionData['DB_CURRENT_TABLE'] = $table; 
         $_sessionData['DBA_SCRIPT'] = $jimbo->urlPrefix.ENGINE_URL.'/';
         

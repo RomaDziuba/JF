@@ -182,16 +182,17 @@ class dbAction {
 			}
 
 			// Предустановленные фильтры
-			if (!empty($this->tableDefinition->filters)) {
-				foreach ($this->tableDefinition->filters as $field => $value) {
-					if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
-						$value = $_sessionData[$tmp[1]];
-					}
-					if (isset($value)) {
-						$where[] = $tblName.".".$field." IN ($value)";
-					}
-				}
-			}
+            if (!empty($this->tableDefinition->filters)) {
+                foreach ($this->tableDefinition->filters as $field => $value) {
+                    if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
+                        $value = isset($_sessionData[$tmp[1]]) ? $_sessionData[$tmp[1]] : 'NULL';
+                    }
+                    
+                    if (isset($value)) {
+                        $where[] = $value == 'NULL' ? $tblName.".".$field." IS NULL" : $tblName.".".$field." IN ($value)";
+                    }
+                }
+            }
 
 			// ParentID влияет на выборку
 			if (isset($this->tableDefinition->actions['parent'])) {
@@ -507,6 +508,10 @@ class dbAction {
 		foreach ($this->tableDefinition->fields as $info) {
 		    
 			switch($info->attributes['type']) {
+			    case 'readonly': {
+                    continue;
+                } break;
+                
 			    case 'many2many': {
 			        $many2many[] = $info;
 				    continue;
