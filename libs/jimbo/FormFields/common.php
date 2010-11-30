@@ -176,6 +176,10 @@ class passwordFormField extends abstractFormField {
 class checkboxFormField extends abstractFormField {
 
 	function getEditInput($value = '') {
+		$readonly = $this->getAttribute('readonly');
+		if ($readonly) {
+			return $this->displayValue($value);
+		}
 		if (is_numeric($value)) {
 			$checked = ($value) ? 'checked' : '';
 		} else {

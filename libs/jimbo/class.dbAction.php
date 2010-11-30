@@ -208,7 +208,7 @@ class dbAction {
 			$this->fields = $fields;
 
 			if ($additionalWhere = $this->tableDefinition->getAttribute('additionalWhere')) {
-				$where[] = $additionalWhere;
+				$where[] = $this->prepareAddonWhere($additionalWhere);
 			}
 
 			if ($customFrom = $this->tableDefinition->getAttribute('customFrom')) {
