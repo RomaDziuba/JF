@@ -381,7 +381,19 @@ function gorupSubmit() {
 	document.getElementById('dba_list_form').submit();
 }
 
+function addPager(pager) {
 
+    var path = document.location.href;
+    if (path.indexOf('?') != -1) {
+        path = path.replace(new RegExp("pager=[0-9]+", "g"), "");
+        path = path + '&pager=' + pager;
+        path = path.replace(new RegExp("order=[a-z]+", "g"), "");
+        path = path.replace(new RegExp("&+", "g"), "&");
+        document.location.href = path;
+    } else {
+        document.location.href = path + '?pager='+pager;
+    }
+}
 
 
 

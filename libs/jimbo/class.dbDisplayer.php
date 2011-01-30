@@ -577,15 +577,17 @@ class dbDisplayer {
                     $html .= '</select>';
                     $filters[] = $html;
                 } elseif ($field->getAttribute('type') == 'datetime') {
+                    $format = substr($field->getFormat(), 0, 8);
+                    
                     $html = '
                     <input type="text" name="filter['.$filterName.']" id="filter['.$filterName.']" value="'.$value.'" size="10" style="vertical-align: top">
-                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal" name="'.$field->name.'_cal"> 
+                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="filter_'.$field->name.'_cal" name="'.$field->name.'_cal"> 
                     <script type="text/javascript">
                         Calendar.setup({
                             inputField     :    "filter['.$filterName.']",
-                            ifFormat       :    "%Y-%m-%d",
+                            ifFormat       :    "'.$format.'",
                             showsTime      :    false,
-                            button         :    "'.$field->name.'_cal",
+                            button         :    "filter_'.$field->name.'_cal",
                             step           :    1
                         });
                     </script>';
