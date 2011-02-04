@@ -95,7 +95,7 @@ class tableDefinition {
 					$field->attributes['hint'] = iconv("UTF-8", 'cp1251', $field->attributes['hint']);
 				}
 			}
-
+			$field->table = $this->name;
             if (!empty($field->name) && !isset($this->fields[$field->name])) {
                 $this->fields[$field->name] = $field;
             } else {

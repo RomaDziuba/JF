@@ -195,6 +195,10 @@ class checkboxFormField extends abstractFormField {
 		$checked = (strtoupper(substr($value, 0, 1)) == 'Y') ? '<img align="center" src="'.HTTP_ROOT.'images/tick.png" />' : '';
 		return $checked;
 	}
+
+	function displayRO($value) {
+		return $this->displayValue($value);
+	}
 }
 
 
@@ -494,4 +498,26 @@ class many2manyFormField extends abstractFormField {
 class sqlFormField  extends abstractFormField {
 
 }
+
+class comboFormField extends abstractFormField {
+
+
+    function getEditInput($value = '') {
+        global $db;
+        $city = $db->getCol("select distinct {$this->name} from {$this->table} order by {$this->name}");
+
+        $value = htmlspecialchars(stripslashes($value));
+        $out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';
+        $out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')">';
+        foreach ($city as $item) {
+            $out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+        }
+        $out .= '</select>';
+        return $out;
+    }
+
+
+}
+
+
 ?>

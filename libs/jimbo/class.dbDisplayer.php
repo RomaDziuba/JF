@@ -338,7 +338,6 @@ class dbDisplayer {
 				}
 
 				$item = array(
-                    'src' => HTTP_ROOT.'images/dbadmin_'.$type.'.gif',
                     'alt' => $action['caption'],
                     'href' => $link,
                     'addon' => $external ? ' target="_blank" ' : '',
@@ -347,6 +346,14 @@ class dbDisplayer {
                     'popupFunction' => $popupFunction,
 				    'js' => isset($action['js']) ? $action['js'] : false, 
                 );
+
+				$src = HTTP_ROOT.'images/dbadmin_'.$type.'.gif';
+				if (!isset($iconExist[$src])) {
+					$iconExist[$src] = is_file(FS_ROOT.$src);
+				}
+				if ($iconExist[$src]) {
+					$item['src'] = $src;
+				}
 				
                 $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
 				
