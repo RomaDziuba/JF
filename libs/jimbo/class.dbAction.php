@@ -316,8 +316,10 @@ class dbAction {
 		global  $_sessionData;
 
 		if (!in_array($id, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias])) {
-			echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			die;
+			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			die;*/
+		    $this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			return false;
 		}
 
 		// Выбор записи по первичному ключу с подргузкой внешних ключей в массивы
@@ -362,8 +364,10 @@ class dbAction {
 
 
 		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
-			echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			die;
+			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			die;*/
+		    $this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			return false;
 		}
 
 
@@ -705,7 +709,6 @@ class dbAction {
 		return $values;
 	}
 
-
 	// ------------------------------------------
 	// ------- Удаление записи из базы ----------
 	// ------------------------------------------
@@ -714,11 +717,8 @@ class dbAction {
 		if (!is_numeric($itemID)) {
 			return false;
 		}
-
 		// Сохраняем саму строку
 		$this->loadRow($itemID);
-
-
 		// Удаляем данные для дочерхних таблиц
 		if (isset($this->tableDefinition->actions['child'])) {
 			$relation = $this->tableDefinition->relations['child'][$this->tableDefinition->actions['child']['relation']];
@@ -728,7 +728,7 @@ class dbAction {
 				$relatedSQL = "select ".$relatedTable->tableDefinition->primaryKey." as id from ".$relatedTable->tableDefinition->name." where ".$relation2['field']." = ".$itemID;
 				$dataRes = $this->dbDriver->query($relatedSQL);
 				if (PEAR::isError($dataRes)) {
-					$this->lastErrorMessage = $this->locale['ERR_REMOVECASCADE'].' SQL:'.$relatedSQL;
+                    $this->mysqlerror2text($dataRes, 'delete');
 					return false;
 				}
 				while ($row = $dataRes->fetchRow()) {
@@ -745,7 +745,7 @@ class dbAction {
 				$sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
 				$dbRes = $this->dbDriver->query($sql);
 				if (PEAR::isError($dbRes)) {
-					$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+                    $this->mysqlerror2text($dbRes, 'delete');
 					return false;
 				}
 			}
@@ -756,7 +756,7 @@ class dbAction {
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.$itemID." LIMIT 1";
 		$dbRes = $this->dbDriver->query($sql);
 		if (PEAR::isError($dbRes)) {
-			$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+            $this->mysqlerror2text($dbRes, 'delete');
 			return false;
 		}
 
@@ -901,8 +901,9 @@ class dbAction {
 	}
 
 	function mysqlerror2text($result, $operation) {
+	    
 		if ($result->code == '-3') {
-			$this->lastErrorMessage = $this->locale['ERR_UNIQKEY'];
+			$this->lastErrorMessage = $this->locale['ERR_CONSTRAINT'];
 		} else {
 			$this->lastErrorMessage = $this->locale['ERR_'.strtoupper($operation)].$result->toString();
 		}
