@@ -138,6 +138,8 @@ class dbDisplayer {
 		header('Content-Type: text/comma-separated-values');
 		header('Content-Length: ' . filesize($tmpFname));
 		header('Content-Disposition: attachment; filename='.$tblName.'.csv');
+		header("Cache-Control: maxage=1");
+		header("Pragma: public"); 
 		fpassthru($fp);
 		fclose($fp);
 		unlink($tmpFname);
