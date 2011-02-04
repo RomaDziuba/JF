@@ -10,9 +10,11 @@ $dbAdminMessages = array(
 
 'ERR_UNIQKEY' => 'Non unique value for keys',
 'ERR_INSERT' => 'Error in insert',
+'ERR_DELETE' => 'Error in delete',
 'ERR_REQUIRED' => 'You haven\'t feel all fields ',
 'ERR_UNKNOWN' => 'Error happend',
 'ERR_TABLEDEF' => "Error while loading table info ",
+'ERR_CONSTRAINT' => 'Impossible to remove the data involved',
 
 'STATUS_SUCCESS' => "Successfuly saved",
 'INFO_PAGES' => 'Pages',

@@ -7,9 +7,9 @@ jQuery(document).ready(function() {
 </script>
 <div id="dba_form">
     <iframe name="db_system" style="display:none" id="db_system"></iframe>
-    <form method="post" style="display:inline" target="db_system" name="tbl_form" id="tbl_form" enctype="multipart/form-data" {if $tpl.CONST.JIMBO_POPUP_MODE != "popup"}action="?action={$tpl.GET.action}&ID={$tpl.GET.ID}"{/if}>
+    <form method="post" style="display:inline" target="db_system" name="tbl_form" id="tbl_form" enctype="multipart/form-data" {if $tpl.CONST.JIMBO_POPUP_MODE != "popup"}action="{$info.url}?action={$tpl.GET.action}&ID={$tpl.GET.ID}"{/if}>
         <input type="hidden" name="picker" id="picker" />
-        
+         
         <table class="jform" cellpadding="0" cellspacing="0" border="0"  width="100%" align="center" bgcolor="#EDF4FF">
             <thead>
                 <tr>

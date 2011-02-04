@@ -35,6 +35,30 @@ class doubleVisitGeoRegionFormField extends abstractFormField {
 	}
 }
 
+class autocompleteFormField extends abstractFormField {
+	
+	function getEditInput($value = '', $inline = false) {
+		$value = htmlspecialchars($value);
+		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
+		$width = $this->getWidth($inline);
+		$out = '<input style="'.$width.'" type="text" name="'.$this->name.'" id="'.$this->name.'_autocomplete" value="'.$value.'" class="thin autocomplete-input" '.$readonly.'>';
+		$out .= "<script>
+					(function () {
+								jQuery('#".$this->name."_autocomplete').autocomplete({
+								    serviceUrl: '".$this->attributes['autocompleteURL']."',
+								    minChars: ".$this->attributes['minChars'].",
+								    maxHeight: 400, 
+								    width: 380, 
+								    zIndex: 9999,
+								    deferRequestBy: 300 
+								});
+					})(jQuery)
+				</script>";
+		return $out;
+	}
+	
+}
+
 class texthintFormField extends abstractFormField {
 
 
