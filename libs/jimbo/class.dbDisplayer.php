@@ -336,7 +336,6 @@ class dbDisplayer {
 				}
 
 				$item = array(
-                    'src' => HTTP_ROOT.'images/dbadmin_'.$type.'.gif',
                     'alt' => $action['caption'],
                     'href' => $link,
                     'addon' => $external ? ' target="_blank" ' : '',
@@ -345,15 +344,23 @@ class dbDisplayer {
                     'popupFunction' => $popupFunction,
 				    'js' => isset($action['js']) ? $action['js'] : false, 
                 );
+                
+                $src = HTTP_ROOT.'images/dbadmin_'.$type.'.gif';
+				if (!isset($iconExist[$src])) {					
+					$iconExist[$src] = is_file(FS_ROOT.$src);
+				}
+				if ($iconExist[$src]) {
+					$item['src'] = $src;
+				}
 				
                 $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
 				
 				$line[$lineKey][] = $item;
 			}
-
+			
 			$data[] = $line;
 		};
-
+		
 		$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias] = array_unique(array_merge($pageIDs, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias]));
 
 
@@ -552,12 +559,9 @@ class dbDisplayer {
                         });
                     </script>';
                     $filters[] = $html;
-                } else {
-                    $inputSize = $field->getAttribute('inputSize');
-                    if (empty($inputSize)) {
-                        $inputSize = 20;
-                    }
-                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" size="'.$inputSize.'">';
+                } else {                    
+                    $width = $field->getWidth(true);                    
+                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
                 }
             }
         }
