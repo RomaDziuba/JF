@@ -138,6 +138,8 @@ class dbDisplayer {
 		header('Content-Type: text/comma-separated-values');
 		header('Content-Length: ' . filesize($tmpFname));
 		header('Content-Disposition: attachment; filename='.$tblName.'.csv');
+		header("Cache-Control: maxage=1");
+		header("Pragma: public"); 
 		fpassthru($fp);
 		fclose($fp);
 		unlink($tmpFname);
@@ -474,7 +476,10 @@ class dbDisplayer {
                         $this->tblAction->loadForeignKeys();
                         $values =  (array)$tableDefinition->fields[$key]->keyData;
                     }
-
+				} elseif ($field->getAttribute('type') == 'sql') {
+					if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
+						$values = $this->customHandler->getFilterValues($field->name);
+					}
                 } else {
                     $values = array();
                 }
@@ -559,8 +564,8 @@ class dbDisplayer {
                         });
                     </script>';
                     $filters[] = $html;
-                } else {                    
-                    $width = $field->getWidth(true);                    
+                } else {
+  					$width = $field->getWidth(true);
                     $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
                 }
             }
@@ -615,8 +620,8 @@ class dbDisplayer {
 		$info['hint'] = $tableDefinition->getAttribute('hint');
 
 		$info['httproot'] = HTTP_ROOT;
-
-
+		$info['url'] = $this->tblAction->getHttpPath();
+		
 		$items = array();
 		$qtips = array();
 

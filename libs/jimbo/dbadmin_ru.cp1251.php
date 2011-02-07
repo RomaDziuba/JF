@@ -11,9 +11,11 @@ $dbAdminMessages = array(
 
 'ERR_UNIQKEY' => 'Такое значение для одного из уникальных полей уже используется',
 'ERR_INSERT' => 'Ошибка при добалвении записи',
+'ERR_DELETE' => 'Ошибка при удалении записи',
 'ERR_REQUIRED' => 'Вы не заполнили поле',
 'ERR_UNKNOWN' => 'Ошибка',
 'ERR_TABLEDEF' => "Error while loading table info ",
+'ERR_CONSTRAINT' => 'Невозможно удалить задействованные данные',
 
 'STATUS_SUCCESS' => "Данные успешно сохранены",
 'INFO_PAGES' => 'Страниц',

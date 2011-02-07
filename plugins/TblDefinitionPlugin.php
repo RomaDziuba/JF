@@ -12,4 +12,3 @@ class TblDefinitionPlugin extends Plugin
 	}
 }
 ?>
-

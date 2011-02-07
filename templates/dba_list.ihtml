@@ -102,7 +102,7 @@ $('#filtersButton').click(function() {
 
 <div class="breadcrumbs"><b>{$info.caption}</b></div>
 <table id="tbllist" class="ka_table" border="0" width="100%"  cellpadding="0" cellspacing="1">
-<form style="display:inline;" method="post" id="tbl_form" name="test">
+<form style="display:inline;" method="post" name="test">
 
 	<input type="hidden" name="picker" id="picker" />
 	<input type="hidden" name="filter_wtd" id="filter_wtd" value="apply" />
@@ -190,7 +190,7 @@ $('#filtersButton').click(function() {
 				<td colspan="50"><b>{$line._group_caption}</b></td>
 			</tr>
 			{/if}
-			<tr class="ka_row">
+			<tr class="ka_row" id="TR_{$line.id}">
 				{if $info.grouped}
 					<TD><input type="checkbox" name="grouped_cb[]" value="{$line.id}"></TD>
 				{/if}
@@ -283,7 +283,7 @@ $('#filtersButton').click(function() {
 <script>
 {if $info.highlight}
         {foreach value=value from=$info.highlight}
-                {literal}${/literal}("#TR_{$value}").css('background-color', '#FFF0CF');
+                {literal}${/literal}("#TR_{$value}").css('background-color', '#FEE5FC');
         {/foreach}
 {/if}
 </script>

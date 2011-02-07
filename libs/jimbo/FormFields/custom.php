@@ -15,8 +15,48 @@ class cityFormField extends abstractFormField {
 		$out .= '</select>';
 		return $out;
 	}
+}
 
+class doubleVisitGeoRegionFormField extends abstractFormField {
 
+	function getEditInput($value = '') {
+		global $db, $_sessionData;
+		
+		$city = $db->getCol('SELECT distinct(geo_region) FROM double_visit WHERE slave_worker_id = '.$_sessionData['auth_id'].' ORDER BY geo_region');
+		
+		$value = htmlspecialchars(stripslashes($value));
+		$out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';		
+		$out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')">';
+		foreach ($city as $item) {
+			$out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+		}
+		$out .= '</select>';
+		return $out;
+	}
+}
+
+class autocompleteFormField extends abstractFormField {
+	
+	function getEditInput($value = '', $inline = false) {
+		$value = htmlspecialchars($value);
+		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
+		$width = $this->getWidth($inline);
+		$out = '<input style="'.$width.'" type="text" name="'.$this->name.'" id="'.$this->name.'_autocomplete" value="'.$value.'" class="thin autocomplete-input" '.$readonly.'>';
+		$out .= "<script>
+					(function () {
+								jQuery('#".$this->name."_autocomplete').autocomplete({
+								    serviceUrl: '".$this->attributes['autocompleteURL']."',
+								    minChars: ".$this->attributes['minChars'].",
+								    maxHeight: 400, 
+								    width: 380, 
+								    zIndex: 9999,
+								    deferRequestBy: 300 
+								});
+					})(jQuery)
+				</script>";
+		return $out;
+	}
+	
 }
 
 class texthintFormField extends abstractFormField {

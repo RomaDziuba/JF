@@ -3,3 +3,4 @@ templates/compiled/*.php
 *.bak
 .svn
 .gitmodules
+plugins/TblDefinitionPlugin.php
