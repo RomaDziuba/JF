@@ -114,7 +114,11 @@ $('#filtersButton').click(function() {
 		{/if}
 		{foreach from=$info.fields value=field}
 			<td class="jcol" width="{$field.width}" {if $field.align}align="{$field.align}"{/if} nowrap>
-				<A HREF="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}" class="db_link">{$field.caption}</A>
+			{if $field.sorting}
+			<A HREF="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}" class="db_link">{$field.caption}</A>
+			{else}
+			{$field.caption}
+			{/if}
 				{if ($info.sorting.field eq $field.name)}
 					&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
 				{/if}

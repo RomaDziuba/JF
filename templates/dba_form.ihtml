@@ -55,6 +55,7 @@ jQuery(document).ready(function() {
                         {/if}
                         <input type="button" class="lbutton" value="{$lang.BUTTON_BACK}" onClick="window.close()" />
                     </div>
+                    <textarea id="errorlog_block" class="errorlog" style="margin:0px;" readonly="readonly"></textarea>
                 </td>
             </tr>
             </tbody>

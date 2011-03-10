@@ -17,14 +17,19 @@ class dbLogic {
 						}
 					}
 				}
-
+				
+				$tblName = $tblAction->tableDefinition->name;
+				
 				unset($_GET['order']);
 				
+				if (!isset($_sessionData['DB_FILTERS'][$tblName])) {
+					$_sessionData['DB_FILTERS'][$tblName] = array();
+				}
 				foreach ($filters as $key => $value) {
 					if (!$this->isEmpty($value)) {
-						$_sessionData['DB_FILTERS'][$key] = $value;
+						$_sessionData['DB_FILTERS'][$tblName][$key] = $value;
 					} else {
-						unset($_sessionData['DB_FILTERS'][$key]);
+						unset($_sessionData['DB_FILTERS'][$tblName][$key]);
 					}
 				}
 			}

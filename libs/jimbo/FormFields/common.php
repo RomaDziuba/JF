@@ -33,9 +33,9 @@ class abstractFormField {
 	function getSearchFilter($value) {
 		if (is_array($value)) {
 			if (empty($value[0])) {
-				return " < '".mysql_escape_string($value[1])."'";
+				return " <= '".mysql_escape_string($value[1])."'";
 			} elseif (empty($value[1])) {
-				return " > '".mysql_escape_string($value[0])."'";
+				return " >= '".mysql_escape_string($value[0])."'";
 			} else {
 				return " BETWEEN '".mysql_escape_string($value[0])."' AND '".mysql_escape_string($value[1])."'";
 			}
@@ -90,11 +90,9 @@ class abstractFormField {
 
 	function getWidth($inline = false, $default = '380px') {
 		$width = $this->getAttribute('inputWidth');
-		if ($inline) {
-			$width = '150px';
-		} elseif (empty($width)) {
-			$width = $default;
-		}
+		if (empty($width)) {
+			$width = $inline ? '150px' : $default;
+		}		
 		return 'width:'.$width.';';
 	}
 

@@ -17,10 +17,10 @@ class dbDisplayer {
 	var $tblAction;
 
 	private static $tpl;
-	
+
 	function dbDisplayer(&$tblAction, &$tpl = null) {
 		$this->tblAction = &$tblAction;
-		
+
 		self::$tpl = $tpl;
 	}
 
@@ -70,22 +70,22 @@ class dbDisplayer {
 	}
 
 	function &getTemplateInstance($tplRoot = false) {
-	    
-	    if(!$tplRoot) {
-            $tplRoot = realpath(dirname(__FILE__).'/../../templates');
-	    }
-	    
-        if(!is_dir($tplRoot)) {
-            throw new Exception('Not found template directory');
-        }
-	    
+
+		if(!$tplRoot) {
+			$tplRoot = realpath(dirname(__FILE__).'/../../templates');
+		}
+
+		if(!is_dir($tplRoot)) {
+			throw new Exception('Not found template directory');
+		}
+
 		$tpl = new Template_Lite();
 		$tpl->template_dir = $tplRoot;
 		$tpl->compile_dir = $tplRoot.'/compiled/';
 		$tpl->force_compile = true;
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
-		
+
 		return $tpl;
 	}
 
@@ -139,7 +139,7 @@ class dbDisplayer {
 		header('Content-Length: ' . filesize($tmpFname));
 		header('Content-Disposition: attachment; filename='.$tblName.'.csv');
 		header("Cache-Control: maxage=1");
-		header("Pragma: public"); 
+		header("Pragma: public");
 		fpassthru($fp);
 		fclose($fp);
 		unlink($tmpFname);
@@ -154,8 +154,15 @@ class dbDisplayer {
 		$tableData = $this->tblAction->loadTableData();
 		$tpl = self::getTemplateInstance();
 
+
+		if (isset($this->customHandler) && method_exists($this->customHandler, 'modifyTableData')) {
+			if (!empty($tableData)) {
+				$tableData = $this->customHandler->modifyTableData($tableData);
+			}
+		}
+
 		$info = array();
-		
+
 		if (is_file($tpl->template_dir."/".$tblName."_list.ihtml")) {
 			$customTemplate = true;
 			$tplFile = $tblName."_list.ihtml";
@@ -177,7 +184,9 @@ class dbDisplayer {
 		$info['parent'] = isset($tableDefinition->actions['parent']['caption']) ? $tableDefinition->actions['parent']['caption'] : '';
 
 
+
 		$_SERVER['QUERY_STRING'] = preg_replace("/&?order=[A-Za-z0-9_]+/", '', @$_SERVER['QUERY_STRING']);
+
 		$info['baseurl'] = HTTP_ROOT;
 		$info['query'] = $_SERVER['QUERY_STRING'];
 		$info['totalRows'] = $this->tblAction->totalRows;
@@ -338,31 +347,31 @@ class dbDisplayer {
 				}
 
 				$item = array(
-                    'alt' => $action['caption'],
-                    'href' => $link,
-                    'addon' => $external ? ' target="_blank" ' : '',
-                    'target' => $target,
-                    'popup' => $external,
-                    'popupFunction' => $popupFunction,
-				    'js' => isset($action['js']) ? $action['js'] : false, 
-                );
-                
-                $src = HTTP_ROOT.'images/dbadmin_'.$type.'.gif';
-				if (!isset($iconExist[$src])) {					
+				'alt' => $action['caption'],
+				'href' => $link,
+				'addon' => $external ? ' target="_blank" ' : '',
+				'target' => $target,
+				'popup' => $external,
+				'popupFunction' => $popupFunction,
+				'js' => isset($action['js']) ? $action['js'] : false,
+				);
+
+				$src = HTTP_ROOT.'images/dbadmin_'.$type.'.gif';
+				if (!isset($iconExist[$src])) {
 					$iconExist[$src] = is_file(FS_ROOT.$src);
 				}
 				if ($iconExist[$src]) {
 					$item['src'] = $src;
 				}
-				
-                $lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
-				
+
+				$lineKey = (isset($action['lists']) && $action['lists'] == "true") ? 'action_lists' : 'actions';
+
 				$line[$lineKey][] = $item;
 			}
-			
+
 			$data[] = $line;
 		};
-		
+
 		$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias] = array_unique(array_merge($pageIDs, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias]));
 
 
@@ -375,9 +384,12 @@ class dbDisplayer {
 		$info['insert'] = isset($tableDefinition->actions['insert']['caption']) && (in_array('insert', $alowedActions)) ? $tableDefinition->actions['insert']['caption'] : '';
 		$info['excel'] = isset($tableDefinition->actions['excel']['caption']) && (in_array('excel', $alowedActions)) ? $tableDefinition->actions['excel']['caption'] : '';
 
+		$_GET['pageID'] = 3;
+		
 		// Навигация по страницам
 		if ( ($forPage = $this->tblAction->rowsPerPage) && ($this->tblAction->totalRows > $forPage)) {
 			require_once 'Pager/Pager.php';
+			
 			$params = array(
 			'totalItems' => $this->tblAction->totalRows,
 			'mode'       => 'Sliding',
@@ -386,11 +398,16 @@ class dbDisplayer {
 			'linkClass' => 'page',
 			'spacesBeforeSeparator' => 1,
 			'spacesAfterSeparator' => 1,
+			'append' => false,
+			'path' => substr($this->tblAction->getHttpPath(), 0, strlen($this->tblAction->getHttpPath()) - 1),
+			'fileName' => '?pageID=%d',
+			'currentPage' => $this->tblAction->pageID
 			);
 			$pager = Pager::factory($params);
 			$links = $pager->getLinks();
 			$info['pager'] = $links['all'];
 		}
+		
 
 		if (!empty($tableDefinition->grouped)) {
 			$gSelect = '<input type="checkbox" style="margin-left:29px; vertical-align:bottom" title="Select all items" onClick="tbl_check_all(\'grouped_cb\', this.checked)">
@@ -432,72 +449,72 @@ class dbDisplayer {
 		return trim($tpl->fetch($tplFile));
 	}
 
-    function addListFilters () {
-        global $_sessionData;
-        include dirname(__FILE__).'/'.$this->getLangFile();
+	function addListFilters () {
+		global $_sessionData;
+		include dirname(__FILE__).'/'.$this->getLangFile();
 
-        // Строим фильтры
-        $tableDefinition =& $this->tblAction->tableDefinition;
-        $tblName = $tableDefinition->name;
+		// Строим фильтры
+		$tableDefinition =& $this->tblAction->tableDefinition;
+		$tblName = $tableDefinition->name;
 
-        $filters = array();
-        $filtersCnt = 0;
+		$filters = array();
+		$filtersCnt = 0;
 
-        foreach ($tableDefinition->fields as $key => $field) {
-            if ($field->getAttribute('hide')) {
-                continue;
-            }
+		foreach ($tableDefinition->fields as $key => $field) {
+			if ($field->getAttribute('hide')) {
+				continue;
+			}
 
-            if (!$filterType = $field->getAttribute('filter')) {
-                // не задан тип фильтра
-                $filters[] = '';
-                continue;
-            }
+			if (!$filterType = $field->getAttribute('filter')) {
+				// не задан тип фильтра
+				$filters[] = '';
+				continue;
+			}
 
-            // Cчетчик количества фильтров
-            $filtersCnt++;
+			// Cчетчик количества фильтров
+			$filtersCnt++;
 
-            $filterName = $tblName.'_'.$field->name;
-            if (isset($_sessionData['DB_FILTERS'][$filterName])) {
-                $value = $_sessionData['DB_FILTERS'][$filterName];
-            } else {
-                $value = null;
-            }
+			$filterName = $tblName.'_'.$field->name;
+			if (isset($_sessionData['DB_FILTERS'][$tblName][$filterName])) {
+				$value = $_sessionData['DB_FILTERS'][$tblName][$filterName];
+			} else {
+				$value = null;
+			}
 
-            if (strtolower($filterType) == 'select') {
-                if ($field->getAttribute('type') == 'select') {
-                    $values = $field->valuesList;
-                } elseif ($field->getAttribute('type') == 'foreignKey') {
-                    $values = false;
-                    if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
-                        $values = $this->customHandler->getFilterValues($field->name);
-                    }
-                    if ($values === false) {
-                        $this->tblAction->loadForeignKeys();
-                        $values =  (array)$tableDefinition->fields[$key]->keyData;
-                    }
+			if (strtolower($filterType) == 'select') {
+				if ($field->getAttribute('type') == 'select') {
+					$values = $field->valuesList;
+				} elseif ($field->getAttribute('type') == 'foreignKey') {
+					$values = false;
+					if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
+						$values = $this->customHandler->getFilterValues($field->name);
+					}
+					if ($values === false) {
+						$this->tblAction->loadForeignKeys();
+						$values =  (array)$tableDefinition->fields[$key]->keyData;
+					}
 				} elseif ($field->getAttribute('type') == 'sql') {
 					if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
 						$values = $this->customHandler->getFilterValues($field->name);
 					}
-                } else {
-                    $values = array();
-                }
-                if (!$length = $field->getAttribute('filterLength')) {
-                    $length = 25;
-                }
-                $html = '<select name="filter['.$filterName.']" style="width:100%">';
-                $html .= '<option value="">  ...';
-                foreach ($values as $fKey => $fValue) {
-                    $selected = (isset($value) && ($value == $fKey) ) ? 'selected' : '';
-                    $fValue = mb_substr($fValue, 0, $length, CHARSET);
-                    $html .= "<option value='$fKey' $selected>$fValue</option> \n";
-                }
-                $html .= '</select>';
-                $filters[] = $html;
-            } elseif (strtolower($filterType) == 'range') {
-                if ($field->getAttribute('type') == 'datetime') {
-                    $filters[]  = '
+				} else {
+					$values = array();
+				}
+				if (!$length = $field->getAttribute('filterLength')) {
+					$length = 25;
+				}
+				$html = '<select name="filter['.$filterName.']" style="width:100%">';
+				$html .= '<option value="">  ...';
+				foreach ($values as $fKey => $fValue) {
+					$selected = (isset($value) && ($value == $fKey) ) ? 'selected' : '';
+					$fValue = mb_substr($fValue, 0, $length, CHARSET);
+					$html .= "<option value='$fKey' $selected>$fValue</option> \n";
+				}
+				$html .= '</select>';
+				$filters[] = $html;
+			} elseif (strtolower($filterType) == 'range') {
+				if ($field->getAttribute('type') == 'datetime') {
+					$filters[]  = '
                     <table>
                     <tr>
                     <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" id="filter['.$filterName.'][0]" value="'.$value[0].'" size="10" style="vertical-align: top">
@@ -528,8 +545,8 @@ class dbDisplayer {
                     </td>
                     </tr>
                     </table>';
-                } else {
-                    $filters[]  = '
+				} else {
+					$filters[]  = '
                     <table>
                     <tr>
                     <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" value="'.$value[0].'" size="5" style="vertical-align: top"></td>
@@ -538,20 +555,20 @@ class dbDisplayer {
                     <td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" value="'.$value[1].'" size="5" style="vertical-align: top"></td>
                     </tr>
                     </table>';
-                }
-            } else {
+				}
+			} else {
 
-                if ($field->getAttribute('type') == 'checkbox') {
-                    $html = '<select name="filter['.$filterName.']">';
-                    $html .= '<option value="">  ...';
-                    $selected = (isset($value) && ($value == 1) ) ? 'selected' : '';
-                    $html .= "<option value='1' $selected>checked</option> \n";
-                    $selected = (isset($value) && ($value == 0) ) ? 'selected' : '';
-                    $html .= "<option value='0' $selected>none</option> \n";
-                    $html .= '</select>';
-                    $filters[] = $html;
-                } elseif ($field->getAttribute('type') == 'datetime') {
-                    $html = '
+				if ($field->getAttribute('type') == 'checkbox') {
+					$html = '<select name="filter['.$filterName.']">';
+					$html .= '<option value="">  ...';
+					$selected = (isset($value) && ($value == 1) ) ? 'selected' : '';
+					$html .= "<option value='1' $selected>checked</option> \n";
+					$selected = (isset($value) && ($value == 0) ) ? 'selected' : '';
+					$html .= "<option value='0' $selected>none</option> \n";
+					$html .= '</select>';
+					$filters[] = $html;
+				} elseif ($field->getAttribute('type') == 'datetime') {
+					$html = '
                     <input type="text" name="filter['.$filterName.']" id="filter['.$filterName.']" value="'.$value.'" size="10" style="vertical-align: top">
                     <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal" name="'.$field->name.'_cal"> 
                     <script type="text/javascript">
@@ -563,31 +580,31 @@ class dbDisplayer {
                             step           :    1
                         });
                     </script>';
-                    $filters[] = $html;
-                } else {
-  					$width = $field->getWidth(true);
-                    $filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
-                }
-            }
-        }
+					$filters[] = $html;
+				} else {
+					$width = $field->getWidth(true);
+					$filters[]  = '<input type="text" name="filter['.$filterName.']" value="'.$value.'" style="'.$width.'">';
+				}
+			}
+		}
 
-        return $filtersCnt > 0 ? $filters : false;
+		return $filtersCnt > 0 ? $filters : false;
 
-    }
+	}
 
 
 	function displayErrorMessage($message = '') {
-        echo $this->displayError($message);
+		echo $this->displayError($message);
 	}
 
 
 	function displayForm($what) {
 		include dirname(__FILE__).'/'.$this->getLangFile();
 		global $_dictionary;
-		
+
 		$tableDefinition = $this->tblAction->tableDefinition;
 		$primaryKey = $tableDefinition->getAttribute('primaryKey');
-		
+
 		$customTemplate = $tableDefinition->getAttribute('customForm');
 
 		// При удалении мы подгружаем не дропдаун, а конкретное значение
@@ -601,9 +618,9 @@ class dbDisplayer {
 			$token = $this->tblAction->createInsertToken();
 		}
 
-		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false; 
-        $tpl = self::getTemplateInstance($path);
-		
+		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false;
+		$tpl = self::getTemplateInstance($path);
+
 		if ($what == 'insert') {
 			$info = array('caption' => $tableDefinition->actions['insert']['caption'], 'action' => 'insert');
 		} elseif ($what == 'info') {
@@ -621,7 +638,7 @@ class dbDisplayer {
 
 		$info['httproot'] = HTTP_ROOT;
 		$info['url'] = $this->tblAction->getHttpPath();
-		
+
 		$items = array();
 		$qtips = array();
 
@@ -700,7 +717,7 @@ class dbDisplayer {
 			}
 		}
 
-		
+
 		if (empty($customTemplate)) {
 			return trim($tpl->fetch('dba_form.ihtml'));
 		} else {
