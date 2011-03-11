@@ -72,9 +72,22 @@ class dbAction {
 			$fields[] = $groupby.' AS _group_field';
 		}
 
+		
+		// init filters
+		
+		if (!isset($_sessionData['DB_FILTERS'][$tblName])) {
+			$_sessionData['DB_FILTERS'][$tblName] = array();
+			foreach ($this->tableDefinition->fields as $item) {
+				if (isset($item->attributes['defaultFilter'])) {
+					$filterName = $tblName.'_'.$item->name;
+					$_sessionData['DB_FILTERS'][$tblName][$filterName] = $item->attributes['defaultFilter'];
+				}
+			}
+		}
+		
 		if ($customSQL = $this->tableDefinition->getAttribute('customSQL')) {
-
 		} else {
+
 
 			// Обрабатываем все поля - строим запрос
 			foreach ($this->tableDefinition->fields as $item) {
@@ -169,8 +182,8 @@ class dbAction {
 				$filterName = $tblName.'_'.$item->name;
 				if ($filterType = $item->getAttribute('filter')) {
 					// Возможно у нас установлен пользовательский фильтр по полю
-					if (isset($_sessionData['DB_FILTERS'][$filterName]) && ($_sessionData['DB_FILTERS'][$filterName] != '')) {
-						$filterValue = $_sessionData['DB_FILTERS'][$filterName];
+					if (isset($_sessionData['DB_FILTERS'][$tblName][$filterName]) && ($_sessionData['DB_FILTERS'][$tblName][$filterName] != '')) {
+						$filterValue = $_sessionData['DB_FILTERS'][$tblName][$filterName];
 						if (in_array($filterType, array('select', 'exact'))) {
 							$where[] = $filterFieldName." = '".mysql_escape_string($filterValue)."'";
 						} else {
@@ -180,6 +193,7 @@ class dbAction {
 				} // конец "фильтр по полю"
 
 			}
+
 
 			// Предустановленные фильтры
             if (!empty($this->tableDefinition->filters)) {
@@ -211,7 +225,7 @@ class dbAction {
 			$this->fields = $fields;
 
 			if ($additionalWhere = $this->tableDefinition->getAttribute('additionalWhere')) {
-				$where[] = $additionalWhere;
+				$where[] = $this->prepareAddonWhere($additionalWhere);
 			}
 
 			if ($customFrom = $this->tableDefinition->getAttribute('customFrom')) {
@@ -237,7 +251,7 @@ class dbAction {
 				$this->totalRows = $countRow['cnt'];
 			}
 		}
-		
+
 		// common code for both ways
 
 
@@ -258,15 +272,13 @@ class dbAction {
 		if (isset($_GET['pageID'])) {
 			$currentID = ( (int)$_GET['pageID'] - 1) * $rowsPerPage;
 			$_sessionData['DB_'.$tblName.'_currentID'] = $currentID;
+			$this->pageID = (int)$_GET['pageID'];
 		} elseif (isset($_sessionData['DB_'.$tblName.'_currentID'])) {
 			$currentID = (int)$_sessionData['DB_'.$tblName.'_currentID'];
-			$_GET['pageID']  = $currentID / $rowsPerPage + 1;
-			if (!empty($_SERVER['QUERY_STRING'])) {
-				$_SERVER['QUERY_STRING'] .= '&';
-			}
-			$_SERVER['QUERY_STRING'] .= 'pageID='.$_GET['pageID'];
+			$this->pageID = (int)$currentID / $rowsPerPage + 1;
 		} else {
 			$currentID = 0;
+			$this->pageID = 1;
 		}
 
 
@@ -284,7 +296,7 @@ class dbAction {
 		} else {
 			$sql = $customSQL;
 		}
-		
+
 		$sql .= ' '. $this->getOrderDirection();
 
 		if ($action != 'excel') {
@@ -297,7 +309,7 @@ class dbAction {
 			$this->raiseError('SQL Exception: '.$dataRes->getMessage());
 			return false;
 		}
-		
+
 		if (!empty($customSQL)) {
 			$sql = "SELECT FOUND_ROWS()";
 			$this->totalRows = $this->dbDriver->getOne($sql);
@@ -319,8 +331,10 @@ class dbAction {
 		global  $_sessionData;
 
 		if (!in_array($id, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias])) {
-			echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			die;
+			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			die;*/
+			$this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			return false;
 		}
 
 		// Выбор записи по первичному ключу с подргузкой внешних ключей в массивы
@@ -365,8 +379,10 @@ class dbAction {
 
 
 		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
-			echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			die;
+			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			die;*/
+			$this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
+			return false;
 		}
 
 
@@ -758,7 +774,6 @@ class dbAction {
 		return $values;
 	}
 
-
 	// ------------------------------------------
 	// ------- Удаление записи из базы ----------
 	// ------------------------------------------
@@ -767,11 +782,8 @@ class dbAction {
 		if (!is_numeric($itemID)) {
 			return false;
 		}
-
 		// Сохраняем саму строку
 		$this->loadRow($itemID);
-
-
 		// Удаляем данные для дочерхних таблиц
 		if (isset($this->tableDefinition->actions['child'])) {
 			$relation = $this->tableDefinition->relations['child'][$this->tableDefinition->actions['child']['relation']];
@@ -781,7 +793,7 @@ class dbAction {
 				$relatedSQL = "select ".$relatedTable->tableDefinition->primaryKey." as id from ".$relatedTable->tableDefinition->name." where ".$relation2['field']." = ".$itemID;
 				$dataRes = $this->dbDriver->query($relatedSQL);
 				if (PEAR::isError($dataRes)) {
-					$this->lastErrorMessage = $this->locale['ERR_REMOVECASCADE'].' SQL:'.$relatedSQL;
+					$this->mysqlerror2text($dataRes, 'delete');
 					return false;
 				}
 				while ($row = $dataRes->fetchRow()) {
@@ -798,7 +810,7 @@ class dbAction {
 				$sql = "delete from ".$relation['linkTable']." where ".$relation['linkField']." = '".$itemID."'";
 				$dbRes = $this->dbDriver->query($sql);
 				if (PEAR::isError($dbRes)) {
-					$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+					$this->mysqlerror2text($dbRes, 'delete');
 					return false;
 				}
 			}
@@ -809,7 +821,7 @@ class dbAction {
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.$itemID." LIMIT 1";
 		$dbRes = $this->dbDriver->query($sql);
 		if (PEAR::isError($dbRes)) {
-			$this->lastErrorMessage = $this->locale['ERR_SQL'].' SQL:'.$relatedSQL;
+			$this->mysqlerror2text($dbRes, 'delete');
 			return false;
 		}
 
@@ -907,7 +919,10 @@ class dbAction {
 	}
 
 	function mysqlerror2text($result, $operation) {
+
 		if ($result->code == '-3') {
+			$this->lastErrorMessage = $this->locale['ERR_CONSTRAINT'];
+		} elseif ($result->code == '-5') {
 			$this->lastErrorMessage = $this->locale['ERR_UNIQKEY'];
 		} else {
 			$this->lastErrorMessage = $this->locale['ERR_'.strtoupper($operation)].$result->toString();

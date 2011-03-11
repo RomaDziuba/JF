@@ -12,11 +12,11 @@ class abstractFormField {
 	}
 
 	function readItself($node, $charset = 'UTF-8') {
-		
+
 		foreach($node->attributes() as $key => $value) {
 			$this->attributes[$key] = (string)$value;
 		}
-		
+
 		$this->name = (string) $node['name'];
 		$this->attributes['caption'] = @html_entity_decode($node['caption'], ENT_COMPAT, $charset);
 	}
@@ -36,9 +36,9 @@ class abstractFormField {
 	function getSearchFilter($value) {
 		if (is_array($value)) {
 			if (empty($value[0])) {
-				return " < '".mysql_escape_string($value[1])."'";
+				return " <= '".mysql_escape_string($value[1])."'";
 			} elseif (empty($value[1])) {
-				return " > '".mysql_escape_string($value[0])."'";
+				return " >= '".mysql_escape_string($value[0])."'";
 			} else {
 				return " BETWEEN '".mysql_escape_string($value[0])."' AND '".mysql_escape_string($value[1])."'";
 			}
@@ -73,10 +73,10 @@ class abstractFormField {
 		return $value;
 	}
 
-    function displayRow($value) {
-        $width = $this->getWidth();
-        return '<input style="'.$width.'" type="text" readonly disabled name="'.$this->name.'" value="'.$value.'" class="thin">';
-    }
+	function displayRow($value) {
+		$width = $this->getWidth();
+		return '<input style="'.$width.'" type="text" readonly disabled name="'.$this->name.'" value="'.$value.'" class="thin">';
+	}
 
 	function DisplayRO($value) {
 		return nl2br($value);
@@ -89,7 +89,6 @@ class abstractFormField {
 			return substr($string, $from, $to);
 		}
 	}
-	
 	
     function getWidth($inline = false, $default = '380px') {
         $width = $this->getAttribute('inputWidth');
@@ -128,6 +127,7 @@ class abstractFormField {
         return true;
     } // end isValidValue
     
+
 }
 
 
@@ -231,6 +231,10 @@ class passwordFormField extends abstractFormField {
 class checkboxFormField extends abstractFormField {
 
 	function getEditInput($value = '') {
+		$readonly = $this->getAttribute('readonly');
+		if ($readonly) {
+			return $this->displayValue($value);
+		}
 		if (is_numeric($value)) {
 			$checked = ($value) ? 'checked' : '';
 		} else {
@@ -245,6 +249,10 @@ class checkboxFormField extends abstractFormField {
 		}
 		$checked = (strtoupper(substr($value, 0, 1)) == 'Y') ? '<img align="center" src="'.HTTP_ROOT.'images/tick.png" />' : '';
 		return $checked;
+	}
+
+	function displayRO($value) {
+		return $this->displayValue($value);
 	}
 }
 
@@ -377,18 +385,19 @@ class datetimeFormField extends abstractFormField
 } // end class datetimeFormField
 
 
+
 class textareaFormField extends abstractFormField {
-    function getEditInput($value = '') {
-        $width = $this->getWidth();
-        return '<textarea style="'.$width.'" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
-    }
+	function getEditInput($value = '') {
+		$width = $this->getWidth();
+		return '<textarea style="'.$width.'" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
+	}
 }
 
 class readonlyFormField extends abstractFormField {
-    function getEditInput($value = '') {
-        $width = $this->getWidth();
-        return '<input style="width:'.$width.'" type="text" name="'.$this->name.'" value="'.$value.'" class="thin" readonly>';
-    }
+	function getEditInput($value = '') {
+		$width = $this->getWidth();
+		return '<input style="width:'.$width.'" type="text" name="'.$this->name.'" value="'.$value.'" class="thin" readonly>';
+	}
 
 }
 
@@ -408,7 +417,7 @@ class selectFormField extends abstractFormField {
 			if (isset($this->charset) && ($this->charset != 'UTF-8') & (function_exists('iconv'))) {
 				$value = iconv("UTF-8", $charset, $value);
 			}
-			$attr = $item->attributes(); 
+			$attr = $item->attributes();
 			$this->valuesList[(string)$attr['id']] = @html_entity_decode($value, ENT_COMPAT, $charset);
 		}
 	}
@@ -417,7 +426,7 @@ class selectFormField extends abstractFormField {
 		if (!empty($this->attributes['readonly'])) {
 			return $this->displayRO($value)	;
 		}
-		
+
 		$width = $this->getWidth($inline);
 		$select = '<select style="'.$width.'" class="thin" name="'.$this->name.'" >';
 		foreach ($this->valuesList as $key => $val) {
@@ -441,36 +450,36 @@ class selectFormField extends abstractFormField {
 }
 
 class foreignKeyFormField extends abstractFormField {
-    var $foreignKey = true;
-    var $keyData = array();
+	var $foreignKey = true;
+	var $keyData = array();
 
-    function getEditInput($value = false) {
-        if (!empty($this->attributes['readonly'])) {
-            return $this->displayRO($value) ;
-        }
-        
-        $ajaxHtml = empty($this->attributes['ajaxChild']) ? '' : ' onChange="dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', this.name, this.value)" ';
-        $ajaxHtml2 = empty($this->attributes['ajaxChild']) ? '' : '<option '.($value === false ? ' selected ' : '').' value="-999">';
-        $width = $this->getWidth();
-        $result = '<select style="'.$width.'" class="thin" name="'.$this->name.'" id="'.$this->name.'" '.$ajaxHtml.'>' . $ajaxHtml2;
-        if (!empty($this->attributes['allowEmpty'])) {
-            $result .= '<option value="0"></option>';
-        }
-        foreach ($this->keyData as $key => $val) {
-            $selected = ($key == $value) ? 'selected' : '';
-            $result .= '<option value="'.$key.'" '.$selected.'>'.$val."\n";
-        }
-        $result .= '</select>';
-        if ( (!empty($this->attributes['ajaxChild'])) && (!empty($value)) ) {
-            //$GLOBALS['dba_afetrpatyjs'] .= '<script>dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', "'.$this->name.'", "'.$value.'")</script>';
-        }
-        return $result;
-    }
+	function getEditInput($value = false) {
+		if (!empty($this->attributes['readonly'])) {
+			return $this->displayRO($value) ;
+		}
 
-    function displayRO($value) {
-        $value = $this->keyData[$value];
-        return $value;
-    }
+		$ajaxHtml = empty($this->attributes['ajaxChild']) ? '' : ' onChange="dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', this.name, this.value)" ';
+		$ajaxHtml2 = empty($this->attributes['ajaxChild']) ? '' : '<option '.($value === false ? ' selected ' : '').' value="-999">';
+		$width = $this->getWidth();
+		$result = '<select style="'.$width.'" class="thin" name="'.$this->name.'" id="'.$this->name.'" '.$ajaxHtml.'>' . $ajaxHtml2;
+		if ($this->attributes['allowEmpty']) {
+			$result .= '<option value="0"></option>';
+		}
+		foreach ($this->keyData as $key => $val) {
+			$selected = ($key == $value) ? 'selected' : '';
+			$result .= '<option value="'.$key.'" '.$selected.'>'.$val."\n";
+		}
+		$result .= '</select>';
+		if ( (!empty($this->attributes['ajaxChild'])) && (!empty($value)) ) {
+			//$GLOBALS['dba_afetrpatyjs'] .= '<script>dbaForeignKeyLoad(\''.$this->attributes['ajaxChild'].'\', "'.$this->name.'", "'.$value.'")</script>';
+		}
+		return $result;
+	}
+
+	function displayRO($value) {
+		$value = $this->keyData[$value];
+		return $value;
+	}
 }
 
 
@@ -502,7 +511,7 @@ class many2manyFormField extends abstractFormField {
 				if (!empty($this->charset) && ($this->charset != 'UTF-8') & (function_exists('iconv'))) {
 					$value = iconv("UTF-8", $charset, $value);
 				}
-				$attr = $item->attributes(); 
+				$attr = $item->attributes();
 				$this->valuesList[(string)$attr['id']] = @html_entity_decode($value, ENT_COMPAT, $charset);
 			}
 
@@ -515,9 +524,9 @@ class many2manyFormField extends abstractFormField {
 	function getEditInput($value = false) {
 
 		global $tblAction;
-		
+
 		$this->attributes['extendedValue'] = $this->extended;
-		
+
 		if (isset($_GET['ID'])) {
 			$list = $tblAction->loadForeignAssigns((int)$_GET['ID'], $this->attributes);
 		} else {
@@ -564,9 +573,43 @@ class many2manyFormField extends abstractFormField {
 		<b>'.$tblAction->locale['FORM_CHECK_ALL'].'</b></label>';
 		return $html;
 	}
+
+	function displayValue($value) {
+		$attr = $this->attributes;
+		$sql = "SELECT mt.{$attr['foreignValueField']} from {$attr['foreignTable']} mt join {$attr['linkTable']} lt on (mt.{$attr['foreignKeyField']} = lt.{$attr['linkForeignField']}) where lt.{$attr['linkField']} = ".(int)$GLOBALS['currentID'];
+		$list = $GLOBALS['db']->getCol($sql);
+		$content = '<div style="height:200px;overflow-y:scroll"><ul style="margin:0px;">';
+		foreach ($list as $item) {
+			$content .= '<li>'.$item;
+		}
+		$content .= '</ul></div>';
+		return $content;
+	}
 }
 
 class sqlFormField  extends abstractFormField {
-	
+
 }
+
+class comboFormField extends abstractFormField {
+
+
+    function getEditInput($value = '') {
+        global $db;
+        $city = $db->getCol("select distinct {$this->name} from {$this->table} order by {$this->name}");
+
+        $value = htmlspecialchars(stripslashes($value));
+        $out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';
+        $out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')">';
+        foreach ($city as $item) {
+            $out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+        }
+        $out .= '</select>';
+        return $out;
+    }
+
+
+}
+
+
 ?>

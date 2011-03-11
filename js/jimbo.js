@@ -27,8 +27,8 @@ function jsonResponse(data)
 function dbaUpdateError(data)
 {
 	if(typeof(jimbo) == undefined || jimbo.mode != 'jquery') {
-		text = $('<textarea class="errorlog" style="margin:0px;" readonly="readonly"></textarea>');
-		$('#form_actions>td').append(text);
+		/*text = $('<textarea class="errorlog" style="margin:0px;" readonly="readonly"></textarea>');
+		$('#form_actions>td').append(text);*/
 	}
 	
 	$('.errorlog').html(data['message']);

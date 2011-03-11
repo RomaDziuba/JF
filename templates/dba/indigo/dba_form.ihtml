@@ -5,7 +5,6 @@ jQuery(document).ready(function() {
 });
 {/literal}
 </script>
-
 <div id="dba_form">
     <iframe name="db_system" style="display:none" id="db_system"></iframe>
     <form method="post" style="display:inline" target="db_system" name="tbl_form" id="tbl_form" enctype="multipart/form-data" {if $tpl.CONST.JIMBO_POPUP_MODE != "popup"}action="{$info.url}?action={$tpl.GET.action}&ID={$tpl.GET.ID}"{/if}>
@@ -56,6 +55,7 @@ jQuery(document).ready(function() {
                         {/if}
                         <input type="button" class="lbutton" value="{$lang.BUTTON_BACK}" onClick="window.close()" />
                     </div>
+                    <textarea id="errorlog_block" class="errorlog" style="margin:0px;" readonly="readonly"></textarea>
                 </td>
             </tr>
             </tbody>

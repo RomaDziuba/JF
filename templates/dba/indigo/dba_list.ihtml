@@ -114,7 +114,11 @@ $('#filtersButton').click(function() {
 		{/if}
 		{foreach from=$info.fields value=field}
 			<td class="jcol" width="{$field.width}" {if $field.align}align="{$field.align}"{/if} nowrap>
-				<A HREF="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}" class="db_link">{$field.caption}</A>
+			{if $field.sorting}
+			<A HREF="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}" class="db_link">{$field.caption}</A>
+			{else}
+			{$field.caption}
+			{/if}
 				{if ($info.sorting.field eq $field.name)}
 					&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
 				{/if}
@@ -190,7 +194,7 @@ $('#filtersButton').click(function() {
 				<td colspan="50"><b>{$line._group_caption}</b></td>
 			</tr>
 			{/if}
-			<tr class="ka_row">
+			<tr class="ka_row" id="TR_{$line.id}">
 				{if $info.grouped}
 					<TD><input type="checkbox" name="grouped_cb[]" value="{$line.id}"></TD>
 				{/if}
@@ -213,9 +217,9 @@ $('#filtersButton').click(function() {
 					
 						{ foreach value=action from=$line.actions }
 							{if $action.popup}
-								&nbsp;<A href="#" onClick='{if $action.js}{$action.js}{else}{$action.popupFunction}{/if}("{$action.href}&popup=true"); return false;' title="{$action.alt}" rel="actionbutton"><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0"></A>&nbsp;
+								&nbsp;<A href="#" onClick='{if $action.js}{$action.js}{else}{$action.popupFunction}{/if}("{$action.href}&popup=true"); return false;' title="{$action.alt}" rel="actionbutton">{if $action.src}<IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0">{else}{$action.alt}{/if}</A>&nbsp;
 							{else}
-								&nbsp;<A href="{$action.href}" {if $action.js}onClick='{$action.js}("{$action.href}"); return false;'{/if} title="{$action.alt}" {$action.addon} {$action.target rel="actionbutton"}><IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0" rel="actionbutton"></A>&nbsp;
+								&nbsp;<A href="{$action.href}" {if $action.js}onClick='{$action.js}("{$action.href}"); return false;'{/if} title="{$action.alt}" {$action.addon} {$action.target rel="actionbutton"}>{if $action.src}<IMG SRC="{$action.src}" ALT="{$action.alt}" BORDER="0" rel="actionbutton">{else}{$action.alt}{/if}</A>&nbsp;
 							{/if}
     					{/foreach}
     					
@@ -283,7 +287,7 @@ $('#filtersButton').click(function() {
 <script>
 {if $info.highlight}
         {foreach value=value from=$info.highlight}
-                {literal}${/literal}("#TR_{$value}").css('background-color', '#FFF0CF');
+                {literal}${/literal}("#TR_{$value}").css('background-color', '#FEE5FC');
         {/foreach}
 {/if}
 </script>

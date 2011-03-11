@@ -15,8 +15,76 @@ class cityFormField extends abstractFormField {
 		$out .= '</select>';
 		return $out;
 	}
+}
 
+class doubleVisitGeoRegionFormField extends abstractFormField {
 
+	function getEditInput($value = '') {
+		global $db, $_sessionData;
+		
+		$city = $db->getCol('SELECT distinct(geo_region) FROM double_visit WHERE slave_worker_id = '.$_sessionData['auth_id'].' ORDER BY geo_region');
+		
+		$value = htmlspecialchars(stripslashes($value));
+		$out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';		
+		$out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')"><option value=""></option>';
+		foreach ($city as $item) {
+			$out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+		}
+		$out .= '</select>';
+		return $out;
+	}
+}
+
+class healthFacilityAddrStreetFormField extends abstractFormField {
+
+	function getEditInput($value = '') {
+		global $db, $_sessionData;
+		
+		$ID = (int)$_GET['ID'];
+		if (!empty($ID)) {
+			$hfCity = (int)$db->getOne('SELECT city_id FROM health_facility WHERE id='.$ID);		
+			$streets = $db->getCol('SELECT DISTINCT(addr_street) FROM health_facility WHERE city_id = '.$hfCity.' ORDER BY addr_street');
+		}
+		else {
+			$streets = $db->getCol('SELECT DISTINCT(addr_street) FROM health_facility ORDER BY addr_street');
+		}
+		
+		$value = htmlspecialchars(stripslashes($value));
+		$out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';		
+		$out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')"><option value=""></option>';
+		foreach ($streets as $item) {
+			$out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+		}
+		$out .= '</select>';
+		
+		return $out;
+	}
+}
+
+class shopAddrStreetFormField extends abstractFormField {
+
+	function getEditInput($value = '') {
+		global $db, $_sessionData;
+		
+		$ID = (int)$_GET['ID'];
+		if (!empty($ID)) {
+			$hfCity = (int)$db->getOne('SELECT city_id FROM shop WHERE id='.$ID);		
+			$streets = $db->getCol('SELECT DISTINCT(addr_street) FROM shop WHERE city_id = '.$hfCity.' ORDER BY addr_street');
+		}
+		else {
+			$streets = $db->getCol('SELECT DISTINCT(addr_street) FROM shop ORDER BY addr_street');
+		}
+		
+		$value = htmlspecialchars(stripslashes($value));
+		$out = '<input style="width:150px" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin">';		
+		$out .= '&nbsp;<select style="width:190px" class="thin" onChange="doSelectTo(this, \''.$this->name.'\')"><option value=""></option>';
+		foreach ($streets as $item) {
+			$out .= '<option value="'.htmlspecialchars($item).'">'.htmlspecialchars($item);
+		}
+		$out .= '</select>';
+		
+		return $out;
+	}
 }
 
 class autocompleteFormField extends abstractFormField {
