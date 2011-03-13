@@ -10,14 +10,21 @@
 
 class dbAction {
 
+    private $_options;
+    
+    public $sessionData;
 	public $tableDefinition;
 	public $lastErrorMessage;
 	public $wasError;
 	public $dbDriver;
 	public $currentRow;
 
-	function dbAction($dsn, $tblName, $tblPath = './tblDefs/') {
+	function dbAction($dsn, $tblName, $options) {
         global $dbAdminMessages;
+        
+        $this->_options = $options;
+        
+        $this->sessionData = &$this->_options['session_data'];
         
 		// подгружаем языковые сообщения
 		include dbDisplayer::getLangFile();
@@ -25,11 +32,11 @@ class dbAction {
 
 		// подгружаем описание таблицы
 
-		$this->tblPath = $tblPath;
+		$this->tblPath = $this->_options['defs_path'];
 		$this->tableDefinition = $this->loadTableDefinition($tblName);
 
-		if(!$this->tableDefinition) {
-			die();
+		if (!$this->tableDefinition) {
+		    throw new Exception();
 		}
 
 		// подключение к БД
@@ -38,10 +45,11 @@ class dbAction {
 			$this->dbDriver = $dsn;
 		} else {
 			$this->dbDriver = MDB2::factory(DSN);
+			
 			if(PEAR::isError($this->dbDriver)) {
-				echo "Can't connect to database: " . $this->dbDriver->getMessage();
-				die();
+			    throw new DatabaseException("Can't connect to database: ".$this->dbDriver->getMessage());
 			}
+			
 			$this->dbDriver->setFetchMode(MDB2_FETCHMODE_ASSOC);
 			$this->dbDriver->loadModule('Extended');
 		}
@@ -55,11 +63,10 @@ class dbAction {
 		}
 
 		$this->alias = $tblAlias;
-
 	}
 
 	function loadTableData($action = 'list') {
-		global $_sessionData;
+		
 
 		$tblName = $this->tableDefinition->name;
 
@@ -75,12 +82,12 @@ class dbAction {
 		
 		// init filters
 		
-		if (!isset($_sessionData['DB_FILTERS'][$tblName])) {
-			$_sessionData['DB_FILTERS'][$tblName] = array();
+		if (!isset($this->sessionData['DB_FILTERS'][$tblName])) {
+			$this->sessionData['DB_FILTERS'][$tblName] = array();
 			foreach ($this->tableDefinition->fields as $item) {
 				if (isset($item->attributes['defaultFilter'])) {
 					$filterName = $tblName.'_'.$item->name;
-					$_sessionData['DB_FILTERS'][$tblName][$filterName] = $item->attributes['defaultFilter'];
+					$this->sessionData['DB_FILTERS'][$tblName][$filterName] = $item->attributes['defaultFilter'];
 				}
 			}
 		}
@@ -182,8 +189,8 @@ class dbAction {
 				$filterName = $tblName.'_'.$item->name;
 				if ($filterType = $item->getAttribute('filter')) {
 					// Возможно у нас установлен пользовательский фильтр по полю
-					if (isset($_sessionData['DB_FILTERS'][$tblName][$filterName]) && ($_sessionData['DB_FILTERS'][$tblName][$filterName] != '')) {
-						$filterValue = $_sessionData['DB_FILTERS'][$tblName][$filterName];
+					if (isset($this->sessionData['DB_FILTERS'][$tblName][$filterName]) && ($this->sessionData['DB_FILTERS'][$tblName][$filterName] != '')) {
+						$filterValue = $this->sessionData['DB_FILTERS'][$tblName][$filterName];
 						if (in_array($filterType, array('select', 'exact'))) {
 							$where[] = $filterFieldName." = '".mysql_escape_string($filterValue)."'";
 						} else {
@@ -199,7 +206,7 @@ class dbAction {
             if (!empty($this->tableDefinition->filters)) {
                 foreach ($this->tableDefinition->filters as $field => $value) {
                     if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
-                        $value = isset($_sessionData[$tmp[1]]) ? $_sessionData[$tmp[1]] : 'NULL';
+                        $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
                     }
                     
                     if (isset($value)) {
@@ -214,10 +221,10 @@ class dbAction {
 				if (isset($relation['foreignTable']) && isset($relation['foreignField'])) {
 					$tmpName = "DB__".$this->alias.'__PARENT';
 					// Инициализируем переменную для первого захода
-					if (empty($_sessionData[$tmpName])) {
+					if (empty($this->sessionData[$tmpName])) {
 						$where[] = "( {$tblName}.{$relation['field']} = 0 or {$tblName}.{$relation['field']} is NULL)";
 					} else {
-						$where[]  = $tblName.".".$relation['field']." = '".mysql_escape_string($_sessionData[$tmpName])."'";
+						$where[]  = $tblName.".".$relation['field']." = '".mysql_escape_string($this->sessionData[$tmpName])."'";
 					}
 				}
 			}
@@ -260,9 +267,9 @@ class dbAction {
 			if ($rowsPerPage == 'all') {
 				$rowsPerPage = 1000;
 			}
-			$_sessionData['DB_PAGER'][$tblName] = $rowsPerPage;
-		} elseif (isset($_sessionData['DB_PAGER'][$tblName])) {
-			$rowsPerPage = $_sessionData['DB_PAGER'][$tblName];
+			$this->sessionData['DB_PAGER'][$tblName] = $rowsPerPage;
+		} elseif (isset($this->sessionData['DB_PAGER'][$tblName])) {
+			$rowsPerPage = $this->sessionData['DB_PAGER'][$tblName];
 		} else {
 			$rowsPerPage = $this->tableDefinition->getAttribute('rowsForPage');
 		}
@@ -271,10 +278,10 @@ class dbAction {
 		// Строим условие LIMIT
 		if (isset($_GET['pageID'])) {
 			$currentID = ( (int)$_GET['pageID'] - 1) * $rowsPerPage;
-			$_sessionData['DB_'.$tblName.'_currentID'] = $currentID;
+			$this->sessionData['DB_'.$tblName.'_currentID'] = $currentID;
 			$this->pageID = (int)$_GET['pageID'];
-		} elseif (isset($_sessionData['DB_'.$tblName.'_currentID'])) {
-			$currentID = (int)$_sessionData['DB_'.$tblName.'_currentID'];
+		} elseif (isset($this->sessionData['DB_'.$tblName.'_currentID'])) {
+			$currentID = (int)$this->sessionData['DB_'.$tblName.'_currentID'];
 			$this->pageID = (int)$currentID / $rowsPerPage + 1;
 		} else {
 			$currentID = 0;
@@ -328,9 +335,8 @@ class dbAction {
 	}
 
 	function loadRow($id) {
-		global  $_sessionData;
-
-		if (!in_array($id, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias])) {
+		
+		if (!in_array($id, (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias])) {
 			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
 			die;*/
 			$this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
@@ -360,7 +366,7 @@ class dbAction {
 	}
 
 	function performAction($action, $needRedirect = true) {
-		global $_sessionData;
+		
 
 
 		$this->adjustPostData();
@@ -378,7 +384,7 @@ class dbAction {
 
 
 
-		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$_sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
+		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
 			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
 			die;*/
 			$this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
@@ -451,7 +457,7 @@ class dbAction {
 		}
 
 		if (!$status) {
-			header('Content-Type: text/html; charset='.SITE_CHARSET);
+			header('Content-Type: text/html; charset='.CHARSET);
 			$message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
 
 			$response = array(
@@ -564,7 +570,7 @@ class dbAction {
 	} // end prepareQueryParams
 
 	function prepareAddonWhere($value, $currentValue = false) {
-		global $_sessionData;
+		
 		$value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
 		if ($currentValue !== false) {
 			if (is_null($currentValue)) {
@@ -672,7 +678,7 @@ class dbAction {
 			}
 		}
 
-		header("Content-type: text/html; charset=".SITE_CHARSET);
+		header("Content-type: text/html; charset=".CHARSET);
 		$html = '';
 		foreach ($item->keyData as $key => $value) {
 			$html .= '
@@ -787,7 +793,7 @@ class dbAction {
 		// Удаляем данные для дочерхних таблиц
 		if (isset($this->tableDefinition->actions['child'])) {
 			$relation = $this->tableDefinition->relations['child'][$this->tableDefinition->actions['child']['relation']];
-			$relatedTable = $tblAction = new dbAction($this->dbDriver, $relation['foreignTable'], FS_ROOT."tblDefs/");
+			$relatedTable = $tblAction = new dbAction($this->dbDriver, $relation['foreignTable'], $this->_options['defs_path']);
 			if (isset($relation['cascade'])) {
 				$relation2 = $relatedTable->tableDefinition->relations['parent'][$relatedTable->tableDefinition->actions['parent']['relation']];
 				$relatedSQL = "select ".$relatedTable->tableDefinition->primaryKey." as id from ".$relatedTable->tableDefinition->name." where ".$relation2['field']." = ".$itemID;
@@ -835,7 +841,7 @@ class dbAction {
 	// ------------------------------------------
     function insertDBItem() 
     {
-		global $_sessionData;
+		
 		
 		$result = $this->prepareQueryParams();
 		if($this->wasError) {
@@ -845,8 +851,8 @@ class dbAction {
 		list($columns, $values, $many2many, $toUpload) = $result;
 		
 		if (isset($_POST['__token'])) {
-			if (isset($_sessionData['insert'][$_POST['__token']])) {
-				$tokenData = $_sessionData['insert'][$_POST['__token']];
+			if (isset($this->sessionData['insert'][$_POST['__token']])) {
+				$tokenData = $this->sessionData['insert'][$_POST['__token']];
 				foreach ($tokenData as $key => $value) {
 					$columns[] = $this->dbDriver->escape($key);
 					$values[] = $value;
@@ -881,7 +887,7 @@ class dbAction {
 	} // end insertDBItem
 	
 	function createInsertToken() {
-		global $_sessionData;
+		
 
 
 		$token = md5(rand());
@@ -891,10 +897,10 @@ class dbAction {
 			$relation = $this->tableDefinition->relations['parent'][$this->tableDefinition->actions['parent']['relation']];
 			if (isset($relation['foreignTable']) && isset($relation['foreignField'])) {
 				$keyName = 'DB__'.$this->alias."__PARENT";
-				if (empty($_sessionData[$keyName]) && isset($relation['isnull'])) {
+				if (empty($this->sessionData[$keyName]) && isset($relation['isnull'])) {
 					$value = 'NULL';
 				} else {
-					$value = "'".mysql_escape_string($_sessionData[$keyName])."'";
+					$value = "'".mysql_escape_string($this->sessionData[$keyName])."'";
 				}
 				$tokenData[$relation['field']] = $value;
 			}
@@ -911,7 +917,7 @@ class dbAction {
 		}
 
 		if (!empty($tokenData)) {
-			$_sessionData['insert'][$token] = $tokenData;
+			$this->sessionData['insert'][$token] = $tokenData;
 			return $token;
 		} else {
 			return false;
@@ -950,20 +956,20 @@ class dbAction {
 				$GLOBALS['db']->query($sql);
 			}
 
-			if (!move_uploaded_file($_FILES[$info->name]['tmp_name'],  FS_ROOT.'storage/'.$this->tableDefinition->name.'/'.$fileName)) {
+			if (!move_uploaded_file($_FILES[$info->name]['tmp_name'],  $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName)) {
 				$this->lastErrorMessage = 'UPLOAD ERRORR';
 			} elseif (in_array($_FILES[$info->name]['type'], array('image/jpeg', 'image/gif', 'image/png'))) {
 
 				if (!empty($info->attributes['thumb'])) {
 					//IMAGEMAGIC
-					$fname = FS_ROOT.'storage/'.$this->tableDefinition->name.'/'.$fileName;
-					$thumb = FS_ROOT.'storage/'.$this->tableDefinition->name.'/thumbs/'.$fileName;
+					$fname = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName;
+					$thumb = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/thumbs/'.$fileName;
 					$cmd = IMAGEMAGIC_BIN." -resize ".$info->attributes['thumb']." $fname $thumb";
 					`$cmd`;
 				}
 
 				if (!empty($info->attributes['resize'])) {
-					$fname = FS_ROOT.'storage/'.$this->tableDefinition->name.'/'.$fileName;
+					$fname = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName;
 					list($needWidth, $needHeight) = explode('x', $info->attributes['resize']);
 					list($width, $height, $type, $attr) = getimagesize($fname);
 					if ( ($width > $needWidth) || ($height > $needHeight)) {
@@ -1065,7 +1071,7 @@ class dbAction {
 
 
 	function followRelation($action) {
-		global $_sessionData;
+		
 
 		$relation = $this->tableDefinition->relations[$action['type']][$action['relation']];
 		if (empty($relation)) {
@@ -1089,7 +1095,7 @@ class dbAction {
 			$this->loadRow($currentID);
 
 			// Прописываем primary ID key в сессию и key Value
-			$_sessionData['DB__'.$relationAlias.'__PARENT'] = $this->currentRow[$relation['field']];
+			$this->sessionData['DB__'.$relationAlias.'__PARENT'] = $this->currentRow[$relation['field']];
 
 			if (!empty($relation['treeCaption'])) {
 				// Необходимо использовать заголовок
@@ -1105,37 +1111,37 @@ class dbAction {
 						$_capt = substr($_capt, 0, $trimPos)."...";
 					}
 				}
-				$_sessionData['DB_'.$relationAlias."_caption"]  = empty($_sessionData['DB_'.$this->alias."_caption"]) ? $_capt : $_sessionData['DB_'.$this->alias."_caption"]. ' / ' . $_capt;
+				$this->sessionData['DB_'.$relationAlias."_caption"]  = empty($this->sessionData['DB_'.$this->alias."_caption"]) ? $_capt : $this->sessionData['DB_'.$this->alias."_caption"]. ' / ' . $_capt;
 			} else {
-				$_sessionData['DB_'.$relationAlias."_caption"] = null;
+				$this->sessionData['DB_'.$relationAlias."_caption"] = null;
 			}
 
 		} elseif ($relation['type'] == 'parent') {
 			/*
 			if (!$this->loadRow($currentID)) {
 			// такой строки нет, вероятно мы уже на самом верхнем уровне
-			$_sessionData['DB_'.$tblAlias."_caption"] = null;
+			$this->sessionData['DB_'.$tblAlias."_caption"] = null;
 			}
 
 			*/
 			// Убираем уровень заголовка
-			if (!empty($_sessionData['DB_'.$this->alias."_caption"])) {
-				$caption = $_sessionData['DB_'.$this->alias."_caption"];
+			if (!empty($this->sessionData['DB_'.$this->alias."_caption"])) {
+				$caption = $this->sessionData['DB_'.$this->alias."_caption"];
 				$caption = ($pos = strrpos($caption, '/')) ? substr($caption, 0, $pos) : '';
-				$_sessionData['DB_'.$relationAlias."_caption"] = $caption;
+				$this->sessionData['DB_'.$relationAlias."_caption"] = $caption;
 			}
 
 			if (DBADMIN_CURRENT_TABLE == $relation['foreignTable']) {
 				// реализация дерева
-				$currentID = (int)$_sessionData['DB__'.$this->alias."__PARENT"];
+				$currentID = (int)$this->sessionData['DB__'.$this->alias."__PARENT"];
 				$this->loadRow($currentID);
-				$_sessionData['DB__'.$this->alias."__PARENT"] = $this->currentRow[$relation['field']];
+				$this->sessionData['DB__'.$this->alias."__PARENT"] = $this->currentRow[$relation['field']];
 			} else {
-				$_sessionData['DB__'.$this->alias."__PARENT"] = null;
+				$this->sessionData['DB__'.$this->alias."__PARENT"] = null;
 			}
 		}
 
-		$url = str_replace("/".$_sessionData['DB_CURRENT_TABLE']."/", "/".$relation['foreignTable']."/", $this->getHttpPath());
+		$url = str_replace("/".$this->sessionData['DB_CURRENT_TABLE']."/", "/".$relation['foreignTable']."/", $this->getHttpPath());
 		
 		header("Location: ".$url);
 		die();
@@ -1143,7 +1149,7 @@ class dbAction {
 
 
 	function getOrderDirection() {
-		global $_sessionData;
+		
 		$tblName = $this->tableDefinition->name;
 
 		// Мы уже один раз считали сортировку
@@ -1155,7 +1161,7 @@ class dbAction {
 		}
 
 		$getOrderField = empty($_GET['order']) ? false : $_GET['order'];
-		$sessionOrderField = empty($_sessionData['DB_'.$tblName.'_order']) ? false : $_sessionData['DB_'.$tblName.'_order'];
+		$sessionOrderField = empty($this->sessionData['DB_'.$tblName.'_order']) ? false : $this->sessionData['DB_'.$tblName.'_order'];
 		$defaultOrderField = $this->tableDefinition->getAttribute('defaultOrderField');
 
 		$defaultOrderDirection = $this->tableDefinition->getAttribute('defaultOrderDirection');
@@ -1166,7 +1172,7 @@ class dbAction {
 		if (!in_array($getOrderDirection, array('ASC', 'DESC'))) {
 			$getOrderDirection = 'ASC';
 		}
-		$sessionOrderDirection = empty($_sessionData['DB_'.$tblName.'_direction']) ? false : $_sessionData['DB_'.$tblName.'_direction'];
+		$sessionOrderDirection = empty($this->sessionData['DB_'.$tblName.'_direction']) ? false : $this->sessionData['DB_'.$tblName.'_direction'];
 
 		if (empty($getOrderField)) {
 			$orderField 		= empty($sessionOrderField) ? $defaultOrderField : $sessionOrderField;
@@ -1189,8 +1195,8 @@ class dbAction {
 			}
 		}
 
-		$_sessionData['DB_'.$tblName.'_direction'] = $orderDirection;
-		$_sessionData['DB_'.$tblName.'_order'] = $orderField;
+		$this->sessionData['DB_'.$tblName.'_direction'] = $orderDirection;
+		$this->sessionData['DB_'.$tblName.'_order'] = $orderField;
 
 		$this->orderDirection = $orderDirection;
 		$this->orderField = $orderField;
@@ -1237,6 +1243,12 @@ class dbAction {
 	{
 		return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
 	} // end getHttpPath
+	
+	public function getOption($name)
+	{
+	    return isset($this->_options[$name]) ? $this->_options[$name] : false; 
+	}
+	
 } 
 
 ?>

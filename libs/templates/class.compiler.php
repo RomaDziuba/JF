@@ -941,7 +941,7 @@ class Template_Lite_Compiler extends Template_Lite {
 			return '$this->_plugins[\'' . $type . '\'][\'' . $function . '\'][0]->' . $this->_plugins[$type][$function][1];
 		}
 		// check for standard functions
-		if (isset($this->_plugins[$type][$function]) && function_exists($this->_plugins[$type][$function]))
+		if (isset($this->_plugins[$type][$function]) && is_callable($this->_plugins[$type][$function]))
 		{
 			return $this->_plugins[$type][$function];
 		}

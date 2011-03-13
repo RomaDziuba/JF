@@ -69,17 +69,25 @@ class dbDisplayer {
 		return $content;
 	}
 
-	function &getTemplateInstance($tplRoot = false) {
+	
+	public static function &getTemplateInstance($tplRoot = false)
+	{
+	    require_once dirname(__FILE__)."/../templates/class.template.php";
 	    
-	    if(!is_null(self::$tpl) && !$tplRoot) {
+	    if (!is_null(self::$tpl)) {
+	        if ($tplRoot) {
+	            self::$tpl->template_dir = $tplRoot;
+                self::$tpl->compile_dir = $tplRoot.'/compiled/';
+	        }
+
             return self::$tpl;
 	    }
 	    
-	    if(!$tplRoot) {
+	    if (!$tplRoot) {
             $tplRoot = realpath(dirname(__FILE__).'/../../templates');
 	    }
 	    
-        if(!is_dir($tplRoot)) {
+        if (!is_dir($tplRoot)) {
             throw new Exception('Not found template directory');
         }
 	    
@@ -90,8 +98,10 @@ class dbDisplayer {
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
 
-		return $tpl;
-	}
+		self::$tpl = $tpl;
+		
+		return self::$tpl;
+	} // end getTemplateInstance
 
 	function displayError($message) {
 		$tpl = self::getTemplateInstance();
@@ -151,7 +161,7 @@ class dbDisplayer {
 	}
 
 	function displayList() {
-		global $_sessionData;
+		$_sessionData = &$this->tblAction->sessionData;
 
 		$tableDefinition =& $this->tblAction->tableDefinition;
 		$tblName = $tableDefinition->name;
@@ -191,7 +201,7 @@ class dbDisplayer {
 
 		$_SERVER['QUERY_STRING'] = preg_replace("/&?order=[A-Za-z0-9_]+/", '', @$_SERVER['QUERY_STRING']);
 
-		$info['baseurl'] = HTTP_ROOT;
+		$info['baseurl'] = $this->tblAction->getOption('http_base');
 		$info['query'] = $_SERVER['QUERY_STRING'];
 		$info['totalRows'] = $this->tblAction->totalRows;
 		$info['rowsPerPage'] = $this->tblAction->rowsPerPage;
@@ -353,7 +363,7 @@ class dbDisplayer {
 				}
 
 				$item = array(
-                    'src' => HTTP_ROOT.'images/dbadmin_'.$type.'.gif',
+                    'src' => $this->tblAction->getOption('engine_http_base').'images/dbadmin_'.$type.'.gif',
                     'alt' => $action['caption'],
                     'href' => $link,
                     'addon' => $external ? ' target="_blank" ' : '',
@@ -423,7 +433,7 @@ class dbDisplayer {
 			$info['grouped'] = $gSelect;
 		}
 
-		include dirname(__FILE__).'/'.$this->getLangFile();
+		include dirname(__FILE__).'/'.self::getLangFile();
 		$tpl->assign('lang', $dbAdminMessages);
 
 		if (isset($_group_field)) {
@@ -480,8 +490,8 @@ class dbDisplayer {
 	} // end getGeneralActions
 	
 	function addListFilters () {
-		global $_sessionData;
-		include dirname(__FILE__).'/'.$this->getLangFile();
+		$_sessionData = &$this->tblAction->sessionData;
+		include dirname(__FILE__).'/'.self::getLangFile();
 
 		// Строим фильтры
 		$tableDefinition =& $this->tblAction->tableDefinition;
@@ -634,7 +644,7 @@ class dbDisplayer {
 
 
 	function displayForm($what) {
-		include dirname(__FILE__).'/'.$this->getLangFile();
+		include dirname(__FILE__).'/'.self::getLangFile();
 		global $_dictionary;
 
 		$tableDefinition = $this->tblAction->tableDefinition;
@@ -653,6 +663,7 @@ class dbDisplayer {
 			$token = $this->tblAction->createInsertToken();
 		}
 
+		// FIXME:
 		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false;
 		$tpl = self::getTemplateInstance($path);
 
@@ -671,7 +682,7 @@ class dbDisplayer {
 		}
 		$info['hint'] = $tableDefinition->getAttribute('hint');
 
-		$info['httproot'] = HTTP_ROOT;
+		$info['httproot'] = $this->tblAction->getOption('http_base');
 		$info['url'] = $this->tblAction->getHttpPath();
 
 		$items = array();
@@ -776,14 +787,16 @@ class dbDisplayer {
 	}
 
 	function prepareValue($value) {
-		global $_sessionData;
+		$_sessionData = &$this->tblAction->sessionData;
+		// FIXME:
+		$GLOBALS["_sessionData"] = $_sessionData;
 		$value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
 		$value = @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return $_GET[$matches[1]];'), $value);
 		return $value;
 	}
 
 
-	function getLangFile() {
+	public static function getLangFile() {
 		if (LANG == 'en') {
 			return 'dbadmin_en.php';
 		} else {

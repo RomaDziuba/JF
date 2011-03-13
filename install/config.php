@@ -15,8 +15,6 @@ define('DEFAULT_TABLE', 'dbdrive_tables');
 //  System setting
 //////////////////////////////
 
-define('SITE_CHARSET', CHARSET);
-
 define('IS_JIMBO', 1);
 define('JIMBO_VERSION', '3.1');
 

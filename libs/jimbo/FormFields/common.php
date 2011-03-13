@@ -133,7 +133,7 @@ class abstractFormField {
 
 class fileFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 	    global $_sessionData;
 	    
 		$value = explode(';0;', $value);
@@ -193,13 +193,13 @@ class textFormField extends abstractFormField {
 
 class md5FormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		$value = htmlspecialchars($value);
 		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
 		return '<input  type="password" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin" '.$readonly.' style="width:400px">';
 	}
 
-    public function getValue($requests)
+    public function getValue($requests = array())
     {
         $value = parent::getValue($requests);
         
@@ -218,7 +218,7 @@ class md5FormField extends abstractFormField {
 
 class passwordFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		$value = htmlspecialchars($value);
 		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
 		return '<input style="width:400px" type="password" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin" '.$readonly.'>';
@@ -230,7 +230,7 @@ class passwordFormField extends abstractFormField {
 
 class checkboxFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		$readonly = $this->getAttribute('readonly');
 		if ($readonly) {
 			return $this->displayValue($value);
@@ -260,7 +260,7 @@ class checkboxFormField extends abstractFormField {
 class timestampFormField extends abstractFormField {
 	var $isTimestamp = true;
 
-	function readItself($node) {
+	function readItself($node, $charset = 'UTF-8') {
 		parent::readItself($node);
 		$length = $this->getAttribute('length');
 		if (!in_array($length, array(5, 10, 16, 19)))  {
@@ -280,7 +280,7 @@ class datetimeFormField extends abstractFormField
 {
     public $needTime;
 
-    function readItself($node) 
+    function readItself($node, $charset = 'UTF-8') 
     {
         parent::readItself($node);
         
@@ -387,14 +387,14 @@ class datetimeFormField extends abstractFormField
 
 
 class textareaFormField extends abstractFormField {
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		$width = $this->getWidth();
 		return '<textarea style="'.$width.'" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
 	}
 }
 
 class readonlyFormField extends abstractFormField {
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		$width = $this->getWidth();
 		return '<input style="width:'.$width.'" type="text" name="'.$this->name.'" value="'.$value.'" class="thin" readonly>';
 	}
@@ -453,7 +453,7 @@ class foreignKeyFormField extends abstractFormField {
 	var $foreignKey = true;
 	var $keyData = array();
 
-	function getEditInput($value = false) {
+	function getEditInput($value = false, $inline = false) {
 		if (!empty($this->attributes['readonly'])) {
 			return $this->displayRO($value) ;
 		}
@@ -486,7 +486,7 @@ class foreignKeyFormField extends abstractFormField {
 class numeratorFormField extends abstractFormField {
 
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		return $value;
 	}
 
@@ -521,7 +521,7 @@ class many2manyFormField extends abstractFormField {
 	}
 
 
-	function getEditInput($value = false) {
+	function getEditInput($value = false, $inline = false) {
 
 		global $tblAction;
 
@@ -594,7 +594,7 @@ class sqlFormField  extends abstractFormField {
 class comboFormField extends abstractFormField {
 
 
-    function getEditInput($value = '') {
+    function getEditInput($value = '', $inline = false) {
         global $db;
         $city = $db->getCol("select distinct {$this->name} from {$this->table} order by {$this->name}");
 

@@ -10,6 +10,10 @@ function compile_compile_custom_function($function, $modifiers, $arguments, &$_r
 {
 	if ($function = $object->_plugin_exists($function, "function"))
 	{
+	    if (is_array($function)) {
+	        $function = join('::', $function);
+	    }
+	    
 		$_args = $object->_parse_arguments($arguments);
 		foreach($_args as $key => $value)
 		{

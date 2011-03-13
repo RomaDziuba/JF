@@ -4,7 +4,7 @@ class dbLogic {
 	var $knownPostActions = array('save', 'insert', 'remove', 'info');
 
 	function detectPerformAction($tblAction) {
-		global $_sessionData;
+		$_sessionData = &$this->tblAction->sessionData;
 
 		if (isset($_REQUEST['filter_wtd'])) {
 			if ( ($_REQUEST['filter_wtd'] == 'apply') && (empty($_REQUEST['grouped_action']))) {

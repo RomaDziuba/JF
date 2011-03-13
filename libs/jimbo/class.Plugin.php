@@ -36,8 +36,8 @@ class Plugin
     
     public function fetch($template)
     {
+        
         return $this->tpl->fetch($template);
     }
-    
 }
 ?>

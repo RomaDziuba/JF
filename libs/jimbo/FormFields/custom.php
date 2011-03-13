@@ -2,7 +2,7 @@
 class cityFormField extends abstractFormField {
 
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		global $db;
 		$city = $db->getCol("select distinct city from client_tt order by city");
 
@@ -19,7 +19,7 @@ class cityFormField extends abstractFormField {
 
 class doubleVisitGeoRegionFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		global $db, $_sessionData;
 		
 		$city = $db->getCol('SELECT distinct(geo_region) FROM double_visit WHERE slave_worker_id = '.$_sessionData['auth_id'].' ORDER BY geo_region');
@@ -37,7 +37,7 @@ class doubleVisitGeoRegionFormField extends abstractFormField {
 
 class healthFacilityAddrStreetFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		global $db, $_sessionData;
 		
 		$ID = (int)$_GET['ID'];
@@ -63,7 +63,7 @@ class healthFacilityAddrStreetFormField extends abstractFormField {
 
 class shopAddrStreetFormField extends abstractFormField {
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		global $db, $_sessionData;
 		
 		$ID = (int)$_GET['ID'];
@@ -114,7 +114,7 @@ class autocompleteFormField extends abstractFormField {
 class texthintFormField extends abstractFormField {
 
 
-	function getEditInput($value = '') {
+	function getEditInput($value = '', $inline = false) {
 		global $db;
 		$city = $db->getCol($this->attributes['hintsql']);
 
