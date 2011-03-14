@@ -74,6 +74,33 @@ class dbDisplayer {
 	{
 	    require_once dirname(__FILE__)."/../templates/class.template.php";
 	    
+	    /*
+	    if(!is_null(self::$tpl) && !$tplRoot) {
+            return self::$tpl;
+        }
+        
+        if(!$tplRoot) {
+            $tplRoot = realpath(dirname(__FILE__).'/../../templates');
+        }
+        
+        if(!is_dir($tplRoot)) {
+            throw new Exception('Not found template directory');
+        }
+        
+        $tpl = new Template_Lite();
+        $tpl->template_dir = $tplRoot;
+        $tpl->compile_dir = $tplRoot.'/compiled/';
+        $tpl->force_compile = true;
+        $tpl->cache = false;
+        $tpl->reserved_template_varname = "tpl";
+        
+        if (is_null(self::$tpl)) {
+            self::$tpl = $tpl;
+        }
+        
+        return $tpl;
+        */
+	    
 	    if (!is_null(self::$tpl)) {
 	        if ($tplRoot) {
 	            self::$tpl->template_dir = $tplRoot;
@@ -117,6 +144,7 @@ class dbDisplayer {
 
 		$fieldsData = array();
 		foreach ($tableDefinition->fields as $field) {
+		    // FIXME:
 			$fieldsData[$field->name] = $needConvert ? iconv($tblCharset, 'WINDOWS-1251', $field->attributes['caption']) : $field->attributes['caption'];
 		}
 		$tableData = $this->tblAction->loadTableData('excel');

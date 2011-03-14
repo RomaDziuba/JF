@@ -11,6 +11,8 @@
 
 class tableDefinition {
 
+    public $tblAction;
+    
 	var $name = '';
 	var $fields = array();
 	var $defaultOrder = array();
@@ -23,7 +25,8 @@ class tableDefinition {
 
 	public $lastErrorMessage;
 
-	function tableDefinition() {
+	function tableDefinition($tblAction) {
+	    $this->tblAction = $tblAction;
 	}
 
 	function loadFromXML($file, $useCache = true) {
@@ -69,7 +72,7 @@ class tableDefinition {
 		}
 
 		if (($this->charset != 'UTF-8') && (function_exists('iconv')) && isset($this->attributes['hint'])) {
-			$this->attributes['hint'] = iconv("UTF-8", 'cp1251',$this->attributes['hint']);
+			$this->attributes['hint'] = iconv("UTF-8", $this->charset,$this->attributes['hint']);
 		}
 
 		// Parsing Fields List
@@ -86,13 +89,13 @@ class tableDefinition {
 				continue;
 			}
 
-			$field = new $className();
+			$field = new $className($this->tblAction);
 			$field->readItself($xmlField, $this->charset);
 
 			if (($this->charset != 'UTF-8') && (function_exists('iconv'))) {
-				$field->attributes['caption'] = iconv("UTF-8", 'cp1251', $field->attributes['caption']);
+				$field->attributes['caption'] = iconv("UTF-8", $this->charset, $field->attributes['caption']);
 				if (isset($field->attributes['hint'])) {
-					$field->attributes['hint'] = iconv("UTF-8", 'cp1251', $field->attributes['hint']);
+					$field->attributes['hint'] = iconv("UTF-8", $this->charset, $field->attributes['hint']);
 				}
 			}
 			$field->table = $this->name;

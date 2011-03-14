@@ -1054,7 +1054,7 @@ class dbAction {
 	}
 
 	function loadTableDefinition($tblName) {
-		$tbl = new tableDefinition();
+		$tbl = new tableDefinition($this);
 
 		if (is_file($this->tblPath.'/custom/'.$tblName.'.xml')) {
 			$tblPath = $this->tblPath. '/custom/';

@@ -2,11 +2,17 @@
 
 class abstractFormField {
 
+    public $tblAction;
+    
 	var $attributes;
 	var $name;
 	
 	public $lastErrorMessage = false;
 	
+	public function __construct($tblAction) 
+	{
+        $this->tblAction = $tblAction;
+	}
 
 	function abstractFormElement() {
 	}
@@ -523,16 +529,14 @@ class many2manyFormField extends abstractFormField {
 
 	function getEditInput($value = false, $inline = false) {
 
-		global $tblAction;
-
 		$this->attributes['extendedValue'] = $this->extended;
 
 		if (isset($_GET['ID'])) {
-			$list = $tblAction->loadForeignAssigns((int)$_GET['ID'], $this->attributes);
+			$list = $this->tblAction->loadForeignAssigns((int)$_GET['ID'], $this->attributes);
 		} else {
-			$list = $tblAction->loadForeignAssigns(0, $this->attributes);
+			$list = $this->tblAction->loadForeignAssigns(0, $this->attributes);
 			if (isset($value)) {
-				$value = $tblAction->prepareAddonWhere($value);
+				$value = $this->tblAction->prepareAddonWhere($value);
 				if (isset($list[$value])) {
 					$list[$value]['checked'] = true;
 				}
@@ -570,7 +574,7 @@ class many2manyFormField extends abstractFormField {
 		$html .= '
 		</div>
 		<label><input type="checkbox" style="vertical-align: middle; margin-left:5px" onClick="tbl_check_all(\'m2m_'.$this->attributes['linkTable'].'\', this.checked)">
-		<b>'.$tblAction->locale['FORM_CHECK_ALL'].'</b></label>';
+		<b>'.$this->tblAction->locale['FORM_CHECK_ALL'].'</b></label>';
 		return $html;
 	}
 

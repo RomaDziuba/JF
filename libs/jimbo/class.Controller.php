@@ -11,6 +11,7 @@ require_once dirname(__FILE__).'/FormFields/custom.php';
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.Plugin.php';
 
+
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
 define('PARAM_STRING_NULL', 104);
@@ -55,7 +56,7 @@ class Controller
                 session_start();
             }
             
-            $this->_options['session_data'] = &$_SESSION['jimbo'];
+            $this->_options['session_data'] = &$_SESSION['dba'];
         }
         
         if (!isset($this->_options['engine_url'])) {
@@ -69,6 +70,11 @@ class Controller
         if (!isset($this->_options['engine_style'])) {
             $this->_options['engine_style'] = 'adminus';
         }
+        
+        if (!isset($this->_options['engine_tpl_path'])) {
+            $this->_options['engine_tpl_path'] = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
+        }
+        
         
         if (!isset($this->_options['engine_http_base'])) {
             $this->_options['engine_http_base'] = $this->urlPrefix.'/jimbo/';
@@ -225,6 +231,7 @@ class Controller
         $tpl = dbDisplayer::getTemplateInstance();
         
         // TODO:
+        $currentTplPath = $tpl->template_dir;
         $tpl->template_dir = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
         
         $displayer = new dbDisplayer($tblAction, $tpl);
@@ -239,6 +246,8 @@ class Controller
         $this->includeJs($this->_options['engine_http_base'].'js/jimbo.js');
         
         $content = $displayer->performDisplay($viewAction);
+        
+        $tpl->template_dir = $currentTplPath;
         
         return $content;
     } // end getView
@@ -289,7 +298,8 @@ class Controller
         
         $info += $this->properties;
         
-//        $tpl->assign('menu', $this->call('Jimbo', 'getMenu'));
+        // FIXME:
+        $tpl->assign('menu', self::call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         if($vars) {
@@ -546,6 +556,32 @@ public function popParam($key)
         );
         return $time; 
     }
+    
+    public function getMenu($menu, $name = 'rootMenu')
+    {
+        $tpl = dbDisplayer::getTemplateInstance();
+        
+        $currentTplPath = $tpl->template_dir;
+        $tpl->template_dir = $this->_options['engine_tpl_path'];
+        
+        
+        $currentItem = $_SERVER['REQUEST_URI']; 
+        $currentItem2 = substr($currentItem, -1, 1) != '/' ? $currentItem.'/' : substr($currentItem, 0, -1);
+        $tpl->assign("currentItem", $currentItem);
+        $tpl->assign("currentItem2", $currentItem2);
+        
+        $tpl->assign("name", $name);
+        $tpl->assign("items", array_values($menu));
+        
+        $content = $tpl->fetch("menu.ihtml");
+        
+        $tpl->template_dir = $currentTplPath;
+        
+        return $content;
+    }
+    
+    
+    // $this->_options['engine_tpl_path']
     
 }
 
