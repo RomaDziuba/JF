@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__FILE__).'/events/EventDispatcher.php';
+require_once dirname(__FILE__).'/class.EventJimbo.php';
 
 /**
 * Form's displayer
@@ -10,7 +12,8 @@
 */
 
 
-class dbDisplayer {
+class dbDisplayer extends EventDispatcher 
+{
 
 	var $knownActions = array('child', 'edit', 'remove', 'about', 'parent', 'excel');
 	var $generalActions = array('list', 'insert', 'child', 'parent', 'excel');
@@ -196,7 +199,6 @@ class dbDisplayer {
 		$tableData = $this->tblAction->loadTableData();
 		$tpl = self::getTemplateInstance();
 
-
 		if (isset($this->customHandler) && method_exists($this->customHandler, 'modifyTableData')) {
 			if (!empty($tableData)) {
 				$tableData = $this->customHandler->modifyTableData($tableData);
@@ -225,7 +227,10 @@ class dbDisplayer {
 		$info['backlink'] = isset($tableDefinition->attributes['backLink']) ? $tableDefinition->attributes['backLink'] : '';
 		$info['parent'] = isset($tableDefinition->actions['parent']['caption']) ? $tableDefinition->actions['parent']['caption'] : '';
 
-
+        // Если нет парента то не отображаем ссылку "вверх"
+        if ( empty($_sessionData['DB__'.$tblAlias.'__PARENT']) ) {
+            unset($info['parent']);
+        }
 
 		$_SERVER['QUERY_STRING'] = preg_replace("/&?order=[A-Za-z0-9_]+/", '', @$_SERVER['QUERY_STRING']);
 
@@ -484,8 +489,16 @@ class dbDisplayer {
 			$info['filter'] = $tableDefinition->attributes['filter'];
 		}
 
-		$tpl->assign('info', $info);
-		$tpl->assign('data', $data);
+		// to be able change data from the code generating event with reference to data
+        $obj = array(
+            'info' => &$info,
+            'data' => &$data,
+        );
+        
+        $event = new EventJimbo(EventJimbo::PREDISPLAY_LIST, $obj);
+        $this->dispatchEvent($event);
+        
+        $tpl->assign($obj);
 		return trim($tpl->fetch($tplFile));
 	}
 

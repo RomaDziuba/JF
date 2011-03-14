@@ -557,6 +557,13 @@ public function popParam($key)
         return $time; 
     }
     
+    /**
+     * Returns the current jimbo menu
+     * 
+     * @param array $menu menu items
+     * @param string $name id in html container
+     * @return string
+     */
     public function getMenu($menu, $name = 'rootMenu')
     {
         $tpl = dbDisplayer::getTemplateInstance();
@@ -578,10 +585,18 @@ public function popParam($key)
         $tpl->template_dir = $currentTplPath;
         
         return $content;
-    }
+    } // end getMenu
     
+    /**
+     * Returns a reference to data in the session used by the jimbo
+     * 
+     * @return array
+     */
+    public function &getSessionData()
+    {
+        return $this->_options['session_data'];
+    } // end getSessionData
     
-    // $this->_options['engine_tpl_path']
     
 }
 
