@@ -336,8 +336,12 @@ class Controller
             return true;
         }
         
-        if(!isset($cms->properties[$name])) {
+        if(!isset($this->properties[$name])) {            
             $this->properties[$name] = array();
+        }
+        
+        if (in_array($value, $this->properties[$name])) {
+            return true;
         }
         
         $this->properties[$name][] = $value;
