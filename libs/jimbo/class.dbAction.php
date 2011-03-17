@@ -10,7 +10,7 @@
 
 class dbAction {
 
-    private $_options;
+    public $_options;
     
     public $sessionData;
 	public $tableDefinition;
@@ -19,10 +19,10 @@ class dbAction {
 	public $dbDriver;
 	public $currentRow;
 
-	function dbAction($dsn, $tblName, $options) {
+	function dbAction($dsn, $tblName, &$options) {
         global $dbAdminMessages;
         
-        $this->_options = $options;
+        $this->_options = &$options;
         
         $this->sessionData = &$this->_options['session_data'];
         
@@ -790,10 +790,11 @@ class dbAction {
 		}
 		// Сохраняем саму строку
 		$this->loadRow($itemID);
+		
 		// Удаляем данные для дочерхних таблиц
 		if (isset($this->tableDefinition->actions['child'])) {
 			$relation = $this->tableDefinition->relations['child'][$this->tableDefinition->actions['child']['relation']];
-			$relatedTable = $tblAction = new dbAction($this->dbDriver, $relation['foreignTable'], $this->_options['defs_path']);
+			$relatedTable = $tblAction = new dbAction($this->dbDriver, $relation['foreignTable'], $this->_options);
 			if (isset($relation['cascade'])) {
 				$relation2 = $relatedTable->tableDefinition->relations['parent'][$relatedTable->tableDefinition->actions['parent']['relation']];
 				$relatedSQL = "select ".$relatedTable->tableDefinition->primaryKey." as id from ".$relatedTable->tableDefinition->name." where ".$relation2['field']." = ".$itemID;
