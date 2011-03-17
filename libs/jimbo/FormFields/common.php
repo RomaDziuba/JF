@@ -468,7 +468,7 @@ class foreignKeyFormField extends abstractFormField {
 		$ajaxHtml2 = empty($this->attributes['ajaxChild']) ? '' : '<option '.($value === false ? ' selected ' : '').' value="-999">';
 		$width = $this->getWidth();
 		$result = '<select style="'.$width.'" class="thin" name="'.$this->name.'" id="'.$this->name.'" '.$ajaxHtml.'>' . $ajaxHtml2;
-		if ($this->attributes['allowEmpty']) {
+		if (isset($this->attributes['allowEmpty'])) {
 			$result .= '<option value="0"></option>';
 		}
 		foreach ($this->keyData as $key => $val) {
