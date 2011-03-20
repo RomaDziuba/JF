@@ -26,6 +26,8 @@ class Controller
     public $properties = array();
     
     static private $_instance = null;
+    static private $_lastPluginOptions = null;
+    
 
     private function __construct($options = array())
     {
@@ -71,17 +73,25 @@ class Controller
             $this->_options['engine_style'] = 'adminus';
         }
         
+        if (!isset($this->_options['engine_style_css'])) {
+            $this->_options['engine_style_css'] = $this->urlPrefix.'styles/'.$this->_options['engine_style'].'.css';
+        }
+        
         if (!isset($this->_options['engine_tpl_path'])) {
             $this->_options['engine_tpl_path'] = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
         }
         
         
         if (!isset($this->_options['engine_http_base'])) {
-            $this->_options['engine_http_base'] = $this->urlPrefix.'/jimbo/';
+            $this->_options['engine_http_base'] = $this->urlPrefix;
         }
         
         if (!isset($this->_options['defs_path'])) {
             $this->_options['defs_path'] = $this->_options['base_path'].'tblDefs/';
+        }
+        
+        if (!isset($this->_options['imagemagic_path'])) {
+            $this->_options['imagemagic_path'] = '/usr/local/bin/convert';
         }
         
         // FIXME:
@@ -92,6 +102,17 @@ class Controller
         
         define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
         
+        if (!defined('CHARSET')) {
+            define('CHARSET', 'UTF-8');
+        }
+        
+        if (!isset($this->_options['lang'])) {
+            $this->_options['lang'] = 'en';
+        }
+        
+        //if (!defined('LANG')) {
+            //define('LANG', 'en');
+        //}
     } // end _setDefaultOptions
         
     
@@ -179,6 +200,12 @@ class Controller
     
     public static function call($plugin, $method, $params = array(), $options = array())
     {
+        if ($options) {
+            self::$_lastPluginOptions = $options;
+        } else if(!is_null(self::$_lastPluginOptions)) {
+            $options = self::$_lastPluginOptions;
+        }
+        
         if ( !isset($options['path']) ) {
             $options['path'] = realpath(dirname(__FILE__).'/../../../').'/plugins/';
         }
@@ -217,6 +244,23 @@ class Controller
         
         return false;
     } // end bind
+    
+    public function systemFetch($tplName) 
+    {
+        $tpl = dbDisplayer::getTemplateInstance();
+        
+        // TODO:
+        $currentTplPath = $tpl->template_dir;
+        $tpl->template_dir = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
+        
+        $displayer = new dbDisplayer($tblAction, $tpl);
+        
+        $content = $tpl->fetch($tplName);
+        
+        $tpl->template_dir = $currentTplPath;
+        
+        return $content;
+    }
     
     public function getView($db, $table)
     {
@@ -287,12 +331,12 @@ class Controller
     {
         $tpl = dbDisplayer::getTemplateInstance($tplPath);
         
-        
         $tpl->assign('content', $content);
         
         $info = array(
             'basehttp' => $this->urlPrefix,
             'charset' => CHARSET,
+            'engine_style_css' => $this->_options['engine_style_css']
             //'style_header' => ENGINE_STYLE.'/header.ihtml'
         );
         
@@ -609,6 +653,6 @@ public function popParam($key)
 
 class SystemException extends Exception { }
 class PermissionsException extends SystemException { }
-class DatabaseException extends SystemException { }
+//class DatabaseException extends SystemException { }
 
 ?>

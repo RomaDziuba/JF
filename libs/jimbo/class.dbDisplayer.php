@@ -466,7 +466,7 @@ class dbDisplayer extends EventDispatcher
 			$info['grouped'] = $gSelect;
 		}
 
-		include dirname(__FILE__).'/'.self::getLangFile();
+		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
 		$tpl->assign('lang', $dbAdminMessages);
 
 		if (isset($_group_field)) {
@@ -532,7 +532,7 @@ class dbDisplayer extends EventDispatcher
 	
 	function addListFilters () {
 		$_sessionData = &$this->tblAction->sessionData;
-		include dirname(__FILE__).'/'.self::getLangFile();
+		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
 
 		// Строим фильтры
 		$tableDefinition =& $this->tblAction->tableDefinition;
@@ -685,7 +685,7 @@ class dbDisplayer extends EventDispatcher
 
 
 	function displayForm($what) {
-		include dirname(__FILE__).'/'.self::getLangFile();
+		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
 		global $_dictionary;
 
 		$tableDefinition = $this->tblAction->tableDefinition;
@@ -837,17 +837,7 @@ class dbDisplayer extends EventDispatcher
 	}
 
 
-	public static function getLangFile() {
-		if (LANG == 'en') {
-			return 'dbadmin_en.php';
-		} else {
-			if (substr(strtolower(CHARSET), 0, 3) == 'utf') {
-				return 'dbadmin_ru.utf8.php';
-			} else {
-				return 'dbadmin_ru.cp1251.php';
-			}
-		}
-	}
+	
 
 }
 

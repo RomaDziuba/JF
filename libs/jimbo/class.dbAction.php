@@ -27,7 +27,7 @@ class dbAction {
         $this->sessionData = &$this->_options['session_data'];
         
 		// подгружаем языковые сообщения
-		include dbDisplayer::getLangFile();
+		include $this->getLangFile();
 		$this->locale = $dbAdminMessages;
 
 		// подгружаем описание таблицы
@@ -957,24 +957,32 @@ class dbAction {
 				$GLOBALS['db']->query($sql);
 			}
 
-			if (!move_uploaded_file($_FILES[$info->name]['tmp_name'],  $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName)) {
+			$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			if (!is_dir($uploadPath)) {
+			    mkdir($uploadPath, 0777, true);
+			}
+			if (!move_uploaded_file($_FILES[$info->name]['tmp_name'],  $uploadPath.$fileName)) {
 				$this->lastErrorMessage = 'UPLOAD ERRORR';
 			} elseif (in_array($_FILES[$info->name]['type'], array('image/jpeg', 'image/gif', 'image/png'))) {
 
 				if (!empty($info->attributes['thumb'])) {
 					//IMAGEMAGIC
-					$fname = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName;
-					$thumb = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/thumbs/'.$fileName;
-					$cmd = IMAGEMAGIC_BIN." -resize ".$info->attributes['thumb']." $fname $thumb";
+					$fname = $uploadPath.$fileName;
+					$thumbPath = $uploadPath.'thumbs/';
+					if (!is_dir($thumbPath)) {
+					    mkdir($thumbPath, 0777, true);
+					}
+					$thumb = $thumbPath.$fileName;
+					$cmd = $this->getOption('imagemagic_path')." -resize ".$info->attributes['thumb']." $fname $thumb";
 					`$cmd`;
 				}
 
 				if (!empty($info->attributes['resize'])) {
-					$fname = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/'.$fileName;
+					$fname = $uploadPath.$fileName;
 					list($needWidth, $needHeight) = explode('x', $info->attributes['resize']);
 					list($width, $height, $type, $attr) = getimagesize($fname);
 					if ( ($width > $needWidth) || ($height > $needHeight)) {
-						$cmd = IMAGEMAGIC_BIN." -resize {$needWidth}x{$needHeight} $fname $fname";
+						$cmd = $this->getOption('imagemagic_path')." -resize {$needWidth}x{$needHeight} $fname $fname";
 						`$cmd`;
 					}
 				}
@@ -1250,6 +1258,20 @@ class dbAction {
 	    return isset($this->_options[$name]) ? $this->_options[$name] : false; 
 	}
 	
+    public function getLangFile() 
+    {
+        $lang = $this->getOption('lang');
+        
+        if ($lang == 'en') {
+            return 'dbadmin_en.php';
+        } else {
+            if (substr(strtolower(CHARSET), 0, 3) == 'utf') {
+                return 'dbadmin_ru.utf8.php';
+            } else {
+                return 'dbadmin_ru.cp1251.php';
+            }
+        }
+    }
 } 
 
 ?>

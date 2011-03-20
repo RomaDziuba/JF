@@ -140,28 +140,32 @@ class abstractFormField {
 class fileFormField extends abstractFormField {
 
 	function getEditInput($value = '', $inline = false) {
-	    global $_sessionData;
+        $_sessionData = &$this->tblAction->sessionData;
+	    
+	    $httpBase = $this->tblAction->getOption('http_base');
 	    
 		$value = explode(';0;', $value);
 		if (!empty($this->attributes['fileName'])) {
-			$link = HTTP_ROOT.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
+			$link = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
 		} else {
-			$link = HTTP_ROOT.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
+			$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
 		}
 		return '<input type="file" name="'.$this->name.'" class="thin">&nbsp; <a href="'.$link.'" class="db_link" target="_blank" style="margin:2px">'.$value[0].'</a>';
 	}
 
 	function displayValue($value) {
-        global $_sessionData;
+        
+	    $_sessionData = &$this->tblAction->sessionData;
+        $httpBase = $this->tblAction->getOption('http_base');
 	    
 		$value = explode(';0;', $value);
 		if (!empty($value[0])) {
 			if (!empty($this->attributes['fileName'])) {
-				$preview = HTTP_ROOT.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/thumbs/'.$value[0];
-				$link = HTTP_ROOT.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
+				$preview = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/thumbs/'.$value[0];
+				$link = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
 			} else {
-				$preview = HTTP_ROOT.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0].'?thumb=1';
-				$link = HTTP_ROOT.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
+				$preview = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0].'?thumb=1';
+				$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
 			}
 			if (!empty($this->attributes['thumb'])) {
 				return "<a href='$link' class='db_link' target='_blank'><img src='$preview' border='0' vspace='2px'></a>";
@@ -253,7 +257,8 @@ class checkboxFormField extends abstractFormField {
 		if (is_numeric($value)) {
 			$value = ($value) ? 'Yes' : 'No';
 		}
-		$checked = (strtoupper(substr($value, 0, 1)) == 'Y') ? '<img align="center" src="'.HTTP_ROOT.'images/tick.png" />' : '';
+		$httpBase = $this->tblAction->getOption('http_base');
+		$checked = (strtoupper(substr($value, 0, 1)) == 'Y') ? '<img align="center" src="'.$httpBase.'images/dbadmin_tick.png" />' : '';
 		return $checked;
 	}
 
