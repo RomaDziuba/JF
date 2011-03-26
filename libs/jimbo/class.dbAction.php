@@ -398,7 +398,7 @@ class dbAction {
 				$customHandler = new customTableHandler();
 				if (method_exists ($customHandler, 'handle')) {
 					$info = array('action' => 'post');
-					$handledEvent = $customHandler->handle(&$info);
+					$handledEvent = $customHandler->handle($info);
 					if ($handledEvent && !empty($info['lastErrorMessage'])) {
 						// Processed with error code
 						$status = false;
@@ -595,15 +595,15 @@ class dbAction {
 			if (isset($item->foreignKey)) {
 
 				if ($exactly) {
-					$this->loadForeignKeyValues(&$this->tableDefinition->fields[$key], true);
+					$this->loadForeignKeyValues($this->tableDefinition->fields[$key], true);
 				} elseif (empty($item->attributes['ajaxParent']) ) {
-					$this->loadForeignKeyValues(&$this->tableDefinition->fields[$key]);
+					$this->loadForeignKeyValues($this->tableDefinition->fields[$key]);
 				} else {
 					$GLOBALS['currentRow'] = $this->currentRow;
 					if (!empty($this->currentRow)) {
 						$where =& $this->tableDefinition->fields[$key]->attributes['valuesWhere'];
 						$where =  @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return $GLOBALS["currentRow"][$matches[1]];'), $where);
-						$this->loadForeignKeyValues(&$this->tableDefinition->fields[$key]);
+						$this->loadForeignKeyValues($this->tableDefinition->fields[$key]);
 					}
 				}
 			}
@@ -673,7 +673,7 @@ class dbAction {
 					$where = preg_replace("/G%".$item->attributes['ajaxParent']."%/", mysql_escape_string($_GET['value']), $item->attributes['valuesWhere']);
 					$item->attributes['valuesWhere'] = $where;
 				}
-				$this->loadForeignKeyValues(&$item);
+				$this->loadForeignKeyValues($item);
 				break;
 			}
 		}

@@ -45,7 +45,7 @@ class dbDisplayer extends EventDispatcher
 			$this->customHandler = new customTableHandler();
 			$info['action'] = $action;
 			$result = '';
-			if ($this->customHandler->display($info, &$result)) {
+			if ($this->customHandler->display($info, $result)) {
 				return $result;
 			}
 		}
