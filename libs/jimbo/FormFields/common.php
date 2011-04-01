@@ -400,7 +400,8 @@ class datetimeFormField extends abstractFormField
 class textareaFormField extends abstractFormField {
 	function getEditInput($value = '', $inline = false) {
 		$width = $this->getWidth();
-		return '<textarea style="'.$width.'" type="text" name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
+		$readonly = $this->getAttribute('readonly') ? 'readonly="true"' : '';
+		return '<textarea style="'.$width.'" type="text" '.$readonly.' name="'.$this->name.'" class="thin" rows="3">'.$value.'</textarea>';
 	}
 }
 
@@ -454,7 +455,7 @@ class selectFormField extends abstractFormField {
 	}
 
 	function displayValue($value) {
-		$value = $this->valuesList[$value];
+		$value = isset($this->valuesList[$value]) ? $this->valuesList[$value] : "";
 		return $value;
 	}
 

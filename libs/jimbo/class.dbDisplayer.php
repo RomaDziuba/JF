@@ -69,6 +69,7 @@ class dbDisplayer extends EventDispatcher
 				$content = $this->displayList();
 			}
 		}
+
 		return $content;
 	}
 
@@ -509,6 +510,7 @@ class dbDisplayer extends EventDispatcher
 	private function getGeneralActions()
 	{
 	    $generalActions = array();
+
 	    foreach ($this->tblAction->tableDefinition->actions as $type => $action) {
 		    if( !isset($action['view']) || $action['view'] != 'top' ) {
 		        continue;
@@ -523,11 +525,11 @@ class dbDisplayer extends EventDispatcher
             );
 		    
 		    $generalActions[$type] = $item;
-		    
+
 		    unset($this->tblAction->tableDefinition->actions[$type]);
 		}
-	    
-	    return $generalActions;
+
+		return $generalActions;
 	} // end getGeneralActions
 	
 	function addListFilters () {

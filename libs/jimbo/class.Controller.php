@@ -415,7 +415,7 @@ class Controller
         return isset($_SESSION[$key]) ? $_SESSION[$key] : false;
     }
     
-public function popParam($key)
+    public function popParam($key)
     {
         $value = $this->getParam($key);
         $this->removeParam($key);

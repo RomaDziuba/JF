@@ -551,7 +551,7 @@ class dbAction {
 			    default: 
                     $value = $info->getValue($_POST);
 			} // end switch
-			
+
 			if($value === false) {
                 $this->wasError = true;
                 $this->lastErrorMessage = $info->lastErrorMessage;
