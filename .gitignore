@@ -5,3 +5,4 @@ templates/compiled/*.php
 .svn
 .gitmodules
 plugins/TblDefinitionPlugin.php
+images/dbadmin_*

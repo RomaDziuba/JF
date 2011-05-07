@@ -393,7 +393,8 @@ class dbAction {
 
 
 		if (!empty($this->tableDefinition->attributes['customHandler'])) {
-			include_once "./tblHandlers/".$this->tableDefinition->attributes['customHandler'].'.php';
+		    
+			include_once $this->_options['base_path']."tblHandlers/".$this->tableDefinition->attributes['customHandler'].'.php';
 			if (class_exists('customTableHandler')) {
 				$customHandler = new customTableHandler();
 				if (method_exists ($customHandler, 'handle')) {
