@@ -41,11 +41,11 @@ class dbDisplayer extends EventDispatcher
 		$tableDefinition = $this->tblAction->tableDefinition;
 
 		if (!empty($tableDefinition->attributes['customHandler'])) {
-			include_once "./tblHandlers/".$tableDefinition->attributes['customHandler'].'.php';
+			include_once $this->tblAction->getOption('base_path')."tblHandlers/".$tableDefinition->attributes['customHandler'].'.php';
 			$this->customHandler = new customTableHandler();
 			$info['action'] = $action;
 			$result = '';
-			if ($this->customHandler->display($info, &$result)) {
+			if ($this->customHandler->display($info, $result)) {
 				return $result;
 			}
 		}
@@ -135,6 +135,8 @@ class dbDisplayer extends EventDispatcher
 	} // end getTemplateInstance
 
 	function displayError($message) {
+	    throw new Exception($message);
+        
 		$tpl = self::getTemplateInstance();
 		$tpl->assign('message', $message);
 		return $tpl->fetch('error.ihtml');
@@ -799,7 +801,7 @@ class dbDisplayer extends EventDispatcher
 		}
 
 		if (!empty($tableDefinition->attributes['customHandler'])) {
-			include_once "./tblHandlers/".$tableDefinition->attributes['customHandler'].'.php';
+			include_once $this->tblAction->getOption('base_path')."tblHandlers/".$tableDefinition->attributes['customHandler'].'.php';
 			$this->customHandler = new customTableHandler();
 			if (method_exists($this->customHandler, 'templateCallback')) {
 				$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);

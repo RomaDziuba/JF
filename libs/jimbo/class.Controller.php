@@ -10,6 +10,8 @@ require_once dirname(__FILE__).'/FormFields/custom.php';
 
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.Plugin.php';
+require_once dirname(__FILE__).'/events/EventDispatcher.php';
+
 
 
 define('PARAM_ARRAY', 100);

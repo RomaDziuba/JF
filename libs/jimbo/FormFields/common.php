@@ -328,7 +328,7 @@ class datetimeFormField extends abstractFormField
     /**
      * Returns date format according to locale settings.
      */
-    private function getFormat()
+    public function getFormat()
     {
         $format = $this->getAttribute('format');
         if($format) {
