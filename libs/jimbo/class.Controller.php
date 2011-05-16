@@ -9,7 +9,7 @@ require_once dirname(__FILE__).'/FormFields/common.php';
 require_once dirname(__FILE__).'/FormFields/custom.php';
 
 require_once dirname(__FILE__).'/class.JimboUser.php';
-require_once dirname(__FILE__).'/class.Plugin.php';
+require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/events/EventDispatcher.php';
 
 
@@ -29,6 +29,8 @@ class Controller
     
     static private $_instance = null;
     static private $_lastPluginOptions = null;
+    
+    static private $_plugins = null;
     
 
     private function __construct($options = array())
@@ -166,8 +168,12 @@ class Controller
         return preg_replace('#^'.$prefix.'#Umis', '/', $url);
     } // end getCurrentURL
     
-    public static function getPluginInstance($plugin, $params = array(), $options = array())
+    public static function &getPluginInstance($plugin, $params = array(), $options = array())
     {
+        if (isset(self::$_plugins[$plugin])) {
+            return self::$_plugins[$plugin];
+        }
+        
         $classPrefix = !isset($options['classPrefix']) ?  'Plugin' : $classPrefix;
         
         $className = $plugin.$classPrefix;
@@ -178,6 +184,10 @@ class Controller
             $path = JIMBO_PLUGINS_PATH;
         } else {
             $path = realpath(dirname(__FILE__).'/../../../').'/plugins/';
+        }
+        
+        if (is_dir($path.$plugin)) {
+            $path .= $plugin.'/';
         }
         
         $classFile = $path.$className.'.php';
@@ -195,9 +205,14 @@ class Controller
         
         $tpl = !isset($options['tpl']) ? dbDisplayer::getTemplateInstance($tplPath) : $options['tpl'];
         
-        $obj = new $className($tpl);
+        $pluginInstance = new $className($tpl);
         
-        return $obj;
+        $pluginInstance->setPluginPath($path);
+        $pluginInstance->onInit();
+
+        self::$_plugins[$plugin] = $pluginInstance;
+        
+        return self::$_plugins[$plugin];
     } // end getPluginInstance
     
     public static function call($plugin, $method, $params = array(), $options = array())

@@ -1,5 +1,5 @@
 <?php 
-class Plugin
+abstract class AbstractPlugin
 {
     protected $tpl;
      
@@ -7,6 +7,14 @@ class Plugin
     {
         $this->tpl = &$tpl;
     }
+    
+    public function setPluginPath($path)
+    {
+        $this->pluginPath = $path;
+    }
+    
+    abstract public function onInit();
+    
     
     public function __set($label, $object) 
     {
@@ -36,7 +44,6 @@ class Plugin
     
     public function fetch($template)
     {
-        
         return $this->tpl->fetch($template);
     }
 }
