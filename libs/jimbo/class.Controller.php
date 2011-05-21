@@ -10,6 +10,7 @@ require_once dirname(__FILE__).'/FormFields/custom.php';
 
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.AbstractPlugin.php';
+require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
 require_once dirname(__FILE__).'/events/EventDispatcher.php';
 
 

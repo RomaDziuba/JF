@@ -3,9 +3,11 @@
 		<div class="bheadl"></div>
 		<div class="bheadr"></div>
 		<h2>Login</h2>
+		{if defined('SITE_HTTP_ROOT')}
 		<ul>
 			<li class="nobg"><a href="{$tpl.CONST.SITE_HTTP_ROOT}">back to the site</a></li>
 		</ul>
+		{/if}
 	</div>	
 				
 	<div class="block_content">
