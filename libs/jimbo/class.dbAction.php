@@ -530,11 +530,12 @@ class dbAction {
 
 		foreach ($this->tableDefinition->fields as $info) {
 		    
+		    if ($info->attributes['type'] == 'readonly') {
+                continue;
+		    }
+		    
+		    $value = null;
 			switch($info->attributes['type']) {
-			    case 'readonly': {
-                    continue;
-                } break;
-                
 			    case 'many2many': {
 			        $many2many[] = $info;
 				    continue;
@@ -562,7 +563,7 @@ class dbAction {
 		    if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
 				continue;
 			}
-            
+			
 			$columns[] = $this->dbDriver->escape($info->name);
 			$values[] = $this->dbDriver->quote($value);
 		} // end foreach
@@ -1013,6 +1014,7 @@ class dbAction {
 		
 		$sql = 'UPDATE '.$this->tableDefinition->name.' SET '.join(', ', $rows);
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.(int)$id;
+		
 		$result = $this->dbDriver->query($sql);
 
 		if (PEAR::isError($result)) {
