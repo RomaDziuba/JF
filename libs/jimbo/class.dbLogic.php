@@ -4,12 +4,12 @@ class dbLogic {
 	var $knownPostActions = array('save', 'insert', 'remove', 'info');
 
 	function detectPerformAction($tblAction) {
-		$_sessionData = &$this->tblAction->sessionData;
-
+		$_sessionData = &$tblAction->sessionData;
+		
 		if (isset($_REQUEST['filter_wtd'])) {
 			if ( ($_REQUEST['filter_wtd'] == 'apply') && (empty($_REQUEST['grouped_action']))) {
 
-				$filters = (array)$_POST['filter'];
+				$filters = (array) $_REQUEST['filter'];
 				if (get_magic_quotes_gpc()) {
 					foreach ($filters as $key => $val) {
 						if (!is_array($val)) {
@@ -33,8 +33,8 @@ class dbLogic {
 					}
 				}
 			}
-			Header("Location: ".$_SERVER['REQUEST_URI']);
-			die;
+			//Header("Location: ".$_SERVER['REQUEST_URI']);
+			//die;
 			
 		}
 

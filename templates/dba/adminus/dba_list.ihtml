@@ -69,7 +69,7 @@ jQuery(document).ready(function() {
 	<div class="block_content">
 		
 		<table id="tbllist" width="100%" cellspacing="0" cellpadding="0" class="sortable">
-			<form method="post">
+			<form method="get">
 				<input type="hidden" name="picker" id="picker" />
 				<input type="hidden" name="filter_wtd" id="filter_wtd" value="apply" />
 				

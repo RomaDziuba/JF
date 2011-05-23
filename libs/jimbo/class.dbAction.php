@@ -372,7 +372,7 @@ class dbAction {
 		$this->adjustPostData();
 		$baseURL = '?';
 		foreach ($_GET as $key => $val) {
-			if (!in_array($key, array('action', 'ID'))) {
+			if (!is_array($val) && !in_array($key, array('action', 'ID'))) {
 				$baseURL .= $key.'='.urlencode($val).'&';
 			}
 		}
