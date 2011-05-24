@@ -33,6 +33,7 @@ class dbAction {
 		// подгружаем описание таблицы
 
 		$this->tblPath = $this->_options['defs_path'];
+		
 		$this->tableDefinition = $this->loadTableDefinition($tblName);
 
 		if (!$this->tableDefinition) {

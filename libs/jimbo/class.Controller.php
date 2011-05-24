@@ -191,6 +191,8 @@ class Controller
             $path .= $plugin.'/';
         }
         
+        $options['plugin_path'] = $path;
+        
         $classFile = $path.$className.'.php';
                           
         if (!file_exists($classFile)) {
@@ -208,7 +210,7 @@ class Controller
         
         $pluginInstance = new $className($tpl);
         
-        $pluginInstance->setPluginPath($path);
+        $pluginInstance->setOptions($options);
         $pluginInstance->onInit();
 
         self::$_plugins[$plugin] = $pluginInstance;
@@ -249,6 +251,7 @@ class Controller
             '~^/jimbo/$~'                           => array('Jimbo', 'main'),
             '~^/getfile/([^/]+)/([^/]+)/([^/]+)/$~' => array('Jimbo', 'getFile'),
             '~^/jimbo/([^/]+)/$~'                   => array('Jimbo', 'main'),
+        	'~^/jimbo/([^/]+)/([^/]+)/$~'           => array('Jimbo', 'main'),
         );
 
         $rules = $urlRules + $systemRules;
@@ -288,7 +291,6 @@ class Controller
         $this->_options['session_data']['DBA_SCRIPT'] = $this->urlPrefix.$this->_options['engine_url'].'/';
         
         $tblAction = new dbAction($db, $table, $this->_options);
-        
         
         $tpl = dbDisplayer::getTemplateInstance();
         
@@ -662,6 +664,18 @@ class Controller
     {
         return $this->_options['session_data'];
     } // end getSessionData
+    
+    
+    public function setOption($name, $value)
+    {
+        $this->_options[$name] = $value;
+    }
+    
+    public function getOption($name)
+    {
+        return $this->_options[$name];
+    }
+    
     
     
 }

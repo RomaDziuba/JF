@@ -8,9 +8,9 @@ abstract class AbstractPlugin
         $this->tpl = &$tpl;
     }
     
-    public function setPluginPath($path)
+    public function setOptions($options)
     {
-        $this->pluginPath = $path;
+        $this->options = $options;
     }
     
     abstract public function onInit();
