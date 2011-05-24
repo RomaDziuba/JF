@@ -3,16 +3,16 @@
 defaultOrderField="order_n" defaultOrderDirection="ASC" rowsForPage="200">
 
     <relations>
-        <link type="parent" field="id_parent" isnull="true" foreignTable="dbdrive_menu" foreignField="id"  />
+        <link type="parent" field="id_parent" foreignTable="dbdrive_menu" foreignField="id"  />
         <link type="child" field="id" foreignTable="dbdrive_menu" foreignField="id_parent" treeCaption="caption" />
     </relations>
     
     <fields>
         <field type="readonly" caption="ID" name="id" trim="60" width="5%" required="true" sorting="true"/>
-        <field type="text" clicable="true" caption="Название" name="caption" trim="60" width="35%" required="true" sorting="true"/>
+        <field type="text" clicable="true" caption="Caption" name="caption" trim="60" width="35%" required="true" sorting="true"/>
         <field type="text" caption="Url" name="url" trim="60" width="50%"  sorting="true"/>
-        <field type="many2many" caption="Доступ" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="user_types" foreignKeyField="id" foreignValueField="type" hide="true" />
-        <field type="text" caption="Order index" name="order_n" trim="60" width="10%"  sorting="true"/>
+        <field type="many2many" caption="Permissions" linkTable="dbdrive_menu_perms" linkField="id_menu " linkForeignField="id_role" foreignTable="user_types" foreignKeyField="id" foreignValueField="caption" hide="true" />
+        <field type="text" caption="Order By" name="order_n" trim="60" width="10%"  sorting="true"/>
     </fields>
     
     <actions>

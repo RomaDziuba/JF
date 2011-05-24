@@ -1,15 +1,48 @@
 <?php 
 class JimboPlugin extends Plugin
 {
-    public function main($table = false)
+    public function __construct(&$tpl)
     {
-        global $jimbo, $_sessionData;
+        global $jimbo;
         
-        if(!defined('ENGINE_URL')) {
+        parent::__construct($tpl);
+    }
+    
+    public function main($table = false, $pluginName = false)
+    { 
+        global $jimbo;
+        
+        $sessionData = &$jimbo->getSessionData();
+        
+        $authData = $jimbo->user->get('auth_data');
+        
+        $sessionData['id_dealer'] = $authData['id_dealer'];
+        
+        if ($pluginName) {
+            $path = $this->options['path'].$pluginName.'/tblDefs/';
+            $jimbo->setOption('defs_path', $path);
+        }
+        
+        $content = $jimbo->getView($jimbo->db, $table);
+        
+        // defs_path
+        
+        $template = $this->getTemplateName();
+        
+        if (!$template) {
+            echo $content;
+            exit();
+        }
+        
+        $jimbo->display($content, $template);
+        
+        die();
+        
+        if (!defined('ENGINE_URL')) {
             throw new SystemException(_('Undefined ENGINE_URL const'));
         }
         
-        if(!$table) {
+        if (!$table) {
             $table = DEFAULT_TABLE; 
         }
         
@@ -17,6 +50,10 @@ class JimboPlugin extends Plugin
         
         $_sessionData['DB_CURRENT_TABLE'] = $table; 
         $_sessionData['DBA_SCRIPT'] = $jimbo->urlPrefix.ENGINE_URL.'/';
+        
+        // TODO:
+        $authData = $jimbo->user->get('auth_data');
+        $_sessionData['id_dealer'] = $authData['id_dealer'];
         
         $sql = "SELECT 
                     dbdrive_perms.value 
@@ -29,7 +66,7 @@ class JimboPlugin extends Plugin
         
         $perms = $jimbo->db->getOne($sql);    
         
-        $GLOBALS['tblAction'] = new dbAction($jimbo->db, $table);
+        $GLOBALS['tblAction'] = new dbAction($jimbo->db, $table, SITE_ROOT.'tblDefs/');
         $tblAction = &$GLOBALS['tblAction'];
         
         if (($perms & 8) == 8) {
@@ -47,7 +84,10 @@ class JimboPlugin extends Plugin
             throw new PermissionsException();
         }
         
-        $displayer = new dbDisplayer($tblAction, dbDisplayer::getTemplateInstance(TPL_ROOT.'dba/'.ENGINE_STYLE.'/') );
+        $displayer = new dbDisplayer($tblAction, $jimbo->tpl);
+        
+        $displayer->addEventListener(EventJimbo::PREDISPLAY_LIST, array(&$this, "handleDisplayList"));
+        
         $dbLogic = new dbLogic();
         
         $doAction = $dbLogic->detectPerformAction($tblAction);
@@ -59,17 +99,22 @@ class JimboPlugin extends Plugin
         
         $template = $this->getTemplateName();
         
-        if(!$template) {
+        if (!$template) {
             echo $content;
             exit();
         }
         
-        $vars = array(
-            '_user' => $jimbo->user->getData()
-        );
-        
-        $jimbo->display($content, $template, $vars, TPL_ROOT.'dba/');
+        $jimbo->display($content, $template);
     } // end main
+    
+    public function handleDisplayList($event)
+    {
+        global $jimbo;
+        
+        $jimbo->setTitle($event->currentTarget['info']['caption']);
+        
+    } // end handleDisplayList
+    
     
     /**
      * Returns the name of the main template
@@ -78,7 +123,7 @@ class JimboPlugin extends Plugin
     {
         $template = 'main.ihtml';
         
-        if(isset($_GET['popup'])) {
+        if (isset($_GET['popup'])) {
             $template = JIMBO_POPUP_MODE == 'popup' ? 'light.ihtml' : false;
         }
         
@@ -89,7 +134,8 @@ class JimboPlugin extends Plugin
     {
         global $jimbo;
     
-        $sql = "SELECT ".$jimbo->db->escape($filed)." FROM ".$jimbo->db->escape($table)." WHERE id = ".$jimbo->db->quote($id);
+        $sql = "SELECT ".$jimbo->db->escape($filed)." FROM ".$jimbo->db->escape($table)." 
+        WHERE id = ".$jimbo->db->quote($id);
         $info = $jimbo->db->getOne($sql);
         
         $info = explode(";0;", $info);
@@ -115,9 +161,7 @@ class JimboPlugin extends Plugin
     {
         global $jimbo;
         
-        require_once 'jimbo/class.dbMenu.php';
-        
-        if(!$jimbo->user->isLogin()) {
+        if (!$jimbo->user->isLogin()) {
             return false;
         }
         
@@ -134,7 +178,7 @@ class JimboPlugin extends Plugin
                     m.id_parent, m.order_n";
         $tmp = $jimbo->db->getAll($sql);
         
-        if(PEAR::isError($tmp)) {
+        if (PEAR::isError($tmp)) {
             throw new DatabaseException($tmp->getMessage());    
         }
 
@@ -152,7 +196,7 @@ class JimboPlugin extends Plugin
                 'level' => 1,
                 'items' => array()
                 );
-            } elseif(isset($menu[$item['id_parent']]['level']) && $menu[$item['id_parent']]['level'] == 1) {
+            } elseif (isset($menu[$item['id_parent']]['level']) && $menu[$item['id_parent']]['level'] == 1) {
             
                 $menu[$item['id_parent']]['items'][$item['id']] = array(
                 'caption' => $item['caption'],
@@ -171,9 +215,8 @@ class JimboPlugin extends Plugin
                 );
             }
         }
-        $menu = new dbMenu($menu, dbDisplayer::getTemplateInstance(TPL_ROOT.'dba/'.ENGINE_STYLE.'/'));
         
-        return $menu->getHTML();
+        return $jimbo->getMenu($menu);
     } // end getMenu
     
 }
