@@ -1,5 +1,5 @@
 <?php 
-class JimboPlugin extends Plugin
+class JimboPlugin extends BaseJimboPlugin
 {
     public function __construct(&$tpl)
     {
@@ -15,8 +15,6 @@ class JimboPlugin extends Plugin
         $sessionData = &$jimbo->getSessionData();
         
         $authData = $jimbo->user->get('auth_data');
-        
-        $sessionData['id_dealer'] = $authData['id_dealer'];
         
         if ($pluginName) {
             $path = $this->options['path'].$pluginName.'/tblDefs/';

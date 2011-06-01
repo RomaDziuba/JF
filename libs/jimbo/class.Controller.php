@@ -356,8 +356,8 @@ class Controller
         $info = array(
             'basehttp' => $this->urlPrefix,
             'charset' => CHARSET,
-            'engine_style_css' => $this->_options['engine_style_css']
-            //'style_header' => ENGINE_STYLE.'/header.ihtml'
+            'engine_style_css' => $this->_options['engine_style_css'],
+            'style_header' => $this->_options['engine_tpl_path'].'header.ihtml'
         );
         
         $info += $this->properties;
