@@ -21,8 +21,7 @@ class ObjectJimboPlugin extends BaseJimboPlugin
         
         return Object::getInstance($name, $jimbo->db, $this->options['plugin_path']);
     }
-    
-    
+        
 }
 
 ?>

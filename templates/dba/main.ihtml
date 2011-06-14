@@ -4,7 +4,7 @@
     <meta http-equiv=Content-Type content="text/html; charset={$info.charset}" >
     <title>{$info.title}</title>
 
-	<link rel="stylesheet" type="text/css" href="{$tpl.CONST.STYLES_HTTP_ROOT}{$tpl.CONST.ENGINE_STYLE}.css">
+	<link rel="stylesheet" type="text/css" href="{$info.engine_style_css}">
     
     <link rel="stylesheet" type="text/css" href="{$info.basehttp}js/calendar/calendar.css">
     <script type="text/javascript" src="{$info.basehttp}js/calendar/calendar.js"></script>
