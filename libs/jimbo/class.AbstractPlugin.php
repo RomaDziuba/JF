@@ -44,7 +44,18 @@ abstract class AbstractPlugin
     
     public function fetch($template)
     {
-        return $this->tpl->fetch($template);
+        $path = $this->options['plugin_path'].'templates/'.$template;
+        
+        $currentPath = $this->tpl->template_dir; 
+        
+        if (file_exists($path)) {
+            $this->tpl->template_dir = $this->options['plugin_path'].'templates/';
+        }
+        
+        $content = $this->tpl->fetch($template);
+        $this->tpl->template_dir = $currentPath;
+        
+        return $content;
     }
 }
 ?>
