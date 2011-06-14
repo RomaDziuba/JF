@@ -13,7 +13,7 @@
 <script type="text/javascript" src="{$info.basehttp}calendar/lang/calendar-en.js"></script>
 <script type="text/javascript" src="{$info.basehttp}calendar/calendar_add.js"></script>
 
-<script type="text/javascript" src="{$info.basehttp}js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="{$info.basehttp}js/jquery.min.js"></script>
 <script type="text/javascript" src="{$info.basehttp}js/jquery-ui-1.8.5.custom.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{$info.basehttp}css/redmond/jquery.ui.all.css" />
 <script type="text/javascript" src="{$info.basehttp}js/jquery.qtip.js"></script>
