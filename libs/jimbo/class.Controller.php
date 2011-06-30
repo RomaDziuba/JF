@@ -425,6 +425,11 @@ class Controller
         return $url;
     }
     
+    public function isExistParam($key)
+    {
+        return isset($_SESSION[$key]);
+    }
+    
     public function addParam($key, $value)
     {
         $_SESSION[$key] = $value;
