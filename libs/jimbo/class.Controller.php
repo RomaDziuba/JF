@@ -184,7 +184,7 @@ class Controller
         } elseif ( defined('JIMBO_PLUGINS_PATH') ) {
             $path = JIMBO_PLUGINS_PATH;
         } else {
-            $path = realpath(dirname(__FILE__).'/../../../').'/plugins/';
+            $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
         }
         
         if (is_dir($path.$plugin)) {
