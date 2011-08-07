@@ -1,5 +1,4 @@
 <?php 
-
 require_once dirname(__FILE__).'/class.dbDisplayer.php';
 require_once dirname(__FILE__).'/class.tableDefinition.php';
 require_once dirname(__FILE__).'/class.dbAction.php';
@@ -13,13 +12,14 @@ require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
 require_once dirname(__FILE__).'/events/EventDispatcher.php';
 
-
-
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
 define('PARAM_STRING_NULL', 104);
 define('PARAM_FILE', 102); 
 
+/**
+ * @package Jimbo
+ */
 class Controller
 {
     private $_options;
@@ -115,6 +115,21 @@ class Controller
             $this->_options['lang'] = 'en';
         }
         
+        
+        if (!isset($this->_options['plugins_path'])) {
+            if (defined('JIMBO_PLUGINS_PATH')) {
+                $path = JIMBO_PLUGINS_PATH;
+            } else {
+                $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
+            }
+            
+            $this->_options['plugins_path'] = $path;
+        }
+        
+        if (!isset($this->_options['objects_path'])) {
+            $this->_options['objects_path'] = realpath(dirname(__FILE__).'/../../../').'/objects/';;
+        }
+        
         //if (!defined('LANG')) {
             //define('LANG', 'en');
         //}
@@ -181,10 +196,13 @@ class Controller
         
         if ( isset($options['path']) ) {
             $path = $options['path'];
-        } elseif ( defined('JIMBO_PLUGINS_PATH') ) {
-            $path = JIMBO_PLUGINS_PATH;
         } else {
-            $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
+            // FIXME:            
+            if (defined('JIMBO_PLUGINS_PATH')) {
+                $path = JIMBO_PLUGINS_PATH;
+            } else {
+                $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
+            }
         }
         
         if (is_dir($path.$plugin)) {
@@ -224,14 +242,6 @@ class Controller
             self::$_lastPluginOptions = $options;
         } else if(!is_null(self::$_lastPluginOptions)) {
             $options = self::$_lastPluginOptions;
-        }
-        
-        if ( !isset($options['path']) ) {
-            $options['path'] = realpath(dirname(__FILE__).'/../../../').'/plugins/';
-        }
-        
-        if ( !isset($options['tpl_path']) ) {
-            //$options['tpl_path'] = $options['path'].'templates/';
         }
         
         $obj = self::getPluginInstance($plugin, $params, $options);
@@ -680,6 +690,21 @@ class Controller
     {
         return $this->_options[$name];
     }
+    
+    public function &getObject($objectName, $pluginName = false)
+    {
+        if (!isset($this->db)) {
+            throw new SystemException(_("Undefined db connection in jimbo controller"));
+        }
+        
+        if ($pluginName) {
+            $path = $this->getOption("plugins_path").$pluginName.'/';
+        } else {
+            $path = $this->getOption("objects_path");
+        }
+        
+        return Object::getInstance($objectName, $this->db, $path);
+    } // end getObject
     
     
     
