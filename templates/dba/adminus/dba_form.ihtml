@@ -79,7 +79,7 @@ $('.dba_form_fields tr').each(function(index) {
 });
 
 $.fn.qtip.styles.mystyle = {
-   width: 300,
+   width: 400,
    background: '#CCCCCC',
    color: 'black',
    textAlign: 'center',
