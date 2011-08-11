@@ -95,6 +95,10 @@ class Controller
             $this->_options['defs_path'] = $this->_options['base_path'].'tblDefs/';
         }
         
+        if (!isset($this->_options['handlers_path'])) {
+            $this->_options['handlers_path'] = $this->_options['base_path'].'tblHandlers/';
+        }
+        
         if (!isset($this->_options['imagemagic_path'])) {
             $this->_options['imagemagic_path'] = '/usr/local/bin/convert';
         }
@@ -204,6 +208,8 @@ class Controller
                 $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
             }
         }
+        
+        $options['plugins_path'] = $path;
         
         if (is_dir($path.$plugin)) {
             $path .= $plugin.'/';
