@@ -489,7 +489,7 @@ class foreignKeyFormField extends abstractFormField {
 	}
 
 	function displayRO($value) {
-		$value = $this->keyData[$value];
+		$value = empty($this->keyData[$value]) ? '' : $this->keyData[$value];
 		return $value;
 	}
 }

@@ -606,7 +606,8 @@ class dbAction {
 					$GLOBALS['currentRow'] = $this->currentRow;
 					if (!empty($this->currentRow)) {
 						$where =& $this->tableDefinition->fields[$key]->attributes['valuesWhere'];
-						$where =  @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return $GLOBALS["currentRow"][$matches[1]];'), $where);
+						// FIXME
+						$where =  @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return empty($GLOBALS["currentRow"][$matches[1]]) ? 0 : $GLOBALS["currentRow"][$matches[1]];'), $where);
 						$this->loadForeignKeyValues($this->tableDefinition->fields[$key]);
 					}
 				}
