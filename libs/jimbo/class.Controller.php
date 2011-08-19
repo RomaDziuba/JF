@@ -379,7 +379,7 @@ class Controller
         $info += $this->properties;
         
         // FIXME:
-        $tpl->assign('menu', self::call('Jimbo', 'getMenu'));
+        //$tpl->assign('menu', self::call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         if($vars) {
