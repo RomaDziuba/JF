@@ -704,6 +704,10 @@ class Controller
         }
         
         if ($pluginName) {
+        	if (is_bool($pluginName)) {
+        		$pluginName = $objectName;
+        	}
+        	
             $path = $this->getOption("plugins_path").$pluginName.'/';
         } else {
             $path = $this->getOption("objects_path");
