@@ -716,6 +716,33 @@ class Controller
         return Object::getInstance($objectName, $this->db, $path);
     } // end getObject
     
+	public static function pluginSmarty($params, &$smarty)
+    {
+    	if (!isset($params['name'])) {
+            $smarty->trigger_error("plugin: input name parameter must be set.");
+        }
+        
+    	if (!isset($params['method'])) {
+            $smarty->trigger_error("plugin: input method parameter must be set.");
+        }
+        
+        $callParams = array();
+        foreach ($params as $key => $value) {
+        	if (in_array($key, array('name', 'method'))) {
+        		continue;
+        	}
+        	
+        	$callParams[$key] = $value;
+        }
+        
+        try {
+			return self::call($params['name'], $params['method'], $callParams);
+        } catch (Exception $exp) {
+        	$smarty->trigger_error("plugin: ".$exp->getMessage());
+        	return false;
+        }
+    }
+    
     
     
 }
