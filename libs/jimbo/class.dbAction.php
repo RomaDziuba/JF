@@ -1235,6 +1235,12 @@ class dbAction {
 
 	function getFieldString($field, $table, $as = false) {
 		$value = strpos($field, '(') ? $field : $table.".".$field;
+		
+		// Fix for multiple join table
+		if (preg_match("#as\s([\.a-zA-z]+)#", $value, $match)) {
+			$value = $match[1];
+		}
+		
 		if ($as) {
 			$value .= ' as '.$as;
 		}
