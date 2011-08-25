@@ -10,6 +10,7 @@ require_once dirname(__FILE__).'/FormFields/custom.php';
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
+require_once dirname(__FILE__).'/class.JimboTableHandler.php';
 require_once dirname(__FILE__).'/events/EventDispatcher.php';
 
 define('PARAM_ARRAY', 100);
@@ -299,12 +300,16 @@ class Controller
         return $content;
     }
     
-    public function getView($db, $table)
+    public function getView($db, $table, $params = array())
     {
         define('DBADMIN_CURRENT_TABLE', $table);
         
         $this->_options['session_data']['DB_CURRENT_TABLE'] = $table;
         $this->_options['session_data']['DBA_SCRIPT'] = $this->urlPrefix.$this->_options['engine_url'].'/';
+        
+        if ($params) {
+			$this->_options['handler_params'] = $params;
+        }
         
         $tblAction = new dbAction($db, $table, $this->_options);
         
