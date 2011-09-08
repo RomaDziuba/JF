@@ -10,6 +10,7 @@ require_once dirname(__FILE__).'/FormFields/custom.php';
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
+require_once dirname(__FILE__).'/class.JimboTableHandler.php';
 require_once dirname(__FILE__).'/events/EventDispatcher.php';
 
 define('PARAM_ARRAY', 100);
@@ -93,6 +94,10 @@ class Controller
         
         if (!isset($this->_options['defs_path'])) {
             $this->_options['defs_path'] = $this->_options['base_path'].'tblDefs/';
+        }
+        
+        if (!isset($this->_options['handlers_path'])) {
+            $this->_options['handlers_path'] = $this->_options['base_path'].'tblHandlers/';
         }
         
         if (!isset($this->_options['imagemagic_path'])) {
@@ -205,6 +210,8 @@ class Controller
             }
         }
         
+        $options['plugins_path'] = $path;
+        
         if (is_dir($path.$plugin)) {
             $path .= $plugin.'/';
         }
@@ -293,12 +300,16 @@ class Controller
         return $content;
     }
     
-    public function getView($db, $table)
+    public function getView($db, $table, $params = array())
     {
         define('DBADMIN_CURRENT_TABLE', $table);
         
         $this->_options['session_data']['DB_CURRENT_TABLE'] = $table;
         $this->_options['session_data']['DBA_SCRIPT'] = $this->urlPrefix.$this->_options['engine_url'].'/';
+        
+        if ($params) {
+			$this->_options['handler_params'] = $params;
+        }
         
         $tblAction = new dbAction($db, $table, $this->_options);
         
@@ -373,7 +384,7 @@ class Controller
         $info += $this->properties;
         
         // FIXME:
-        $tpl->assign('menu', self::call('Jimbo', 'getMenu'));
+        //$tpl->assign('menu', self::call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         if($vars) {
@@ -698,6 +709,9 @@ class Controller
         }
         
         if ($pluginName) {
+        	if (is_bool($pluginName)) {
+        		$pluginName = $objectName;
+        	}
             $path = $this->getOption("plugins_path").$pluginName.'/';
         } else {
             $path = $this->getOption("objects_path");
@@ -706,7 +720,32 @@ class Controller
         return Object::getInstance($objectName, $this->db, $path);
     } // end getObject
     
-    
+	public static function pluginSmarty($params, &$smarty)
+    {
+    	if (!isset($params['name'])) {
+            $smarty->trigger_error("plugin: input name parameter must be set.");
+        }
+        
+    	if (!isset($params['method'])) {
+            $smarty->trigger_error("plugin: input method parameter must be set.");
+        }
+        
+        $callParams = array();
+        foreach ($params as $key => $value) {
+        	if (in_array($key, array('name', 'method'))) {
+        		continue;
+        	}
+        	
+        	$callParams[$key] = $value;
+        }
+        
+        try {
+			return self::call($params['name'], $params['method'], $callParams);
+        } catch (Exception $exp) {
+        	$smarty->trigger_error("plugin: ".$exp->getMessage());
+        	return false;
+        }
+    }
     
 }
 

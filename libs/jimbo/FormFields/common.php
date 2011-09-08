@@ -390,6 +390,11 @@ class datetimeFormField extends abstractFormField
     {
         $value = parent::getValue($requests);
         
+    	if( !$value && isset($this->attributes['isnull']) ) {
+            $value = null;
+			return $value;
+        }
+        
         return date('Y-m-d H:i:s', strtotime($value));
     } // end getValue
     
@@ -489,7 +494,7 @@ class foreignKeyFormField extends abstractFormField {
 	}
 
 	function displayRO($value) {
-		$value = $this->keyData[$value];
+		$value = empty($this->keyData[$value]) ? '' : $this->keyData[$value];
 		return $value;
 	}
 }
