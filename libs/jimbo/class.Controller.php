@@ -338,7 +338,7 @@ class Controller
     } // end getView
     
     
-    public function redirect($url, $usePrefix = true)
+    public function redirect($url = '', $usePrefix = true)
     {
         $url = $usePrefix ? $this->urlPrefix.$url : $url;
         header('Location: '.$url);
