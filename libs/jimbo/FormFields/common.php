@@ -287,6 +287,12 @@ class timestampFormField extends abstractFormField {
 
 }
 
+/**
+ * DateTime Field
+ * 
+ * @package Jimbo
+ * @subpackage Fields
+ */
 class datetimeFormField extends abstractFormField 
 {
     public $needTime;
@@ -367,6 +373,18 @@ class datetimeFormField extends abstractFormField
         
         return $value.'';
     } // end displayValue
+    
+    public function getRangeFilter($filterName, $value)
+    {
+    	$tpl = dbDisplayer::getTemplateInstance();
+    	
+    	$tpl->assign("attributes", $this->attributes);
+    	$tpl->assign("value", $value);
+    	$tpl->assign("filterName", $filterName);
+    	
+    	return $tpl->fetch("fields/datetime/filter_range.tpl");
+    	
+    } // end getRangeFilter
     
     private function getHtml($value, $width, $format)
     {
