@@ -1,4 +1,10 @@
 <?php 
+if (!class_exists("EventDispatcher")) {
+	require_once dirname(__FILE__).'/events/EventDispatcher.php';
+} else {
+	require_once dirname(__FILE__)."/events/Event.php";
+}
+
 require_once dirname(__FILE__).'/class.dbDisplayer.php';
 require_once dirname(__FILE__).'/class.tableDefinition.php';
 require_once dirname(__FILE__).'/class.dbAction.php';
@@ -6,12 +12,11 @@ require_once dirname(__FILE__).'/class.dbDisplayer.php';
 require_once dirname(__FILE__).'/class.dbLogic.php';
 require_once dirname(__FILE__).'/FormFields/common.php';
 require_once dirname(__FILE__).'/FormFields/custom.php';
-
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
 require_once dirname(__FILE__).'/class.JimboTableHandler.php';
-require_once dirname(__FILE__).'/events/EventDispatcher.php';
+require_once dirname(__FILE__).'/class.ObjectJimboPlugin.php';
 
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
@@ -110,7 +115,9 @@ class Controller
             $this->_options['popup_mode'] = 'jquery';
         }
         
-        define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
+        if (!defined("JIMBO_POPUP_MODE")) {
+			define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
+        }
         
         if (!defined('CHARSET')) {
             define('CHARSET', 'UTF-8');
@@ -750,10 +757,10 @@ class Controller
 }
 
 //FIXME:
+if (!class_exists("SystemException")) {
+	class SystemException extends Exception { }
+}
 
-
-class SystemException extends Exception { }
-class PermissionsException extends SystemException { }
 //class DatabaseException extends SystemException { }
 
 ?>

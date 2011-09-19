@@ -1,5 +1,4 @@
 <?php
-require_once dirname(__FILE__).'/events/EventDispatcher.php';
 require_once dirname(__FILE__).'/class.EventJimbo.php';
 
 /**
@@ -82,7 +81,9 @@ class dbDisplayer extends EventDispatcher
 	
 	public static function &getTemplateInstance($tplRoot = false)
 	{
-	    require_once dirname(__FILE__)."/../templates/class.template.php";
+		if (!class_exists("Template_Lite")) {
+			require_once dirname(__FILE__)."/../templates/class.template.php";
+		}
 	    
 	    /*
 	    if(!is_null(self::$tpl) && !$tplRoot) {
