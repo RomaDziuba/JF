@@ -62,7 +62,7 @@ class dbAction {
 		} else {
 			$tblAlias = $this->tableDefinition->name;
 		}
-
+		
 		$this->alias = $tblAlias;
 	}
 
@@ -1263,7 +1263,9 @@ class dbAction {
 	 */
 	public function getHttpPath()
 	{
-		return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
+		//return empty($_SERVER['REDIRECT_URL']) ? $_SERVER['PHP_SELF'] : $_SERVER['REDIRECT_URL'];
+		$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		return $path;
 	} // end getHttpPath
 	
 	public function getOption($name)
