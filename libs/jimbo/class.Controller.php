@@ -300,7 +300,7 @@ class Controller
         $currentTplPath = $tpl->template_dir;
         $tpl->template_dir = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
         
-        $displayer = new dbDisplayer($tblAction, $tpl);
+        //$displayer = new dbDisplayer($tblAction, $tpl);
         
         $content = $tpl->fetch($tplName);
         
