@@ -399,6 +399,7 @@ class dbAction {
 			include_once $this->getOption('handlers_path').$this->tableDefinition->attributes['customHandler'].'.php';
 			if (class_exists('customTableHandler')) {
 				$customHandler = new customTableHandler();
+				$customHandler->params = $this->getOption('handler_params');
 				if (method_exists ($customHandler, 'handle')) {
 					$info = array('action' => 'post');
 					$handledEvent = $customHandler->handle($info);
@@ -606,7 +607,8 @@ class dbAction {
 					$GLOBALS['currentRow'] = $this->currentRow;
 					if (!empty($this->currentRow)) {
 						$where =& $this->tableDefinition->fields[$key]->attributes['valuesWhere'];
-						$where =  @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return $GLOBALS["currentRow"][$matches[1]];'), $where);
+						// FIXME
+						$where =  @preg_replace_callback("#G%(.+?)%#", create_function('$matches', 'return empty($GLOBALS["currentRow"][$matches[1]]) ? 0 : $GLOBALS["currentRow"][$matches[1]];'), $where);
 						$this->loadForeignKeyValues($this->tableDefinition->fields[$key]);
 					}
 				}
@@ -1234,6 +1236,12 @@ class dbAction {
 
 	function getFieldString($field, $table, $as = false) {
 		$value = strpos($field, '(') ? $field : $table.".".$field;
+		
+		// Fix for multiple join table
+		if (preg_match("#as\s([\.a-zA-z]+)#", $value, $match)) {
+			$value = $match[1];
+		}
+		
 		if ($as) {
 			$value .= ' as '.$as;
 		}

@@ -1,4 +1,10 @@
 <?php 
+if (!class_exists("EventDispatcher")) {
+	require_once dirname(__FILE__).'/events/EventDispatcher.php';
+} else {
+	require_once dirname(__FILE__)."/events/Event.php";
+}
+
 require_once dirname(__FILE__).'/class.dbDisplayer.php';
 require_once dirname(__FILE__).'/class.tableDefinition.php';
 require_once dirname(__FILE__).'/class.dbAction.php';
@@ -6,11 +12,11 @@ require_once dirname(__FILE__).'/class.dbDisplayer.php';
 require_once dirname(__FILE__).'/class.dbLogic.php';
 require_once dirname(__FILE__).'/FormFields/common.php';
 require_once dirname(__FILE__).'/FormFields/custom.php';
-
 require_once dirname(__FILE__).'/class.JimboUser.php';
 require_once dirname(__FILE__).'/class.AbstractPlugin.php';
 require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
-require_once dirname(__FILE__).'/events/EventDispatcher.php';
+require_once dirname(__FILE__).'/class.JimboTableHandler.php';
+require_once dirname(__FILE__).'/class.ObjectJimboPlugin.php';
 
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
@@ -109,7 +115,9 @@ class Controller
             $this->_options['popup_mode'] = 'jquery';
         }
         
-        define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
+        if (!defined("JIMBO_POPUP_MODE")) {
+			define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
+        }
         
         if (!defined('CHARSET')) {
             define('CHARSET', 'UTF-8');
@@ -290,7 +298,7 @@ class Controller
         $currentTplPath = $tpl->template_dir;
         $tpl->template_dir = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
         
-        $displayer = new dbDisplayer($tblAction, $tpl);
+        //$displayer = new dbDisplayer($tblAction, $tpl);
         
         $content = $tpl->fetch($tplName);
         
@@ -299,12 +307,16 @@ class Controller
         return $content;
     }
     
-    public function getView($db, $table)
+    public function getView($db, $table, $params = array())
     {
         define('DBADMIN_CURRENT_TABLE', $table);
         
         $this->_options['session_data']['DB_CURRENT_TABLE'] = $table;
         $this->_options['session_data']['DBA_SCRIPT'] = $this->urlPrefix.$this->_options['engine_url'].'/';
+        
+        if ($params) {
+			$this->_options['handler_params'] = $params;
+        }
         
         $tblAction = new dbAction($db, $table, $this->_options);
         
@@ -333,7 +345,7 @@ class Controller
     } // end getView
     
     
-    public function redirect($url, $usePrefix = true)
+    public function redirect($url = '', $usePrefix = true)
     {
         $url = $usePrefix ? $this->urlPrefix.$url : $url;
         header('Location: '.$url);
@@ -379,7 +391,7 @@ class Controller
         $info += $this->properties;
         
         // FIXME:
-        $tpl->assign('menu', self::call('Jimbo', 'getMenu'));
+        //$tpl->assign('menu', self::call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         if($vars) {
@@ -704,6 +716,9 @@ class Controller
         }
         
         if ($pluginName) {
+        	if (is_bool($pluginName)) {
+        		$pluginName = $objectName;
+        	}
             $path = $this->getOption("plugins_path").$pluginName.'/';
         } else {
             $path = $this->getOption("objects_path");
@@ -712,15 +727,40 @@ class Controller
         return Object::getInstance($objectName, $this->db, $path);
     } // end getObject
     
-    
+	public static function pluginSmarty($params, &$smarty)
+    {
+    	if (!isset($params['name'])) {
+            $smarty->trigger_error("plugin: input name parameter must be set.");
+        }
+        
+    	if (!isset($params['method'])) {
+            $smarty->trigger_error("plugin: input method parameter must be set.");
+        }
+        
+        $callParams = array();
+        foreach ($params as $key => $value) {
+        	if (in_array($key, array('name', 'method'))) {
+        		continue;
+        	}
+        	
+        	$callParams[$key] = $value;
+        }
+        
+        try {
+			return self::call($params['name'], $params['method'], $callParams);
+        } catch (Exception $exp) {
+        	$smarty->trigger_error("plugin: ".$exp->getMessage());
+        	return false;
+        }
+    }
     
 }
 
 //FIXME:
+if (!class_exists("SystemException")) {
+	class SystemException extends Exception { }
+}
 
-
-class SystemException extends Exception { }
-class PermissionsException extends SystemException { }
 //class DatabaseException extends SystemException { }
 
 ?>

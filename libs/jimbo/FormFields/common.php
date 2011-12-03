@@ -287,6 +287,12 @@ class timestampFormField extends abstractFormField {
 
 }
 
+/**
+ * DateTime Field
+ * 
+ * @package Jimbo
+ * @subpackage Fields
+ */
 class datetimeFormField extends abstractFormField 
 {
     public $needTime;
@@ -368,6 +374,18 @@ class datetimeFormField extends abstractFormField
         return $value.'';
     } // end displayValue
     
+    public function getRangeFilter($filterName, $value)
+    {
+    	$tpl = dbDisplayer::getTemplateInstance();
+    	
+    	$tpl->assign("attributes", $this->attributes);
+    	$tpl->assign("value", $value);
+    	$tpl->assign("filterName", $filterName);
+    	
+    	return $tpl->fetch("fields/datetime/filter_range.tpl");
+    	
+    } // end getRangeFilter
+    
     private function getHtml($value, $width, $format)
     {
         $content = '<input style="'.$width.' vertical-align:top;" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" />
@@ -389,6 +407,11 @@ class datetimeFormField extends abstractFormField
     public function getValue($requests = array())
     {
         $value = parent::getValue($requests);
+        
+    	if( !$value && isset($this->attributes['isnull']) ) {
+            $value = null;
+			return $value;
+        }
         
         return date('Y-m-d H:i:s', strtotime($value));
     } // end getValue
@@ -489,7 +512,7 @@ class foreignKeyFormField extends abstractFormField {
 	}
 
 	function displayRO($value) {
-		$value = $this->keyData[$value];
+		$value = empty($this->keyData[$value]) ? '' : $this->keyData[$value];
 		return $value;
 	}
 }

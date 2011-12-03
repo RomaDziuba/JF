@@ -1,5 +1,4 @@
 <?php
-require_once dirname(__FILE__).'/events/EventDispatcher.php';
 require_once dirname(__FILE__).'/class.EventJimbo.php';
 
 /**
@@ -25,6 +24,11 @@ class dbDisplayer extends EventDispatcher
 		$this->tblAction = &$tblAction;
 
 		self::$tpl = $tpl;
+		
+		if (!is_null(self::$tpl)) {
+			include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
+			self::$tpl->assign("lang", $dbAdminMessages);
+		}
 	}
 
 	function performDisplay($action) {
@@ -43,6 +47,7 @@ class dbDisplayer extends EventDispatcher
 		if (!empty($tableDefinition->attributes['customHandler'])) {
 			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
 			$this->customHandler = new customTableHandler();
+			$this->customHandler->params = $this->tblAction->getOption('handler_params');
 			$info['action'] = $action;
 			$result = '';
 			if ($this->customHandler->display($info, $result)) {
@@ -76,7 +81,9 @@ class dbDisplayer extends EventDispatcher
 	
 	public static function &getTemplateInstance($tplRoot = false)
 	{
-	    require_once dirname(__FILE__)."/../templates/class.template.php";
+		if (!class_exists("Template_Lite")) {
+			require_once dirname(__FILE__)."/../templates/class.template.php";
+		}
 	    
 	    /*
 	    if(!is_null(self::$tpl) && !$tplRoot) {
@@ -599,38 +606,9 @@ class dbDisplayer extends EventDispatcher
 				$html .= '</select>';
 				$filters[] = $html;
 			} elseif (strtolower($filterType) == 'range') {
-				if ($field->getAttribute('type') == 'datetime') {
-					$filters[]  = '
-                    <table>
-                    <tr>
-                    <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" id="filter['.$filterName.'][0]" value="'.$value[0].'" size="10" style="vertical-align: top">
-                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_f" name="'.$field->name.'_cal_f"> 
-                    <script type="text/javascript">
-                        Calendar.setup({
-                            inputField     :    "filter['.$filterName.'][0]",
-                            ifFormat       :    "%Y-%m-%d",
-                            showsTime      :    false,
-                            button         :    "'.$field->name.'_cal_f",
-                            step           :    1
-                        });
-                    </script>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" id="filter['.$filterName.'][1]" value="'.$value[1].'" size="10" style="vertical-align: top">
-                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$field->name.'_cal_t" name="'.$field->name.'_cal_t"> 
-                    <script type="text/javascript">
-                        Calendar.setup({
-                            inputField     :    "filter['.$filterName.'][1]",
-                            ifFormat       :    "%Y-%m-%d",
-                            showsTime      :    false,
-                            button         :    "'.$field->name.'_cal_t",
-                            step           :    1
-                        });
-                    </script>
-                    </td>
-                    </tr>
-                    </table>';
+				
+				if (is_callable(array($field, 'getRangeFilter'))) {
+					$filters[] = $field->getRangeFilter($filterName, $value);
 				} else {
 					$filters[]  = '
                     <table>
@@ -804,6 +782,7 @@ class dbDisplayer extends EventDispatcher
 		if (!empty($tableDefinition->attributes['customHandler'])) {
 			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
 			$this->customHandler = new customTableHandler();
+			$this->customHandler->params = $this->tblAction->getOption('handler_params');
 			if (method_exists($this->customHandler, 'templateCallback')) {
 				$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);
 			}

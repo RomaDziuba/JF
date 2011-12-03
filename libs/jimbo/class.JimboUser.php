@@ -42,6 +42,13 @@ class JimboUser
 		return $value;
 	}
 	
+    public function set($name, $value) 
+	{
+	    $this->_sessionData[$name] = $value;
+		
+		return $value;
+	}
+	
 	public function getData()
 	{
 	    return $this->_sessionData;
