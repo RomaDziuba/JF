@@ -15,11 +15,15 @@ class ObjectJimboPlugin extends BaseJimboPlugin
         
     }
     
-    public function &getObject($name)
+ 	public function getObject($name, $pluginName = true)
     {
         global $jimbo;
         
-        return Object::getInstance($name, $jimbo->db, $this->options['plugin_path']);
+        if ($pluginName === true) {
+        	$pluginName = str_replace("Plugin", "", get_class($this));
+        }
+        
+        return $jimbo->getObject($name, $pluginName); 
     }
         
 }

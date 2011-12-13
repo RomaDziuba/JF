@@ -3,7 +3,7 @@ class JimboUser
 {
     private $_sessionData;
     
-    private $requiredFields = array('auth', 'auth_id', 'auth_login', 'auth_role');
+    protected $requiredFields = array('auth', 'auth_id', 'auth_login', 'auth_role');
     
     public function __construct(&$_sessionData) 
     {
@@ -52,6 +52,11 @@ class JimboUser
 	public function getData()
 	{
 	    return $this->_sessionData;
+	}
+	
+	public function getID()
+	{
+		return $this->get("auth_id");
 	}
 	
 }

@@ -753,7 +753,6 @@ class Controller
         	return false;
         }
     }
-    
 }
 
 //FIXME:
