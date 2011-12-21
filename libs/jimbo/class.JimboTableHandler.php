@@ -8,6 +8,6 @@ abstract class JimboTableHandler
 	
 	abstract public function display();
 	abstract public function handle($info);
-	abstract public function getAlowedActions($actions, $currentRow); 
+	abstract public function getAlowedActions($actions, $currentRow = array()); 
 }
 ?>

@@ -9,9 +9,9 @@ require_once dirname(__FILE__)."/Event.php";
 class EventDispatcher implements IEventDispatcher
 {
  
-     private $listeners;
+	private $listeners;
      
-    public function __construct()
+	public function __construct()
     {
         $this->listeners = array();
     }

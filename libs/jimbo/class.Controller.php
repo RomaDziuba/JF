@@ -26,7 +26,7 @@ define('PARAM_FILE', 102);
 /**
  * @package Jimbo
  */
-class Controller
+class Controller extends EventDispatcher
 {
     private $_options;
     
@@ -40,7 +40,7 @@ class Controller
     static private $_plugins = null;
     
 
-    private function __construct($options = array())
+    public function __construct($options = array())
     {
         $this->_options = $options;
         
@@ -762,6 +762,12 @@ if (!class_exists("SystemException")) {
 	class SystemException extends Exception { }
 }
 
-//class DatabaseException extends SystemException { }
+if (!class_exists("PermissionsException")) {
+	class PermissionsException extends SystemException { }
+}
+
+if (!class_exists("DatabaseException")) {
+	class DatabaseException extends SystemException { }
+}
 
 ?>

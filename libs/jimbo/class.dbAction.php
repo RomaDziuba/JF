@@ -963,7 +963,10 @@ class dbAction {
 				$GLOBALS['db']->query($sql);
 			}
 
-			$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			// FIXME: @bred нелогично что нет возможности изменить путь сохранения файлов
+			$uploadPath = !empty($info->attributes['uploadDirPath']) ? $info->attributes['uploadDirPath'] : $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			#$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			
 			if (!is_dir($uploadPath)) {
 			    mkdir($uploadPath, 0777, true);
 			}
