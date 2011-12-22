@@ -539,10 +539,9 @@ class dbAction {
 		    
 		    $value = null;
 			switch($info->attributes['type']) {
-			    case 'many2many': {
+			    case 'many2many': 
 			        $many2many[] = $info;
-				    continue;
-			    } break;
+			    	break;
 			    
 			    case 'file': {
     			    if (empty($_FILES[$info->name]['name'])) {
