@@ -538,26 +538,34 @@ class dbAction {
 		    }
 		    
 		    $value = null;
-			switch($info->attributes['type']) {
+		    $isProcessing = true;
+			switch ($info->attributes['type']) {
 			    case 'many2many': {
 			        $many2many[] = $info;
-				    continue;
+				    $isProcessing = false;
 			    } break;
 			    
 			    case 'file': {
+			    	
     			    if (empty($_FILES[$info->name]['name'])) {
-    					continue;
+    					$isProcessing = false;
+    				}
+    				else {
+	    				$value =  $info->getValue();
+	    				$toUpload[] = $info;
     				}
     				
-    				$value =  $info->getValue();
-    				$toUpload[] = $info;
 			    } break;
 			    
 			    default: 
                     $value = $info->getValue($_POST);
 			} // end switch
+			
+			if (!$isProcessing) {
+				continue;
+			}
 
-			if($value === false) {
+			if ($value === false) {
                 $this->wasError = true;
                 $this->lastErrorMessage = $info->lastErrorMessage;
                 return false;
@@ -1021,7 +1029,7 @@ class dbAction {
 		
 		$sql = 'UPDATE '.$this->tableDefinition->name.' SET '.join(', ', $rows);
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.(int)$id;
-		
+
 		$result = $this->dbDriver->query($sql);
 
 		if (PEAR::isError($result)) {
