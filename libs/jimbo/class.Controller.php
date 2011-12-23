@@ -766,8 +766,4 @@ if (!class_exists("PermissionsException")) {
 	class PermissionsException extends SystemException { }
 }
 
-if (!class_exists("DatabaseException")) {
-	class DatabaseException extends SystemException { }
-}
-
 ?>
