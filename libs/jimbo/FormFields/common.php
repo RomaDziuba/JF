@@ -146,7 +146,8 @@ class fileFormField extends abstractFormField {
 	    
 		$value = explode(';0;', $value);
 		if (!empty($this->attributes['fileName'])) {
-			$link = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
+			$httpPath = !empty($this->attributes['httpPath']) ? $this->attributes['httpPath'] : $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/';
+			$link = $httpPath.$value[0];
 		} else {
 			$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
 		}
@@ -161,8 +162,10 @@ class fileFormField extends abstractFormField {
 		$value = explode(';0;', $value);
 		if (!empty($value[0])) {
 			if (!empty($this->attributes['fileName'])) {
-				$preview = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/thumbs/'.$value[0];
-				$link = $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$value[0];
+				$httpPath = !empty($this->attributes['httpPath']) ? $this->attributes['httpPath'] : $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/';
+				
+				$preview = $httpPath.'thumbs/'.$value[0];
+				$link = $httpPath.$value[0];
 			} else {
 				$preview = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0].'?thumb=1';
 				$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
@@ -206,7 +209,8 @@ class md5FormField extends abstractFormField {
 	function getEditInput($value = '', $inline = false) {
 		$value = htmlspecialchars($value);
 		$readonly = $this->getAttribute('readonly') == 'true' ? 'readonly' : '';
-		return '<input  type="password" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin" '.$readonly.' style="width:400px">';
+		$width = $this->getWidth($inline);
+		return '<input  type="password" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" class="thin" '.$readonly.' style="'.$width.'">';
 	}
 
     public function getValue($requests = array())

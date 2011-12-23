@@ -538,25 +538,35 @@ class dbAction {
 		    }
 		    
 		    $value = null;
-			switch($info->attributes['type']) {
-			    case 'many2many': 
+
+		    $isProcessing = true;
+			switch ($info->attributes['type']) {
+			    case 'many2many': {
 			        $many2many[] = $info;
-			    	break;
+				    $isProcessing = false;
+			    } break;
 			    
 			    case 'file': {
+			    	
     			    if (empty($_FILES[$info->name]['name'])) {
-    					continue;
+    					$isProcessing = false;
+    				}
+    				else {
+	    				$value =  $info->getValue();
+	    				$toUpload[] = $info;
     				}
     				
-    				$value =  $info->getValue();
-    				$toUpload[] = $info;
 			    } break;
 			    
 			    default: 
                     $value = $info->getValue($_POST);
 			} // end switch
+			
+			if (!$isProcessing) {
+				continue;
+			}
 
-			if($value === false) {
+			if ($value === false) {
                 $this->wasError = true;
                 $this->lastErrorMessage = $info->lastErrorMessage;
                 return false;
@@ -962,7 +972,10 @@ class dbAction {
 				$GLOBALS['db']->query($sql);
 			}
 
-			$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			// FIXME: @bred нелогично что нет возможности изменить путь сохранения файлов
+			$uploadPath = !empty($info->attributes['uploadDirPath']) ? $info->attributes['uploadDirPath'] : $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			#$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
+			
 			if (!is_dir($uploadPath)) {
 			    mkdir($uploadPath, 0777, true);
 			}
@@ -1017,7 +1030,7 @@ class dbAction {
 		
 		$sql = 'UPDATE '.$this->tableDefinition->name.' SET '.join(', ', $rows);
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.(int)$id;
-		
+
 		$result = $this->dbDriver->query($sql);
 
 		if (PEAR::isError($result)) {
