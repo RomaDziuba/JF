@@ -148,10 +148,16 @@ class fileFormField extends abstractFormField {
 		if (!empty($this->attributes['fileName'])) {
 			$httpPath = !empty($this->attributes['httpPath']) ? $this->attributes['httpPath'] : $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/';
 			$link = $httpPath.$value[0];
-		} else {
+		} elseif (isset($GLOBALS['currentID'])) {
 			$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
 		}
-		return '<input type="file" name="'.$this->name.'" class="thin">&nbsp; <a href="'.$link.'" class="db_link" target="_blank" style="margin:2px">'.$value[0].'</a>';
+		
+		$html = '<input type="file" name="'.$this->name.'" class="thin">';
+		if (isset($link)) {
+			$html .= '&nbsp; <a href="'.$link.'" class="db_link" target="_blank" style="margin:2px">'.$value[0].'</a>';
+		}
+		
+		return $html;
 	}
 
 	function displayValue($value) {

@@ -960,11 +960,10 @@ class dbAction {
 			} else {
 				$fileName = $_FILES[$info->name]['name'];
 
-				$pos = strrpos($fileName, '.');
 				$repl = array(
-				'__ID__' => $id,
-				'__EXT__' => substr($fileName, $pos + 1),
-				'__NAME__' =>substr($fileName, 0, $pos),
+					'__ID__'   => $id,
+					'__EXT__'  => pathinfo($fileName, PATHINFO_FILENAME),
+					'__NAME__' => pathinfo($fileName, PATHINFO_EXTENSION)
 				);
 				$fileName = strtr($info->attributes['fileName'], $repl);
 				$value = $fileName.';0;'.$_FILES[$info->name]['type'];;
