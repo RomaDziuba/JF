@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__).'/class.EventJimbo.php';
+require_once $__jimboLibPath.'/class.JimboEvent.php';
 
 /**
 * Form's displayer
@@ -82,7 +82,7 @@ class dbDisplayer extends EventDispatcher
 	public static function &getTemplateInstance($tplRoot = false)
 	{
 		if (!class_exists("Template_Lite")) {
-			require_once dirname(__FILE__)."/../templates/class.template.php";
+			require_once dirname(__FILE__)."/../../templates/class.template.php";
 		}
 	    
 	    /*
@@ -506,7 +506,7 @@ class dbDisplayer extends EventDispatcher
             'data' => &$data,
         );
         
-        $event = new EventJimbo(EventJimbo::PREDISPLAY_LIST, $obj);
+        $event = new JimboEvent(JimboEvent::PREDISPLAY_LIST, $obj);
         $this->dispatchEvent($event);
         
         $tpl->assign($obj);

@@ -1,22 +1,28 @@
-<?php 
+<?php
+$__jimboLibPath = dirname(__FILE__);
+ 
 if (!class_exists("EventDispatcher")) {
-	require_once dirname(__FILE__).'/events/EventDispatcher.php';
+	require_once $__jimboLibPath.'/events/EventDispatcher.php';
 } else {
-	require_once dirname(__FILE__)."/events/Event.php";
+	require_once $__jimboLibPath."/events/Event.php";
 }
 
-require_once dirname(__FILE__).'/class.dbDisplayer.php';
-require_once dirname(__FILE__).'/class.tableDefinition.php';
-require_once dirname(__FILE__).'/class.dbAction.php';
-require_once dirname(__FILE__).'/class.dbDisplayer.php';
-require_once dirname(__FILE__).'/class.dbLogic.php';
-require_once dirname(__FILE__).'/FormFields/common.php';
-require_once dirname(__FILE__).'/FormFields/custom.php';
-require_once dirname(__FILE__).'/class.JimboUser.php';
-require_once dirname(__FILE__).'/class.AbstractPlugin.php';
-require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
-require_once dirname(__FILE__).'/class.JimboTableHandler.php';
-require_once dirname(__FILE__).'/class.ObjectJimboPlugin.php';
+require_once $__jimboLibPath.'/database/class.dbDisplayer.php';
+require_once $__jimboLibPath.'/database/class.tableDefinition.php';
+require_once $__jimboLibPath.'/database/class.dbAction.php';
+require_once $__jimboLibPath.'/database/class.dbDisplayer.php';
+require_once $__jimboLibPath.'/database/class.dbLogic.php';
+require_once $__jimboLibPath.'/database/class.JimboTableHandler.php';
+
+require_once $__jimboLibPath.'/fields/common.php';
+require_once $__jimboLibPath.'/fields/custom.php';
+
+require_once $__jimboLibPath.'/plugins/class.AbstractPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.BaseJimboPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.ObjectJimboPlugin.php';
+
+require_once $__jimboLibPath.'/class.JimboUser.php';
+
 
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
