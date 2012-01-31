@@ -915,8 +915,10 @@ class dbAction {
 				$keyName = 'DB__'.$this->alias."__PARENT";
 				if (empty($this->sessionData[$keyName]) && isset($relation['isnull'])) {
 					$value = 'NULL';
+				} else if (isset($this->sessionData[$keyName])) {
+					$value = $this->dbDriver->quote($this->sessionData[$keyName]);
 				} else {
-					$value = "'".mysql_escape_string($this->sessionData[$keyName])."'";
+				    $value = "''";
 				}
 				$tokenData[$relation['field']] = $value;
 			}
