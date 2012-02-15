@@ -127,8 +127,42 @@ class texthintFormField extends abstractFormField {
 		$out .= '</select>';
 		return $out;
 	}
+}
 
+class wysiwygFormField extends  abstractFormField 
+{
 
+    function getEditInput($value = '') 
+    {
+        global $jimbo;
+        
+        
+        
+        $httpBase = $jimbo->getOption("http_base");
+        
+        //$jimbo->includeJs($httpBase.'js/base.js');
+        $value = htmlspecialchars($value, ENT_COMPAT, 'utf-8');
+        $out = <<< END
+    <script src="{$httpBase}js/editor/fckeditor.js" type="application/x-javascript"></script>
+    <script type="text/javascript">
+        var oFCKeditor_{$this->name} = new FCKeditor('FCKeditor1');
+        oFCKeditor_{$this->name}.BasePath = '{$httpBase}js/editor/' ;
+    </script>
+    <div>
+        <input id="FCKeditor1" name="{$this->name}" id="{$this->name}" value="{$value}" style="display: none;" type="hidden" />
+        <iframe id="FCKeditor1___Frame" src="{$httpBase}js/editor/editor/fckeditor.html?InstanceName=FCKeditor1&amp;Toolbar=Basic" frameborder="0" height="60px" scrolling="no" width="450px" onload="this.height=window.top.document.body.clientHeight-5"></iframe>
+    </div>
+END;
+
+        return $out;
+    }
+
+    function displayRO($value) {
+        if (preg_match('#[/<>&\'"]#', $value)) {
+            $value = htmlentities  (strip_tags($value), ENT_QUOTES, 'utf-8');
+        }
+        return substr($value, 0, 500);
+    }
 }
 
 ?>
