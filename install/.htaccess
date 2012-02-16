@@ -1,20 +1,42 @@
 AddDefaultCharset utf-8
 
-DirectoryIndex jimbo.php
+DirectoryIndex index.php
 
-php_value register_globals Off
-php_value display_errors On
-php_value upload_max_filesize 50M
-php_value max_execution_time 600
-php_value session.gc_maxlifetime 3600
+<IfModule mod_php5.c>
+	php_value register_globals Off
+	php_value upload_max_filesize 50M
+	php_value max_execution_time 600
+	php_value session.gc_maxlifetime 3600
+</IfModule>
 
 <Files ~ "(sql)$">
-    Deny from all
+	Deny from all
 </Files>
 
-Options -Indexes
-Options FollowSymLinks
-RewriteEngine On
+<Files ~ "install.sh|README|TODO|init.php|common.php|config.php|local.php"> 
+	Deny from all
+</Files> 
 
-RewriteRule \.(css|js|php|jpg|gif|jpeg|png|zip|gz)$ - [L] 
-RewriteRule .* jimbo.php [L,QSA]
+Options -Indexes
+RewriteEngine on
+Options +FollowSymLinks
+RewriteBase /
+ 
+RewriteRule ^libs/(.*)$ - [F]
+RewriteRule ^cron/(.*)$ - [F]
+RewriteRule ^dba/(.*)$ - [F]
+RewriteRule ^paybox/(.*)$ - [F]
+RewriteRule ^tests/(.*)$ - [F]
+RewriteRule ^templates/(.*)$ - [F]
+RewriteRule ^tblHandlers/(.*)$ - [F]
+RewriteRule ^tblDefs/(.*)$ - [F]
+RewriteRule ^objects/(.*)$ - [F]
+RewriteRule ^logs/(.*)$ - [F]
+RewriteRule ^jplugins/(.*)$ - [F]
+RewriteRule ^templates/(.*)$ - [F]
+
+RewriteRule ^cp/(.*)\.(css|jpg|png|gif|js)$ $1.$2 [L]
+RewriteRule ^cp/ jimbo.php [L,QSA]
+
+RewriteRule \.(css|js|php|jpg|gif|jpeg|png|zip|gz|swf)$ - [L] 
+RewriteRule .* index.php [L,QSA]

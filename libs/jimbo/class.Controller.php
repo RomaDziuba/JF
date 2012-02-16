@@ -1,22 +1,28 @@
-<?php 
+<?php
+$__jimboLibPath = dirname(__FILE__);
+ 
 if (!class_exists("EventDispatcher")) {
-	require_once dirname(__FILE__).'/events/EventDispatcher.php';
+	require_once $__jimboLibPath.'/events/EventDispatcher.php';
 } else {
-	require_once dirname(__FILE__)."/events/Event.php";
+	require_once $__jimboLibPath."/events/Event.php";
 }
 
-require_once dirname(__FILE__).'/class.dbDisplayer.php';
-require_once dirname(__FILE__).'/class.tableDefinition.php';
-require_once dirname(__FILE__).'/class.dbAction.php';
-require_once dirname(__FILE__).'/class.dbDisplayer.php';
-require_once dirname(__FILE__).'/class.dbLogic.php';
-require_once dirname(__FILE__).'/FormFields/common.php';
-require_once dirname(__FILE__).'/FormFields/custom.php';
-require_once dirname(__FILE__).'/class.JimboUser.php';
-require_once dirname(__FILE__).'/class.AbstractPlugin.php';
-require_once dirname(__FILE__).'/class.BaseJimboPlugin.php';
-require_once dirname(__FILE__).'/class.JimboTableHandler.php';
-require_once dirname(__FILE__).'/class.ObjectJimboPlugin.php';
+require_once $__jimboLibPath.'/database/class.dbDisplayer.php';
+require_once $__jimboLibPath.'/database/class.tableDefinition.php';
+require_once $__jimboLibPath.'/database/class.dbAction.php';
+require_once $__jimboLibPath.'/database/class.dbDisplayer.php';
+require_once $__jimboLibPath.'/database/class.dbLogic.php';
+require_once $__jimboLibPath.'/database/class.JimboTableHandler.php';
+
+require_once $__jimboLibPath.'/fields/common.php';
+require_once $__jimboLibPath.'/fields/custom.php';
+
+require_once $__jimboLibPath.'/plugins/class.AbstractPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.BaseJimboPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.ObjectJimboPlugin.php';
+
+require_once $__jimboLibPath.'/class.JimboUser.php';
+
 
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
@@ -26,7 +32,7 @@ define('PARAM_FILE', 102);
 /**
  * @package Jimbo
  */
-class Controller
+class Controller extends EventDispatcher
 {
     private $_options;
     
@@ -40,7 +46,7 @@ class Controller
     static private $_plugins = null;
     
 
-    private function __construct($options = array())
+    public function __construct($options = array())
     {
         $this->_options = $options;
         
@@ -191,7 +197,9 @@ class Controller
             $prefix = $this->urlPrefix;
         }
         
-        $url =  empty($_SERVER['REDIRECT_URL']) ? '/' : $_SERVER['REDIRECT_URL'];
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        
+        $url =  empty($path) ? '/' : $path;
         
         return preg_replace('#^'.$prefix.'#Umis', '/', $url);
     } // end getCurrentURL
@@ -270,7 +278,7 @@ class Controller
     public function bind($urlRules = array(), $callOptions = array())
     {
         $currentUrl = $this->getCurrentURL();
-
+        
         $systemRules = array(
             '~^/jimbo/$~'                           => array('Jimbo', 'main'),
             '~^/getfile/([^/]+)/([^/]+)/([^/]+)/$~' => array('Jimbo', 'getFile'),
@@ -753,7 +761,6 @@ class Controller
         	return false;
         }
     }
-    
 }
 
 //FIXME:
@@ -761,6 +768,8 @@ if (!class_exists("SystemException")) {
 	class SystemException extends Exception { }
 }
 
-//class DatabaseException extends SystemException { }
+if (!class_exists("PermissionsException")) {
+	class PermissionsException extends SystemException { }
+}
 
 ?>
