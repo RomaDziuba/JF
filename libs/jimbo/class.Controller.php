@@ -20,6 +20,7 @@ require_once $__jimboLibPath.'/fields/custom.php';
 require_once $__jimboLibPath.'/plugins/class.AbstractPlugin.php';
 require_once $__jimboLibPath.'/plugins/class.BaseJimboPlugin.php';
 require_once $__jimboLibPath.'/plugins/class.ObjectJimboPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.SqlJimboPlugin.php';
 
 require_once $__jimboLibPath.'/class.JimboUser.php';
 
