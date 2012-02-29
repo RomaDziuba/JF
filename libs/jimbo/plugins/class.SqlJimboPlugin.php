@@ -19,7 +19,7 @@ abstract class SqlJimboPlugin extends BaseJimboPlugin
         $this->db = $this->getDB();
     }
     
-    abstract function &getDB();
+    abstract function getDB();
     
     public function insert($table, $values, $is_update_dublicate = false)
     {
@@ -60,6 +60,11 @@ abstract class SqlJimboPlugin extends BaseJimboPlugin
         return $this->query($sql);
     } // end massInsert
     
+    public function quote($value)
+    {
+        return $this->db->quote($value);
+    }
+    
     /**
      * Returns quoted values for insert sql
      *
@@ -91,6 +96,12 @@ abstract class SqlJimboPlugin extends BaseJimboPlugin
     
         return $this->query($sql);
     }
+    
+    public function query($sql)
+    {
+        return $this->db->query($sql);
+    }
+    
     
     /**
      * Returns the generated SQL query to insert data
@@ -164,6 +175,19 @@ abstract class SqlJimboPlugin extends BaseJimboPlugin
     
         return $sql;
     } // end getUpdateSQL
+    
+    public function getSelectSQL($sql, $search = array(), $orderBy = array())
+    {
+        $where = $this->getSqlCondition($search);
+        
+        $sql .= " WHERE ".join(" AND ", $where);
+        
+        if ($orderBy) {
+            $sql .= " ORDER BY ".join(", ", $sql);
+        }
+        
+        return $sql;
+    }
     
     public function getSqlCondition($obj = array(), $is_default = true)
     {
