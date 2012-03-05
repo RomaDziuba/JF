@@ -773,4 +773,18 @@ if (!class_exists("PermissionsException")) {
 	class PermissionsException extends SystemException { }
 }
 
+if (!class_exists("ApiException")) {
+    class ApiException extends SystemException 
+    { 
+        public $params;
+        
+        public function __construct($message, $code = 0, $params = array())
+        {
+            parent::__construct($message, $code);
+            
+            $this->params = $params;
+        }
+    }
+}
+
 ?>
