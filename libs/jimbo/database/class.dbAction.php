@@ -4,12 +4,12 @@
 *
 * Class for do database actions
 *
-* @autor Alexander Voytsekhovskyy <young@php.net>;
+* @author Alexander Voytsekhovskyy <young@php.net>;
 * @version 2.0
 */
 
-class dbAction {
-
+class dbAction 
+{
     public $_options;
     
     public $sessionData;
@@ -19,7 +19,8 @@ class dbAction {
 	public $dbDriver;
 	public $currentRow;
 
-	function dbAction($dsn, $tblName, &$options) {
+	public function __construct($dsn, $tblName, &$options) 
+	{
         global $dbAdminMessages;
         
         $this->_options = &$options;
@@ -45,9 +46,9 @@ class dbAction {
 			// объект PEAR_DB
 			$this->dbDriver = $dsn;
 		} else {
-			$this->dbDriver = MDB2::factory(DSN);
+			$this->dbDriver = MDB2::factory($dsn);
 			
-			if(PEAR::isError($this->dbDriver)) {
+			if (PEAR::isError($this->dbDriver)) {
 			    throw new DatabaseException("Can't connect to database: ".$this->dbDriver->getMessage());
 			}
 			
@@ -252,7 +253,6 @@ class dbAction {
 			$sql = "SELECT count(*) as cnt FROM $fromSection WHERE $whereSection";
 			$countRow = $this->dbDriver->getRow($sql);
 			if (PEAR::isError($countRow)) {
-				print_r($sql);
 				$this->raiseError('SQL Exception: '.$countRow->getMessage());
 				return false;
 			} else {
@@ -313,7 +313,6 @@ class dbAction {
 
 		$dataRes = $this->dbDriver->query($sql);
 		if (PEAR::isError($dataRes)) {
-			print_r($sql);
 			$this->raiseError('SQL Exception: '.$dataRes->getMessage());
 			return false;
 		}
@@ -461,7 +460,7 @@ class dbAction {
 		}
 
 		if (!$status) {
-			header('Content-Type: text/html; charset='.CHARSET);
+			header('Content-Type: text/html; charset='.$this->getOption('charset'));
 			$message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
 
 			$response = array(
@@ -693,7 +692,7 @@ class dbAction {
 			}
 		}
 
-		header("Content-type: text/html; charset=".CHARSET);
+		header("Content-type: text/html; charset=".$this->getOption('charset'));
 		$html = '';
 		foreach ($item->keyData as $key => $value) {
 			$html .= '
@@ -1264,11 +1263,11 @@ class dbAction {
 
 	private function getText($text)
 	{
-		if(strtolower(CHARSET) == 'utf-8') {
+		if(strtolower($this->getOption('charset')) == 'utf-8') {
 			return $text;
 		}
 
-		return iconv(CHARSET, 'UTF-8', $text);
+		return iconv($this->getOption('charset'), 'UTF-8', $text);
 	}
 
 	/**
@@ -1293,7 +1292,7 @@ class dbAction {
         if ($lang == 'en') {
             return 'dbadmin_en.php';
         } else {
-            if (substr(strtolower(CHARSET), 0, 3) == 'utf') {
+            if (substr(strtolower($this->getOption('charset')), 0, 3) == 'utf') {
                 return 'dbadmin_ru.utf8.php';
             } else {
                 return 'dbadmin_ru.cp1251.php';

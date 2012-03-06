@@ -130,6 +130,11 @@ class Controller extends EventDispatcher
             define('CHARSET', 'UTF-8');
         }
         
+        if (!isset($this->_options['charset'])) {
+            $this->_options['charset'] = CHARSET;
+        }
+        
+        
         if (!isset($this->_options['lang'])) {
             $this->_options['lang'] = 'en';
         }
