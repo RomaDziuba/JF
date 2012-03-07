@@ -1,14 +1,17 @@
 <?php
+
+if (!class_exists('EventDispatcher')):
+
 require_once dirname(__FILE__)."/IEventDispatcher.php";
 require_once dirname(__FILE__)."/Event.php";
 
 /**
-* author: Denis Panaskin <goliathdp@gmail.com>
-* version: RC 1.0
-*/
+ * @author: Denis Panaskin <goliathdp@gmail.com>
+ * @version: RC 1.0
+ * @since 2007
+ */
 class EventDispatcher implements IEventDispatcher
 {
- 
 	private $listeners;
      
 	public function __construct()
@@ -16,10 +19,14 @@ class EventDispatcher implements IEventDispatcher
         $this->listeners = array();
     }
  
-/**
-* $this->addEventListener("Init", array(&$this, "f"));
-* $this->addEventListener("Init", ty);
-*/
+    /**
+     * $this->addEventListener("Init", array(&$this, "f"));
+     * $this->addEventListener("Init", ty);
+     * 
+     * @param mixed $type
+     * @param mixed $listener
+     * @return boolean
+     */
     public function addEventListener($type, $listener)
     {
         if (!is_callable($listener)) {
@@ -69,4 +76,5 @@ class EventDispatcher implements IEventDispatcher
     } // end _getKey
      
 }
+endif;
 ?>

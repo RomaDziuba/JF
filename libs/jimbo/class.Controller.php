@@ -24,6 +24,8 @@ require_once $__jimboLibPath.'/plugins/class.SqlJimboPlugin.php';
 
 require_once $__jimboLibPath.'/class.JimboUser.php';
 
+require_once $__jimboLibPath.'/locale/LocaleModel.php';
+require_once $__jimboLibPath.'/locale/MoDictionaryLocale.php';
 
 define('PARAM_ARRAY', 100);
 define('PARAM_STRING', 101);
@@ -46,6 +48,7 @@ class Controller extends EventDispatcher
     
     static private $_plugins = null;
     
+    protected $locale;
 
     public function __construct($options = array())
     {
@@ -53,7 +56,26 @@ class Controller extends EventDispatcher
         
         $this->_setDefaultOptions();
         
+        //
+        $this->onInitLocale();
+        
     } // end __construct
+    
+    protected function onInitLocale()
+    {
+        $this->locale = new LocaleModel();
+        
+        // System locale
+        $localePath = $this->getOption('engine_path');
+        //$moFilePath =  $localePath."locale/".$this->getOption('lang').".mo";
+        $moFilePath =  $localePath."locale/ru.mo";
+        
+        if (file_exists($moFilePath)) {
+            $systemDictionary = new MoDictionaryLocale($moFilePath);
+            $this->locale->addDictionary($systemDictionary);
+        }
+        
+    } // end onInitLocale
     
     private function _setDefaultOptions()
     {
@@ -99,7 +121,6 @@ class Controller extends EventDispatcher
             $this->_options['engine_tpl_path'] = $this->_options['engine_path'].'templates/dba/'.$this->_options['engine_style'].'/';
         }
         
-        
         if (!isset($this->_options['engine_http_base'])) {
             $this->_options['engine_http_base'] = $this->urlPrefix;
         }
@@ -116,12 +137,17 @@ class Controller extends EventDispatcher
             $this->_options['imagemagic_path'] = '/usr/local/bin/convert';
         }
         
+        if (!isset($this->_options['locale_path'])) {
+            $this->_options['locale_path'] = $this->_options['base_path'].'locale/';
+        }
+        
         // FIXME:
         // popup | jquery
         if (!isset($this->_options['popup_mode'])) {
             $this->_options['popup_mode'] = 'jquery';
         }
         
+        // FIXME:
         if (!defined("JIMBO_POPUP_MODE")) {
 			define('JIMBO_POPUP_MODE', $this->_options['popup_mode']);
         }
@@ -154,9 +180,6 @@ class Controller extends EventDispatcher
             $this->_options['objects_path'] = realpath(dirname(__FILE__).'/../../../').'/objects/';;
         }
         
-        //if (!defined('LANG')) {
-            //define('LANG', 'en');
-        //}
     } // end _setDefaultOptions
         
     
@@ -210,7 +233,7 @@ class Controller extends EventDispatcher
         return preg_replace('#^'.$prefix.'#Umis', '/', $url);
     } // end getCurrentURL
     
-    public static function &getPluginInstance($plugin, $params = array(), $options = array())
+    public function &getPluginInstance($plugin, $params = array(), $options = array())
     {
         if (isset(self::$_plugins[$plugin])) {
             return self::$_plugins[$plugin];
@@ -242,12 +265,27 @@ class Controller extends EventDispatcher
         $classFile = $path.$className.'.php';
                           
         if (!file_exists($classFile)) {
-            throw new SystemException(sprintf(_('File "%s" for plugin "%s" was not found.'), $classFile, $plugin));
+            throw new SystemException(sprintf(__('File "%s" for plugin "%s" was not found.'), $classFile, $plugin));
         }
             
         require_once $classFile;
         if (!class_exists($className)) {
-            throw new SystemException(sprintf(_('Class "%s" was not found in file "%s".'), $className, $classFile));
+            throw new SystemException(__('Class "%s" was not found in file "%s".', $className, $classFile));
+        }
+        
+        // Plugin locale
+        $defaultLocalePath = $this->getOption("locale_path");
+        $localePaths = array(
+            $defaultLocalePath,
+            $path."locale/"
+        );
+        
+        foreach ($localePaths as $localePath) {
+            $moFilePath = $localePath.$plugin.".mo";
+            if (file_exists($moFilePath)) {
+                $pluginDictionary = new MoDictionaryLocale($moFilePath);
+                $this->locale->addDictionary($pluginDictionary);
+            }
         }
 
         $tplPath = isset($options['tpl_path']) ? $options['tpl_path'] : false;
@@ -264,7 +302,7 @@ class Controller extends EventDispatcher
         return self::$_plugins[$plugin];
     } // end getPluginInstance
     
-    public static function call($plugin, $method, $params = array(), $options = array())
+    public function call($plugin, $method, $params = array(), $options = array())
     {
         if ($options) {
             self::$_lastPluginOptions = $options;
@@ -272,10 +310,10 @@ class Controller extends EventDispatcher
             $options = self::$_lastPluginOptions;
         }
         
-        $obj = self::getPluginInstance($plugin, $params, $options);
+        $obj = $this->getPluginInstance($plugin, $params, $options);
         
         if (!is_callable(array($obj, $method))) {
-            throw new SystemException(sprintf(_('Method "%s" was not found in module "%s".'), $method, $plugin));
+            throw new SystemException(sprintf(__('Method "%s" was not found in module "%s".'), $method, $plugin));
         }
             
         return call_user_func_array(array($obj, $method), $params);
@@ -372,7 +410,7 @@ class Controller extends EventDispatcher
         
         switch($type) {
             case 'iframe':
-                header('Content-Type: text/html; charset='.CHARSET);
+                header('Content-Type: text/html; charset='.$this->getOption("charset"));
                 echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
                 break;
             default:
@@ -397,15 +435,12 @@ class Controller extends EventDispatcher
         
         $info = array(
             'basehttp' => $this->urlPrefix,
-            'charset' => CHARSET,
-            'engine_style_css' => $this->_options['engine_style_css'],
-            'style_header' => $this->_options['engine_tpl_path'].'header.ihtml'
+            'charset' => $this->getOption("charset"),
+            'engine_style_css' => $this->getOption("engine_style_css"),
+            'style_header' => $this->getOption("engine_tpl_path").'header.ihtml'
         );
         
         $info += $this->properties;
-        
-        // FIXME:
-        //$tpl->assign('menu', self::call('Jimbo', 'getMenu'));
         
         $tpl->assign('info', $info);
         if($vars) {
@@ -673,36 +708,6 @@ class Controller extends EventDispatcher
     }
     
     /**
-     * Returns the current jimbo menu
-     * 
-     * @param array $menu menu items
-     * @param string $name id in html container
-     * @return string
-     */
-    public function getMenu($menu, $name = 'rootMenu')
-    {
-        $tpl = dbDisplayer::getTemplateInstance();
-        
-        $currentTplPath = $tpl->template_dir;
-        $tpl->template_dir = $this->_options['engine_tpl_path'];
-        
-        
-        $currentItem = $_SERVER['REQUEST_URI']; 
-        $currentItem2 = substr($currentItem, -1, 1) != '/' ? $currentItem.'/' : substr($currentItem, 0, -1);
-        $tpl->assign("currentItem", $currentItem);
-        $tpl->assign("currentItem2", $currentItem2);
-        
-        $tpl->assign("name", $name);
-        $tpl->assign("items", array_values($menu));
-        
-        $content = $tpl->fetch("menu.ihtml");
-        
-        $tpl->template_dir = $currentTplPath;
-        
-        return $content;
-    } // end getMenu
-    
-    /**
      * Returns a reference to data in the session used by the jimbo
      * 
      * @return array
@@ -712,6 +717,15 @@ class Controller extends EventDispatcher
         return $this->_options['session_data'];
     } // end getSessionData
     
+    public function setLocaleModel($locale)
+    {
+        $this->locale = $locale;
+    } // end setLocaleModel
+    
+    public function getLocaleModel()
+    {
+        return $this->locale;
+    } //end getLocaleModel
     
     public function setOption($name, $value)
     {
@@ -726,7 +740,7 @@ class Controller extends EventDispatcher
     public function &getObject($objectName, $pluginName = false)
     {
         if (!isset($this->db)) {
-            throw new SystemException(_("Undefined db connection in jimbo controller"));
+            throw new SystemException(__("Undefined db connection in jimbo controller"));
         }
         
         if ($pluginName) {
@@ -761,7 +775,7 @@ class Controller extends EventDispatcher
         }
         
         try {
-			return self::call($params['name'], $params['method'], $callParams);
+			return self::getInstance()->call($params['name'], $params['method'], $callParams);
         } catch (Exception $exp) {
         	$smarty->trigger_error("plugin: ".$exp->getMessage());
         	return false;
@@ -791,5 +805,29 @@ if (!class_exists("ApiException")) {
         }
     }
 }
+
+function __()
+{
+    global $jimbo;
+    
+    $args = func_get_args();
+    if (!isset($args[0])) {
+        return false;
+    }
+    
+    $locale = $jimbo->getLocaleModel();
+    $word = $locale->get($args[0]);
+    if (!$word) {
+        return false;
+    }
+    
+    $params = array_slice($args, 1);
+    if ($params) {
+        $word = vsprintf($word, $params);
+    }
+    
+    return $word;
+}
+
 
 ?>
