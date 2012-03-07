@@ -310,7 +310,7 @@ class Controller extends EventDispatcher
             $options = self::$_lastPluginOptions;
         }
         
-        $obj = $this->getPluginInstance($plugin, $params, $options);
+        $obj = self::getInstance()->getPluginInstance($plugin, $params, $options);
         
         if (!is_callable(array($obj, $method))) {
             throw new SystemException(sprintf(__('Method "%s" was not found in module "%s".'), $method, $plugin));
@@ -369,7 +369,7 @@ class Controller extends EventDispatcher
         if ($params) {
 			$this->_options['handler_params'] = $params;
         }
-        
+       
         $tblAction = new dbAction($db, $table, $this->_options);
         
         $tpl = dbDisplayer::getTemplateInstance();
