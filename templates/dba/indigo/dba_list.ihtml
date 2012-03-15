@@ -54,7 +54,7 @@ $('#filtersButton').click(function() {
 <table class="filters" style="display:none;" id="filters" cellpadding="3" align="center">
 	<thead>
 		<tr>
-			<td class="caption" colspan="2">{$lang.FILTERS}</td>
+			<td class="caption" colspan="2">{lang value="FILTERS"}</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -128,7 +128,7 @@ $('#filtersButton').click(function() {
 		{if $data.0.actions || !empty($filters)}
 		<td class="jcol" style="padding:0pc; margin:0px;" align="center">
 			{if $info.filter == 'top' && !empty($filters)}
-				<input id="filtersButton" type="button" class="sbutton" value="{$lang.FILTERS}" style="vertical-align: middle;" />
+				<input id="filtersButton" type="button" class="sbutton" value="{lang value="FILTERS"}" style="vertical-align: middle;" />
 			{/if}
 		</td>
 		{/if}
@@ -258,20 +258,20 @@ $('#filtersButton').click(function() {
   {if $info.backlink != '' }
   	<div class="backlink" >
   	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
-  	<a href="{$info.backlink}" class="db_link">{$lang.BUTTON_BACK}</a></div>
+  	<a href="{$info.backlink}" class="db_link">{lang value="BUTTON_BACK"}</a></div>
   {/if}
 
   
   {if isset($info.pager)}
   <div class="pager">
   	<span>{$info.pager}</span>
-  	<span><span>[{$lang.TOTAL_ITEMS}: {$info.totalRows}]</span></span>
+  	<span><span>[{lang value="TOTAL_ITEMS"}: {$info.totalRows}]</span></span>
  	</div>
  {/if}
 
  <div class="perpage">
  <span>
-  {$lang.ITEMSOERPAGE}: <select OnChange="addPager(this.value)">
+  {lang value="ITEMSOERPAGE"}: <select OnChange="addPager(this.value)">
   {foreach key=key value=value from=$info.limitOptions}
     <option value="{$key}" {if $key eq $info.rowsPerPage}selected{/if}>{$value}</option>
   {/foreach}

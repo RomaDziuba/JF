@@ -16,7 +16,7 @@ jQuery(document).ready(function() {
 <table class="filters" style="display:none;" id="filters" cellpadding="3" align="center">
 	<thead>
 		<tr>
-			<td class="caption" colspan="2">{$lang.FILTERS}</td>
+			<td class="caption" colspan="2">{lang value="FILTERS"}</td>
 		</tr>
 	</thead>
 	<tbody>
@@ -93,7 +93,7 @@ jQuery(document).ready(function() {
     					{if $data.0.actions || !empty($filters)}
     						<th>
     							{if $info.filter == 'top' && !empty($filters)}
-    								<input id="filtersButton" type="button" class="submit small_tiny" value="{$lang.FILTERS}" />
+    								<input id="filtersButton" type="button" class="submit small_tiny" value="{lang value="FILTERS"}" />
 								{else}
 								&nbsp;
     							{/if}
@@ -202,12 +202,12 @@ jQuery(document).ready(function() {
 						
 		{if isset($info.pager)}
     		<div class="pagination right">
-    			{$info.pager} <span>[{$lang.TOTAL_ITEMS}: {$info.totalRows}]</span>
+    			{$info.pager} <span>[{lang value="TOTAL_ITEMS"}: {$info.totalRows}]</span>
     		</div>
 		{/if}
 		
 		<div class="pagination right">
-			{$lang.ITEMSOERPAGE}: 
+			{lang value="ITEMSOERPAGE"}: 
 			<select OnChange="addPager(this.value)">
 				{foreach key=key value=value from=$info.limitOptions}
     				<option value="{$key}" {if $key eq $info.rowsPerPage}selected{/if}>{$value}</option>
@@ -263,7 +263,7 @@ jQuery(document).ready(function() {
   {if $info.backlink != '' }
   	<div class="backlink" >
   	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
-  	<a href="{$info.backlink}" class="db_link">{$lang.BUTTON_BACK}</a></div>
+  	<a href="{$info.backlink}" class="db_link">{lang value="BUTTON_BACK"}</a></div>
   {/if}
 
   

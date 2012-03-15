@@ -67,8 +67,7 @@ class Controller extends EventDispatcher
         
         // System locale
         $localePath = $this->getOption('engine_path');
-        //$moFilePath =  $localePath."locale/".$this->getOption('lang').".mo";
-        $moFilePath =  $localePath."locale/ru.mo";
+        $moFilePath =  $localePath."locale/".$this->getOption('lang').".mo";
         
         if (file_exists($moFilePath)) {
             $systemDictionary = new MoDictionaryLocale($moFilePath);
@@ -781,6 +780,15 @@ class Controller extends EventDispatcher
         	return false;
         }
     }
+    
+    public static function getLangSmarty($params, &$smarty)
+    {
+    	if (!isset($params['value'])) {
+    		$smarty->trigger_error("name: input value parameter must be set.");
+    	}
+    
+    	return __($params['value']);
+    } // end getLangSmarty
 }
 
 //FIXME:
@@ -818,7 +826,7 @@ function __()
     $locale = $jimbo->getLocaleModel();
     $word = $locale->get($args[0]);
     if (!$word) {
-        return false;
+        return $args[0];
     }
     
     $params = array_slice($args, 1);

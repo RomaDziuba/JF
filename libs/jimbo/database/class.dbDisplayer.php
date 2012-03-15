@@ -24,11 +24,6 @@ class dbDisplayer extends EventDispatcher
 		$this->tblAction = &$tblAction;
 
 		self::$tpl = $tpl;
-		
-		if (!is_null(self::$tpl)) {
-			include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
-			self::$tpl->assign("lang", $dbAdminMessages);
-		}
 	}
 
 	function performDisplay($action) {
@@ -85,33 +80,6 @@ class dbDisplayer extends EventDispatcher
 			require_once dirname(__FILE__)."/../../templates/class.template.php";
 		}
 	    
-	    /*
-	    if(!is_null(self::$tpl) && !$tplRoot) {
-            return self::$tpl;
-        }
-        
-        if(!$tplRoot) {
-            $tplRoot = realpath(dirname(__FILE__).'/../../templates');
-        }
-        
-        if(!is_dir($tplRoot)) {
-            throw new Exception('Not found template directory');
-        }
-        
-        $tpl = new Template_Lite();
-        $tpl->template_dir = $tplRoot;
-        $tpl->compile_dir = $tplRoot.'/compiled/';
-        $tpl->force_compile = true;
-        $tpl->cache = false;
-        $tpl->reserved_template_varname = "tpl";
-        
-        if (is_null(self::$tpl)) {
-            self::$tpl = $tpl;
-        }
-        
-        return $tpl;
-        */
-	    
 	    if (!is_null(self::$tpl)) {
 	        if ($tplRoot) {
 	            self::$tpl->template_dir = $tplRoot;
@@ -135,6 +103,9 @@ class dbDisplayer extends EventDispatcher
 		$tpl->force_compile = true;
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
+		
+		$tpl->register_function("plugin", array("Controller", "pluginSmarty"));
+		$tpl->register_function("lang", array("Controller", "getLangSmarty"));
 
 		self::$tpl = $tpl;
 		
@@ -477,8 +448,6 @@ class dbDisplayer extends EventDispatcher
 			$info['grouped'] = $gSelect;
 		}
 
-		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
-		$tpl->assign('lang', $dbAdminMessages);
 
 		if (isset($_group_field)) {
 			$info['subtotals'] = $subtotals_group;
@@ -544,7 +513,6 @@ class dbDisplayer extends EventDispatcher
 	
 	function addListFilters () {
 		$_sessionData = &$this->tblAction->sessionData;
-		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
 
 		// Строим фильтры
 		$tableDefinition =& $this->tblAction->tableDefinition;
@@ -613,10 +581,10 @@ class dbDisplayer extends EventDispatcher
 					$filters[]  = '
                     <table>
                     <tr>
-                    <td>'.$dbAdminMessages['FROM'].':</td><td><input type="text" name="filter['.$filterName.'][0]" value="'.$value[0].'" size="5" style="vertical-align: top"></td>
+                    <td>'.__('FROM').':</td><td><input type="text" name="filter['.$filterName.'][0]" value="'.$value[0].'" size="5" style="vertical-align: top"></td>
                     </tr>
                     <tr>
-                    <td>'.$dbAdminMessages['TO'].':</td><td><input type="text" name="filter['.$filterName.'][1]" value="'.$value[1].'" size="5" style="vertical-align: top"></td>
+                    <td>'.__('TO').':</td><td><input type="text" name="filter['.$filterName.'][1]" value="'.$value[1].'" size="5" style="vertical-align: top"></td>
                     </tr>
                     </table>';
                 }
@@ -668,8 +636,6 @@ class dbDisplayer extends EventDispatcher
 
 
 	function displayForm($what) {
-		include dirname(__FILE__).'/'.$this->tblAction->getLangFile();
-		global $_dictionary;
 
 		$tableDefinition = $this->tblAction->tableDefinition;
 		$primaryKey = $tableDefinition->getAttribute('primaryKey');
@@ -694,7 +660,7 @@ class dbDisplayer extends EventDispatcher
 		if ($what == 'insert') {
 			$info = array('caption' => $tableDefinition->actions['insert']['caption'], 'action' => 'insert');
 		} elseif ($what == 'info') {
-			$info = array('caption' => $dbAdminMessages['ROW_VIEW']);
+			$info = array('caption' => __('ROW_VIEW'));
 		} elseif ($what == 'edit') {
 			$info = array('caption' => $tableDefinition->actions[$what]['caption'], 'action' => 'save');
 		} elseif ($what == 'remove') {
@@ -761,19 +727,14 @@ class dbDisplayer extends EventDispatcher
 
 		if (isset($tableDefinition->actions[$what]['caption']) && $tableDefinition->actions[$what]['caption'] != '' && 0)    {
 			$info['actionbutton'] = $tableDefinition->actions[$what]['caption'];
-		} elseif (isset($dbAdminMessages['BUTTON_'.strtoupper($what)])) {
-			$info['actionbutton'] = $dbAdminMessages['BUTTON_'.strtoupper($what)];
+		} else {
+			$info['actionbutton'] = __('BUTTON_'.strtoupper($what));
 		}
 
 		$info['afetrpatyjs'] = isset($GLOBALS['dba_afetrpatyjs']) ? $GLOBALS['dba_afetrpatyjs'] : '';
-		if (!empty($_dictionary)) {
-			$tpl->assign('_dictionary', $_dictionary);
-		}
 		$tpl->assign('items', $items);
 		$tpl->assign('info', $info);
 		$tpl->assign('qtips', $qtips);
-
-		$tpl->assign('lang', $dbAdminMessages);
 
 		if (isset($_GET['popup']) && ($_GET['popup'] == 'true')) {
 			$GLOBALS['dbaCustomTemplate'] = 'light.ihtml';
@@ -798,6 +759,7 @@ class dbDisplayer extends EventDispatcher
 	}
 
 	function getBackAction() {
+		//FIXME:
 		if (isset($_GET['backLink'])) {
 			$backLink = $_GET['backLink'];
 		} else {

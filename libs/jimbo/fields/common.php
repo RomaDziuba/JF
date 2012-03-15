@@ -123,10 +123,8 @@ class abstractFormField {
     
     public function isValidValue($value)
     {
-        global $dbAdminMessages;
-        
         if (isset($this->attributes['required']) && empty($value)) {
-            $this->lastErrorMessage = $dbAdminMessages['ERR_REQUIRED']." '".$this->attributes['caption']."'";
+            $this->lastErrorMessage = __('ERR_REQUIRED', $this->attributes['caption']);
             return false;
         }
 
@@ -613,7 +611,7 @@ class many2manyFormField extends abstractFormField {
 		$html .= '
 		</div>
 		<label><input type="checkbox" style="vertical-align: middle; margin-left:5px" onClick="tbl_check_all(\'m2m_'.$this->attributes['linkTable'].'\', this.checked)">
-		<b>'.$this->tblAction->locale['FORM_CHECK_ALL'].'</b></label>';
+		<b>'.__('FORM_CHECK_ALL').'</b></label>';
 		return $html;
 	}
 

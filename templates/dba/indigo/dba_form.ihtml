@@ -53,7 +53,7 @@ jQuery(document).ready(function() {
                         {if $info.actionbutton != ''}
                             <input type="submit" class="lbutton" value="{$info.actionbutton}"  />
                         {/if}
-                        <input type="button" class="lbutton" value="{$lang.BUTTON_BACK}" onClick="window.close()" />
+                        <input type="button" class="lbutton" value="{lang value="BUTTON_BACK"}" onClick="window.close()" />
                     </div>
                     <textarea id="errorlog_block" class="errorlog" style="margin:0px;" readonly="readonly"></textarea>
                 </td>

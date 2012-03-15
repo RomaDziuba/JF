@@ -63,6 +63,7 @@ function dbaUpdateSuccess(data)
 
 function setIframeResponse(jsonStr) 
 {
+	hideLoadingBar();
 	var data = eval('(' + jsonStr + ')');	
 	jsonResponse(data);
 } // end setIframeResponse

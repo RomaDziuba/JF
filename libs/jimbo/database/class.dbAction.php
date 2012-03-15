@@ -27,10 +27,6 @@ class dbAction
         
         $this->sessionData = &$this->_options['session_data'];
         
-		// подгружаем языковые сообщения
-		include $this->getLangFile();
-		$this->locale = $dbAdminMessages;
-
 		// подгружаем описание таблицы
 
 		$this->tblPath = $this->_options['defs_path'];
@@ -461,11 +457,11 @@ class dbAction
 
 		if (!$status) {
 			header('Content-Type: text/html; charset='.$this->getOption('charset'));
-			$message = empty($this->lastErrorMessage) ? $this->locale['ERR_UNKNOWN'] : $this->lastErrorMessage;
+			$message = empty($this->lastErrorMessage) ? __('ERR_UNKNOWN') : $this->lastErrorMessage;
 
 			$response = array(
-			'type' => 'error',
-			'message' => $this->getText($message)
+				'type'    => 'error',
+				'message' => $this->getText($message)
 			);
 
 			// TODO: Move to root logic
@@ -483,12 +479,12 @@ class dbAction
 			$isPoupMode = (int) isset($_GET['popup']) && ($_GET['popup'] == 'true');
 
 			$response = array(
-			'type' => 'success',
-			'message' => $this->getText($this->locale['STATUS_SUCCESS']),
-			'url' => $newLocation,
-			'isPoupMode' => $isPoupMode
+				'type'       => 'success',
+				'message'    => $this->getText(__('STATUS_SUCCESS')),
+				'url'        => $newLocation,
+				'isPoupMode' => $isPoupMode
 			);
-
+			
 			// TODO: Move to root logic
 			$json = json_encode($response);
 			echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
@@ -944,11 +940,11 @@ class dbAction
 	function mysqlerror2text($result, $operation) {
 
 		if ($result->code == '-3') {
-			$this->lastErrorMessage = $this->locale['ERR_CONSTRAINT'];
+			$this->lastErrorMessage = __('ERR_CONSTRAINT');
 		} elseif ($result->code == '-5') {
-			$this->lastErrorMessage = $this->locale['ERR_UNIQKEY'];
+			$this->lastErrorMessage = __('ERR_UNIQKEY');
 		} else {
-			$this->lastErrorMessage = $this->locale['ERR_'.strtoupper($operation)].$result->toString();
+			$this->lastErrorMessage = __('ERR_'.strtoupper($operation), $result->toString());
 		}
 
 	}
@@ -1057,7 +1053,7 @@ class dbAction
 		$sql = "delete from ".$item->attributes['linkTable']." where ".$item->attributes['linkField']." = '$id'";
 		$result = $db->query($sql);
 		if (PEAR::isError($result)) {
-			$this->lastErrorMessage = $this->locale['ERR_SQL'].$result->toString();
+			$this->lastErrorMessage = __('ERR_SQL', $result->toString());
 			return false;
 		}
 
@@ -1073,7 +1069,7 @@ class dbAction
 				}
 				$result = $db->query($sql);
 				if (PEAR::isError($result)) {
-					$this->lastErrorMessage = $this->locale['ERR_SQL'].$result->toString();
+					$this->lastErrorMessage = __('ERR_SQL', $result->toString());
 					return false;
 				}
 			}
@@ -1091,7 +1087,7 @@ class dbAction
 		}
 
 		if (!$tbl->loadFromXML($tblPath.$tblName.'.xml', false)) {
-			$this->raiseError($this->locale['ERR_TABLEDEF'].' : '.$tbl->lastErrorMessage);
+			$this->raiseError(__('ERR_TABLEDEF', $tbl->lastErrorMessage));
 			return false;
 		}
 		return $tbl;
@@ -1284,21 +1280,7 @@ class dbAction
 	{
 	    return isset($this->_options[$name]) ? $this->_options[$name] : false; 
 	}
-	
-    public function getLangFile() 
-    {
-        $lang = $this->getOption('lang');
-        
-        if ($lang == 'en') {
-            return 'dbadmin_en.php';
-        } else {
-            if (substr(strtolower($this->getOption('charset')), 0, 3) == 'utf') {
-                return 'dbadmin_ru.utf8.php';
-            } else {
-                return 'dbadmin_ru.cp1251.php';
-            }
-        }
-    }
+    
 } 
 
 ?>
