@@ -361,10 +361,8 @@ class dbAction
 		}
 	}
 
-	function performAction($action, $needRedirect = true) {
-		
-
-
+	function performAction($action, $needRedirect = true) 
+	{
 		$this->adjustPostData();
 		$baseURL = '?';
 		foreach ($_GET as $key => $val) {
@@ -377,8 +375,7 @@ class dbAction
 		$wasCommit = false;
 		$handledEvent = false;
 		$status = true;
-
-
+		$isTransaction = false;
 
 		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
 			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
@@ -419,6 +416,16 @@ class dbAction
 			if (isset($actionInfo['relation'])) {
 				$action = 'relation';
 			}
+			
+			$transactionActions = array('save', 'insert', 'remove');
+			if (in_array($action, $transactionActions)) {
+				
+				if (!$this->dbDriver->inTransaction()) {
+					$this->dbDriver->beginTransaction();
+					$isTransaction = true;
+				}
+			}
+			
 			switch ($action) {
 				case "save": {
 					$status = $this->updateDBItem();
@@ -456,23 +463,29 @@ class dbAction
 		}
 
 		if (!$status) {
-			header('Content-Type: text/html; charset='.$this->getOption('charset'));
-			$message = empty($this->lastErrorMessage) ? __('ERR_UNKNOWN') : $this->lastErrorMessage;
-
-			$response = array(
-				'type'    => 'error',
-				'message' => $this->getText($message)
-			);
-
-			// TODO: Move to root logic
-			$json = json_encode($response);
-			echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
-			exit();
+			if ($isTransaction) {
+				$this->dbDriver->rollback();
+			}
+			
+			$this->error();
 		}
 
 		if ($wasCommit) {
 			if (isset($customHandler) && method_exists ($customHandler, 'afterCommit')) {
 				$customHandler->afterCommit($this->updateInfo);
+			}
+			
+			if (!empty($this->updateInfo['lastErrorMessage'])) {
+				$this->lastErrorMessage = $this->updateInfo['lastErrorMessage'];
+				if ($isTransaction) {
+					$this->dbDriver->rollback();
+				}
+				
+				$this->error();
+			}
+			
+			if ($isTransaction) {
+				$this->dbDriver->commit();
 			}
 
 			// for compatibility with the old versions
@@ -485,10 +498,7 @@ class dbAction
 				'isPoupMode' => $isPoupMode
 			);
 			
-			// TODO: Move to root logic
-			$json = json_encode($response);
-			echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
-			exit();
+			$this->jsonResponse($response);
 		}
 
 		if ($needRedirect) {
@@ -498,6 +508,28 @@ class dbAction
 
 		return true;
 	}
+	
+	public function error()
+	{
+		$message = empty($this->lastErrorMessage) ? __('ERR_UNKNOWN') : $this->lastErrorMessage;
+		
+		$response = array(
+			'type'    => 'error',
+			'message' => $this->getText($message)
+		);
+		
+		$this->jsonResponse($response);
+	} // end error
+	
+	public function jsonResponse($response)
+	{
+		header('Content-Type: text/html; charset='.$this->getOption('charset'));
+		
+		// TODO: Move to root logic
+		$json = json_encode($response);
+		echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+		exit();
+	} // end jsonResponse
 
 
 	// предварительная обработка данных POST

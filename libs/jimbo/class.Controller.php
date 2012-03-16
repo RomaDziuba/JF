@@ -826,7 +826,7 @@ function __()
     $locale = $jimbo->getLocaleModel();
     $word = $locale->get($args[0]);
     if (!$word) {
-        return $args[0];
+        $word = $args[0];
     }
     
     $params = array_slice($args, 1);
