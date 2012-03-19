@@ -81,19 +81,19 @@ $('#filtersButton').click(function() {
 {if $info.insert != ''}
 		
 		<div class="action">
-		<img src="{$info.baseurl}images/add.png" width="16" height="16"  border="0" hspace="3" />	
+		<img src="{$info.base_http_icon}add.png" width="16" height="16"  border="0" hspace="3" />	
 		<a href="#" onClick="openWindow('?action=insert&popup=true')" class="db_link">{$info.insert}</a>
 		</div>
 	{/if}
 	{if $info.excel != ''}
 		<div class="action">
-		<img src="{$info.baseurl}images/excel.png" width="16" height="16"  border="0" hspace="3" />	
+		<img src="{$info.base_http_icon}excel.png" width="16" height="16"  border="0" hspace="3" />	
 		<a href="?action=excel" class="db_link">{$info.excel}</a>
 		</div>
 	{/if}
 	{ if $info.parent != '' }
 		<div class="action">
-		<img src="{$info.baseurl}images/dbadmin_top.gif" hspace="3" border="0" />
+		<img src="{$info.base_http_icon}dbadmin_top.gif" hspace="3" border="0" />
 		<a href="?action=parent" class="db_link">{$info.parent}</a>
 		</div>
 	{/if}
@@ -120,7 +120,7 @@ $('#filtersButton').click(function() {
 			{$field.caption}
 			{/if}
 				{if ($info.sorting.field eq $field.name)}
-					&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
+					&nbsp;<img src="{$info.base_http_icon}dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
 				{/if}
 			</td>
 		{/foreach}
@@ -257,7 +257,7 @@ $('#filtersButton').click(function() {
   
   {if $info.backlink != '' }
   	<div class="backlink" >
-  	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
+  	<img src="{$info.base_http_icon}dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
   	<a href="{$info.backlink}" class="db_link">{lang value="BUTTON_BACK"}</a></div>
   {/if}
 

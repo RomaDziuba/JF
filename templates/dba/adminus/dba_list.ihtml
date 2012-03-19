@@ -54,13 +54,13 @@ jQuery(document).ready(function() {
 			{/if}
 			{*TODO: вынести в CSS*}
 			{if $info.excel != ''}
-				<li><a style="background-image:url('{$info.baseurl}images/excel.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=excel" >{$info.excel}</a></li>
+				<li><a style="background-image:url('{$info.base_http_icon}excel.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=excel" >{$info.excel}</a></li>
 			{/if}
 			{ if $info.parent != '' }
-				<li><a style="background-image:url('{$info.baseurl}images/dbadmin_top.gif'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=parent" >{$info.parent}</a></li>
+				<li><a style="background-image:url('{$info.base_http_icon}dbadmin_top.gif'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="?action=parent" >{$info.parent}</a></li>
 			{/if}
 			{if $info.insert != ''}
-				<li><a style="background-image:url('{$info.baseurl}images/add.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="#" onClick="openWindow('?action=insert&popup=true'); return false;">{$info.insert}</a></li>
+				<li><a style="background-image:url('{$info.base_http_icon}add.png'); background-repeat:no-repeat; padding-left:19px; font-size:13px;" href="#" onClick="openWindow('?action=insert&popup=true'); return false;">{$info.insert}</a></li>
 			{/if}
 		</ul>
 	</div> {*.block_head ends *}
@@ -85,7 +85,7 @@ jQuery(document).ready(function() {
     						<th class="header" width="{$field.width}" style="cursor: pointer;" nowrap="nowrap">
     							<a href="?{$info.query}&order={$field.name}&direction={if $info.sorting.field eq $field.name}{if $info.sorting.direction eq 'ASC'}DESC{else}ASC{/if}{else}ASC{/if}">{$field.caption}</a>
     							{if ($info.sorting.field eq $field.name)}
-    							&nbsp;<img src="{$info.baseurl}images/dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
+    							&nbsp;<img src="{$info.base_http_icon}dbadmin_sort_{if $info.sorting.direction eq 'ASC'}az{else}za{/if}.gif">
     							{/if}
     						</th>
     					{/foreach}
@@ -262,7 +262,7 @@ jQuery(document).ready(function() {
   
   {if $info.backlink != '' }
   	<div class="backlink" >
-  	<img src="{$info.baseurl}images/dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
+  	<img src="{$info.base_http_icon}dbadmin_back.gif" border="0" hspace="2" style="vertical-align: bottom" />
   	<a href="{$info.backlink}" class="db_link">{lang value="BUTTON_BACK"}</a></div>
   {/if}
 

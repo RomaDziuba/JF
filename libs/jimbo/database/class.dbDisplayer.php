@@ -369,7 +369,7 @@ class dbDisplayer extends EventDispatcher
 				$external = in_array($type, array('edit', 'remove', 'info')) || isset($action['ext']);
 				$target = isset($action['target']) ? 'target="'.$action['target'].'"' : '';
 				$link = isset($action['link']) ? str_replace("%ID%", $ID, @html_entity_decode ($action['link'], ENT_QUOTES, 'UTF-8')) : '?action='.$type.'&ID='.$ID;
-				$src = empty($action['src']) ? $this->tblAction->getOption('engine_http_base').'images/dbadmin_'.$type.'.gif' : $action['src'];
+				$src = empty($action['src']) ? $this->tblAction->getOption('http_base_icon').'dbadmin_'.$type.'.gif' : $action['src'];
 
 				if (isset($action['fullscreen'])) {
 					$popupFunction = 'openFullWindow';
@@ -469,6 +469,8 @@ class dbDisplayer extends EventDispatcher
 			$info['filter'] = $tableDefinition->attributes['filter'];
 		}
 
+		$info['base_http_icon'] = $this->tblAction->getOption('http_base_icon');
+		
 		// to be able change data from the code generating event with reference to data
         $obj = array(
             'info' => &$info,

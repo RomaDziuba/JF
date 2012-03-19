@@ -90,6 +90,10 @@ class Controller extends EventDispatcher
             $this->urlPrefix = '/';
         }
         
+        if (!isset($this->_options['http_base_icon'])) {
+        	$this->_options['http_base_icon'] = $this->_options['http_base']."images/";
+        } 
+        
         $this->_options['http_base'] =  $this->urlPrefix;
         
         if (!isset($this->_options['session_data'])) {
@@ -368,7 +372,7 @@ class Controller extends EventDispatcher
         if ($params) {
 			$this->_options['handler_params'] = $params;
         }
-       
+        
         $tblAction = new dbAction($db, $table, $this->_options);
         
         $tpl = dbDisplayer::getTemplateInstance();
@@ -433,10 +437,11 @@ class Controller extends EventDispatcher
         $tpl->assign('content', $content);
         
         $info = array(
-            'basehttp' => $this->urlPrefix,
-            'charset' => $this->getOption("charset"),
+            'basehttp'         => $this->urlPrefix,
+        	'base_http_icon'   => $this->getOption("http_base_icon"),
+            'charset'          => $this->getOption("charset"),
             'engine_style_css' => $this->getOption("engine_style_css"),
-            'style_header' => $this->getOption("engine_tpl_path").'header.ihtml'
+            'style_header'     => $this->getOption("engine_tpl_path").'header.ihtml'
         );
         
         $info += $this->properties;
@@ -751,7 +756,9 @@ class Controller extends EventDispatcher
             $path = $this->getOption("objects_path");
         }
         
-        return Object::getInstance($objectName, $this->db, $path);
+        $obj = Object::getInstance($objectName, $this->db, $path);
+        
+        return $obj;
     } // end getObject
     
 	public static function pluginSmarty($params, &$smarty)
