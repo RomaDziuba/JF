@@ -91,7 +91,7 @@ class Controller extends EventDispatcher
         }
         
         if (!isset($this->_options['http_base_icon'])) {
-        	$this->_options['http_base_icon'] = $this->_options['http_base']."images/";
+        	$this->_options['http_base_icon'] = $this->urlPrefix."images/";
         } 
         
         $this->_options['http_base'] =  $this->urlPrefix;
