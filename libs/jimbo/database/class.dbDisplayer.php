@@ -41,7 +41,7 @@ class dbDisplayer extends EventDispatcher
 
 		if (!empty($tableDefinition->attributes['customHandler'])) {
 			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
-			$this->customHandler = new customTableHandler();
+			$this->customHandler = new customTableHandler($this->tblAction);
 			$this->customHandler->params = $this->tblAction->getOption('handler_params');
 			$info['action'] = $action;
 			$result = '';
@@ -744,7 +744,7 @@ class dbDisplayer extends EventDispatcher
 
 		if (!empty($tableDefinition->attributes['customHandler'])) {
 			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
-			$this->customHandler = new customTableHandler();
+			$this->customHandler = new customTableHandler($this->tblAction);
 			$this->customHandler->params = $this->tblAction->getOption('handler_params');
 			if (method_exists($this->customHandler, 'templateCallback')) {
 				$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);

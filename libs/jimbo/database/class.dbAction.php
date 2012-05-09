@@ -390,8 +390,9 @@ class dbAction
             
 			include_once $this->getOption('handlers_path').$this->tableDefinition->attributes['customHandler'].'.php';
 			if (class_exists('customTableHandler')) {
-				$customHandler = new customTableHandler();
+				$customHandler = new customTableHandler($this);
 				$customHandler->params = $this->getOption('handler_params');
+				
 				if (method_exists ($customHandler, 'handle')) {
 					$info = array('action' => 'post');
 					$handledEvent = $customHandler->handle($info);
