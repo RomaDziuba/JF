@@ -52,6 +52,7 @@ class Controller extends EventDispatcher
 
     public function __construct($options = array())
     {
+        parent::__construct();
         $this->_options = $options;
 
         $this->_setDefaultOptions();
