@@ -190,7 +190,7 @@ class dbAction
 					if (isset($this->sessionData['DB_FILTERS'][$tblName][$filterName]) && ($this->sessionData['DB_FILTERS'][$tblName][$filterName] != '')) {
 						$filterValue = $this->sessionData['DB_FILTERS'][$tblName][$filterName];
 						if (in_array($filterType, array('select', 'exact'))) {
-							$where[] = $filterFieldName." = '".mysql_escape_string($filterValue)."'";
+							$where[] = $filterFieldName." = '".mysql_real_escape_string($filterValue)."'";
 						} else {
 							$where[] = $filterFieldName.' '.$item->getSearchFilter($filterValue);
 						}
@@ -222,7 +222,7 @@ class dbAction
 					if (empty($this->sessionData[$tmpName])) {
 						$where[] = "( {$tblName}.{$relation['field']} = 0 or {$tblName}.{$relation['field']} is NULL)";
 					} else {
-						$where[]  = $tblName.".".$relation['field']." = '".mysql_escape_string($this->sessionData[$tmpName])."'";
+						$where[]  = $tblName.".".$relation['field']." = '".mysql_real_escape_string($this->sessionData[$tmpName])."'";
 					}
 				}
 			}
@@ -528,7 +528,7 @@ class dbAction
 		
 		// TODO: Move to root logic
 		$json = json_encode($response);
-		echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+		echo "<script>parent.setIframeResponse('".mysql_real_escape_string($json)."');</script>";
 		exit();
 	} // end jsonResponse
 
@@ -713,7 +713,7 @@ class dbAction
 
 				$item =& $this->tableDefinition->fields[$key];
 				if ($item->attributes['ajaxParent'] == $_GET['ajaxParent']) {
-					$where = preg_replace("/G%".$item->attributes['ajaxParent']."%/", mysql_escape_string($_GET['value']), $item->attributes['valuesWhere']);
+					$where = preg_replace("/G%".$item->attributes['ajaxParent']."%/", mysql_real_escape_string($_GET['value']), $item->attributes['valuesWhere']);
 					$item->attributes['valuesWhere'] = $where;
 				}
 				$this->loadForeignKeyValues($item);
@@ -957,7 +957,7 @@ class dbAction
 			foreach ($this->tableDefinition->filters as $field => $value) {
 				// возможно, оно уже было в полях выше
 				if (!in_array($field, $tokenData)) {
-					$tokenData[$field] = "'".mysql_escape_string($value)."'";
+					$tokenData[$field] = "'".mysql_real_escape_string($value)."'";
 				}
 			}
 		}
