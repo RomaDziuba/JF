@@ -416,7 +416,7 @@ class Controller extends EventDispatcher
         switch($type) {
             case 'iframe':
                 header('Content-Type: text/html; charset='.$this->getOption("charset"));
-                echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+                echo "<script>parent.setIframeResponse('".mysql_real_escape_string($json)."');</script>";
                 break;
             default:
                 header('Content-type: application/json');

@@ -42,14 +42,14 @@ class abstractFormField {
 	function getSearchFilter($value) {
 		if (is_array($value)) {
 			if (empty($value[0])) {
-				return " <= '".mysql_escape_string($value[1])."'";
+				return " <= '".mysql_real_escape_string($value[1])."'";
 			} elseif (empty($value[1])) {
-				return " >= '".mysql_escape_string($value[0])."'";
+				return " >= '".mysql_real_escape_string($value[0])."'";
 			} else {
-				return " BETWEEN '".mysql_escape_string($value[0])."' AND '".mysql_escape_string($value[1])."'";
+				return " BETWEEN '".mysql_real_escape_string($value[0])."' AND '".mysql_real_escape_string($value[1])."'";
 			}
 		} else {
-			return " LIKE '%".mysql_escape_string($value)."%'";
+			return " LIKE '%".mysql_real_escape_string($value)."%'";
 		}
 	}
 
