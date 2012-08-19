@@ -575,6 +575,44 @@ class Controller extends EventDispatcher
         return $r;
     } // end getParams
 
+    public function setImageResizeMagic($outfile, $infile, $neww, $newh = null)
+    {
+        $imageData = getimagesize($infile);
+
+        if (is_null($newh)) {
+            $ratio = $imageData[0] / $neww;
+            $ratio = $ratio == 0 ? 1 : $ratio;
+
+            $thumbWidth = round($imageData[0]/$ratio);
+            $thumbHeight = round($imageData[1]/$ratio);
+        } else {
+            $thumbWidth = $neww;
+            $thumbHeight = $newh;
+        }
+
+        // create thumb
+        $zoomKoef = 1.15;
+        $kw = $zoomKoef * $thumbWidth / $imageData[0];
+        $kh = $zoomKoef * $thumbHeight / $imageData[1];
+        $maxKoef = max($kw, $kh);
+        $width = (int)($maxKoef * $imageData[0]);
+        $height = (int)($maxKoef * $imageData[1]);
+        $cropx = (int)(($width - $thumbWidth) / 2);
+        $cropy = (int)(($height - $thumbHeight) / 2);
+
+        $convertPath = $this->getOption("convert_path");
+        if (!$convertPath) {
+           throw new SystemException(__("Undefined convert_path in options"));
+        }
+
+        $cmd = $convertPath." -resize ".$width."x".$height." -crop {$thumbWidth}x{$thumbHeight}+".$cropx."+".$cropy;
+        $cmd .= " ".$infile." ".$outfile;
+
+        $this->exec($cmd);
+
+        return true;
+    } // end setImageResizeMagic
+
     public function setImageResize($outfile, $infile, $neww, $newh = null, $options = array() )
     {
         $image_info = getimagesize($infile);
@@ -829,7 +867,7 @@ class Controller extends EventDispatcher
 
     public function getOption($name)
     {
-        return $this->_options[$name];
+        return isset($this->_options[$name]) ? $this->_options[$name] : false;
     }
 
     public function &getObject($objectName, $pluginName = false)
@@ -887,6 +925,18 @@ class Controller extends EventDispatcher
 
     	return __($params['value']);
     } // end getLangSmarty
+
+
+    public function exec($cmd)
+    {
+        $res = exec($cmd, $output, $ret);
+        if ($ret !== 0) {
+            throw new Exception("Can't exec: ".$cmd);
+        }
+
+        return $res;
+    }
+
 }
 
 //FIXME:

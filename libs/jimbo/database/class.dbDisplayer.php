@@ -29,7 +29,7 @@ class dbDisplayer extends EventDispatcher
 	function performDisplay($action) {
 
 		if (isset($_GET['ID'])) {
-			if (!$this->tblAction->loadRow(mysql_escape_string($_GET['ID']))) {
+			if (!$this->tblAction->loadRow(mysql_real_escape_string($_GET['ID']))) {
 				$action = 'error';
 				$errorType = 'invalidRow';
 			}

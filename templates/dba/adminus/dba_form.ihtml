@@ -71,26 +71,24 @@ jQuery(document).ready(function() {
 
 
 {literal}
+<style>
+.ui-tooltip-jf-form {
+	background: #CCCCCC;
+	color: black;
+	text-align: center;
+	border-width: 5px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+}
+</style>
 <script>
 
 $('.dba_form_fields tr').each(function(index) {
 	className = (index % 2 == 0) ? 'odd' : 'even';
 	$(this).attr('class', className);
 });
-
-$.fn.qtip.styles.mystyle = {
-   width: 400,
-   background: '#CCCCCC',
-   color: 'black',
-   textAlign: 'center',
-   border: {
-      width: 5,
-      radius: 3,
-      color: '#CCCCCC'
-   },
-   tip: 'bottomLeft',
-   name: 'dark' // Inherit the rest of the attributes from the preset dark style
-}
 
 function doTip(el, tip) {
 	$('#'+el).qtip({
@@ -104,7 +102,9 @@ function doTip(el, tip) {
       }
    },
 	style: { 
-      name: 'mystyle'
+		width: 400,
+		tip: 'bottomLeft',
+		name: 'ui-tooltip-jf-form'
    }
 });
 
