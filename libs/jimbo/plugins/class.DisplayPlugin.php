@@ -1,5 +1,5 @@
 <?php
-class DisplayPlugin extends BaseJimboPlugin
+class DisplayPlugin extends ObjectJimboPlugin
 {
     private $vars = array();
 

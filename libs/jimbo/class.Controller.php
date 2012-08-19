@@ -19,8 +19,8 @@ require_once $__jimboLibPath.'/fields/custom.php';
 
 require_once $__jimboLibPath.'/plugins/class.AbstractPlugin.php';
 require_once $__jimboLibPath.'/plugins/class.BaseJimboPlugin.php';
-require_once $__jimboLibPath.'/plugins/class.DisplayPlugin.php';
 require_once $__jimboLibPath.'/plugins/class.ObjectJimboPlugin.php';
+require_once $__jimboLibPath.'/plugins/class.DisplayPlugin.php';
 require_once $__jimboLibPath.'/plugins/class.SqlJimboPlugin.php';
 
 require_once $__jimboLibPath.'/class.JimboUser.php';
@@ -416,7 +416,7 @@ class Controller extends EventDispatcher
         switch($type) {
             case 'iframe':
                 header('Content-Type: text/html; charset='.$this->getOption("charset"));
-                echo "<script>parent.setIframeResponse('".mysql_escape_string($json)."');</script>";
+                echo "<script>parent.setIframeResponse('".mysql_real_escape_string($json)."');</script>";
                 break;
             default:
                 header('Content-type: application/json');
@@ -496,6 +496,12 @@ class Controller extends EventDispatcher
         return true;
     } // end addProperties
 
+    public function getProperties($key)
+    {
+        return isset($this->properties[$key]) ?  $this->properties[$key] : false;
+    }
+
+
 
     public function getUrl($url)
     {
@@ -569,11 +575,13 @@ class Controller extends EventDispatcher
         return $r;
     } // end getParams
 
-    public static function setImageResize($outfile, $infile, $neww, $newh = null, $quality = 100)
+    public function setImageResize($outfile, $infile, $neww, $newh = null, $options = array() )
     {
         $image_info = getimagesize($infile);
 
-        if (!$image_info) {
+        $quality = isset($options['quality']) ? $options['quality'] : 100;
+
+        if(!$image_info) {
             return false;
         }
 
@@ -591,25 +599,25 @@ class Controller extends EventDispatcher
                 break;
         }
 
-        if (!$im) {
+        if(!$im) {
             return false;
         }
 
         $w_src = imagesx($im);
         $h_src = imagesy($im);
 
-        if (!$w_src || !$h_src) {
+        if(!$w_src || !$h_src) {
             return false;
         }
 
-        if (is_null($newh)) {
+        if(is_null($newh)) {
             // вычисление пропорций
             $ratio = $w_src / $neww;
             $ratio = $ratio == 0 ? 1 : $ratio;
 
             $w_dest = round($w_src/$ratio);
             $h_dest = round($h_src/$ratio);
-        } else if (is_null($neww)) {
+        } else if(is_null($neww)) {
             $ratio = $h_src / $newh;
             $ratio = $ratio == 0 ? 1 : $ratio;
 
@@ -620,28 +628,104 @@ class Controller extends EventDispatcher
             $h_dest = $newh;
         }
 
-        $imResult = imagecreatetruecolor($w_dest, $h_dest);
+        $im1 = imagecreatetruecolor($w_dest,$h_dest);
 
-        if (!$imResult) {
+        if(!$im1) {
             return false;
         }
 
-        if (!imagecopyresampled($imResult, $im, 0, 0, 0, 0, $w_dest, $h_dest, $w_src, $h_src)) {
+        if(!imagecopyresampled($im1, $im, 0, 0, 0, 0, $w_dest, $h_dest, $w_src, $h_src)) {
             return false;
         }
 
-        if (!imagejpeg($imResult, $outfile, $quality)) {
+        if(isset($options['watermark'])) {
+            $im1 = self::create_watermark($im1, $options['watermark'], $options['font']);
+            if(!$im1) {
+                return false;
+            }
+        }
+
+        if(!imagejpeg($im1, $outfile, $quality)) {
             return false;
         }
 
         imagedestroy($im);
-        imagedestroy($imResult);
+        imagedestroy($im1);
 
         chmod($outfile, 0777);
         chmod($outfile, 0777);
 
         return true;
     }// end setImageResize
+
+    public static function create_watermark($main_img_obj, $text, $font, $r = 0, $g = 0, $b = 255, $alpha_level = 95)
+    {
+        $width = imagesx($main_img_obj);
+        $height = imagesy($main_img_obj);
+        $angle =  -rad2deg(atan2((-$height),($width)));
+
+        $text = " ".$text." ";
+
+        $c = imagecolorallocatealpha($main_img_obj, $r, $g, $b, $alpha_level);
+        if(!$c) {
+            return false;
+        }
+        $size = (($width+$height)/2)*2/strlen($text);
+
+
+        $box  = imagettfbbox($size, $angle, $font, $text);
+        if(!$box) {
+            return false;
+        }
+
+        //$x = $width/2 - abs($box[4] - $box[0])/2;
+        //$y = ($height/2 + abs($box[5] - $box[1])/2) + 15;
+        $angle = 45;
+        $x = -50;
+        $y = ($height/6 + abs($box[5] - $box[1])/2);
+
+        $res = imagettftext($main_img_obj, $size ,$angle, $x, $y, $c, $font, $text);
+        if(!$res) {
+            return false;
+        }
+
+
+        $x = $width/2 - abs($box[4] - $box[0])/2;
+        $y = ($height/3 + abs($box[5] - $box[1])/2);
+
+        $res = imagettftext($main_img_obj,$size ,$angle, $x, $y, $c, $font, $text);
+        if(!$res) {
+        	return false;
+        }
+
+        $x = $width/2 - abs($box[4] - $box[0])/2;
+        $y += $height/5 + $size;
+
+        $res = imagettftext($main_img_obj,$size ,$angle, $x, $y, $c, $font, $text);
+        if(!$res) {
+        	return false;
+        }
+
+        /*
+        $x = $width/2 - abs($box[4] - $box[0])/2;
+        $y = ($height/2 + abs($box[5] - $box[1])/2) + ($size + $size / 2);
+
+        $res = imagettftext($main_img_obj,$size ,$angle, $x, $y, $c, $font, $text);
+        if(!$res) {
+        	return false;
+        }
+        */
+
+
+        /*
+        $res = imagettftext($main_img_obj, $size , 0, 0, $height/2, $c, $font, $text);
+        if(!$res) {
+            return false;
+        }
+        */
+
+        return $main_img_obj;
+    }
 
 
     /**
