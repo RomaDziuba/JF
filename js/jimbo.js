@@ -314,7 +314,7 @@ function dbaListActions(select)
     select.selectedIndex = 0;
 } // end dbaListActions
 
-function loadContent(url, id)
+function loadContent(url, id, callback)
 {
 	id = (id == undefined) ? 'loader' : id;
 
@@ -325,6 +325,9 @@ function loadContent(url, id)
 	obj = $("#" + id);
 
 	obj.load(url, function() {
+		if (callback) {
+			callback(data);
+		}
 	});
 } // end loadContent
 

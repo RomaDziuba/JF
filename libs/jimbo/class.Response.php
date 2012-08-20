@@ -7,6 +7,7 @@ class Response
     const JSON        = 'json';
     const JSON_JS     = 'json_js';
     const JSON_IFRAME = 'json_iframe';
+    const JSON_P      = 'jsonp';
 
     protected $type;
 
@@ -99,6 +100,10 @@ class Response
             echo "<script>parent.Jimbo.responseIframe('".json_encode($this->response)."');</script>";
         } else if ($this->type == self::JSON_JS) {
             echo "<script>Jimbo.responseIframe('".json_encode($this->response)."');</script>";
+        } else if ($this->type == self::JSON_P) {
+            $callbakFunctionName = isset($_REQUEST['callback']) ? $_REQUEST['callback'] : 'jsonpCallback';
+            header('Content-Type: text/javascript');
+            echo $callbakFunctionName . '('.json_encode($this->response).')';
         }
 
         exit();
