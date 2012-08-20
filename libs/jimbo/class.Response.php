@@ -85,17 +85,20 @@ class Response
     {
         global $jimbo;
 
-        if ($this->type == self::JSON) {
-
+        if ($this->type != self::NORMAL) {
             if ($this->notifications) {
-               $this->response['notifications'] = $this->notifications;
+                $this->response['notifications'] = $this->notifications;
             }
+        }
 
+        if ($this->type == self::JSON) {
             $jimbo->json($this->response);
         } else if ($this->type == self::NORMAL) {
             $this->_processing($plugin);
         } else if ($this->type == self::JSON_IFRAME) {
-            echo "<script>parent.setIframeResponse('".json_encode($this->response)."');</script>";
+            echo "<script>parent.Jimbo.responseIframe('".json_encode($this->response)."');</script>";
+        } else if ($this->type == self::JSON_JS) {
+            echo "<script>Jimbo.responseIframe('".json_encode($this->response)."');</script>";
         }
 
         exit();

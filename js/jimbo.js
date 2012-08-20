@@ -1,15 +1,24 @@
 var Jimbo = {
 	growlCreate: growl_create,
 	updateGrowls: growl_update,
-	growlTimer: growl_timer
+	growlTimer: growl_timer,
+
+	responseIframe: setIframeResponse,
+	response: jsonResponse
 };
 
 
 function jsonResponse(data)
 {
-	if(data['eval'] != undefined) {
+	if (data['eval'] != undefined) {
 		eval(data['eval']);
 	}
+
+	if (data['notifications'] != undefined) {
+		  jQuery.each(data['notifications'], function(index, msg) {
+			  Jimbo.growlCreate('Уведомление', msg, false);
+		  });
+    }
 
 	switch(data['type']) {
 		case 'error':
@@ -20,8 +29,15 @@ function jsonResponse(data)
 			dbaUpdateSuccess(data);
 			break;
 
+		case 'redirect':
+			if (data['url'] != undefined) {
+				setTimeout("document.location.replace('"+data['url']+"')", 1200);
+			}
+			break;
+
 		case 'alert':
-			showMessages(data['title'], data['message']);
+			var messages = !data['message'] ? data['messages'] : data['message'];
+			showMessages(data['title'], messages);
 			if(data['url'] != undefined) {
 				setTimeout("document.location.replace('"+data['url']+"')", 1200);
 			}
@@ -87,6 +103,7 @@ function showMessages(title, messages, height, width)
 	obj = $("#dialog-message");
 
 	$(obj).attr('title', title);
+	// FIXME: add template
 	$(obj).html(messages);
 
 	$(obj).dialog({
