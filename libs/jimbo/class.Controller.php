@@ -45,7 +45,7 @@ class Controller extends EventDispatcher
     public $properties = array();
 
     static private $_instance = null;
-    static private $_lastPluginOptions = null;
+//     static private $_lastPluginOptions = null;
 
     static private $_plugins = null;
 
@@ -238,7 +238,7 @@ class Controller extends EventDispatcher
         return preg_replace('#^'.$prefix.'#Umis', '/', $url);
     } // end getCurrentURL
 
-    public function &getPluginInstance($plugin, $params = array(), $options = array())
+    public function &getPluginInstance($plugin, $options = array())
     {
         if (isset(self::$_plugins[$plugin])) {
             return self::$_plugins[$plugin];
@@ -255,7 +255,7 @@ class Controller extends EventDispatcher
             if (defined('JIMBO_PLUGINS_PATH')) {
                 $path = JIMBO_PLUGINS_PATH;
             } else {
-                $path = realpath(dirname(__FILE__).'/../../../').'/jplugins/';
+                $path = $this->getOption("plugins_path");
             }
         }
 
@@ -309,13 +309,15 @@ class Controller extends EventDispatcher
 
     public function call($plugin, $method, $params = array(), $options = array())
     {
+        /*
         if ($options) {
             self::$_lastPluginOptions = $options;
         } else if(!is_null(self::$_lastPluginOptions)) {
             $options = self::$_lastPluginOptions;
         }
+        */
 
-        $obj = self::getInstance()->getPluginInstance($plugin, $params, $options);
+        $obj = $this->getPluginInstance($plugin, $options);
 
         if (!is_callable(array($obj, $method))) {
             throw new SystemException(sprintf(__('Method "%s" was not found in module "%s".'), $method, $plugin));
@@ -336,6 +338,10 @@ class Controller extends EventDispatcher
         );
 
         $rules = $urlRules + $systemRules;
+
+        if (!isset($callOptions['path'])) {
+            $callOptions['path'] = $this->getOption("plugins_path");
+        }
 
         foreach($rules as $regExp => $call) {
             if (preg_match($regExp, $currentUrl, $regs)) {
