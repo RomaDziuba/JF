@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
 * DB Admin
 *
@@ -8,10 +8,10 @@
 * @version 2.0
 */
 
-class dbAction 
+class dbAction
 {
     public $_options;
-    
+
     public $sessionData;
 	public $tableDefinition;
 	public $lastErrorMessage;
@@ -19,18 +19,18 @@ class dbAction
 	public $dbDriver;
 	public $currentRow;
 
-	public function __construct($dsn, $tblName, &$options) 
+	public function __construct($dsn, $tblName, &$options)
 	{
         global $dbAdminMessages;
-        
+
         $this->_options = &$options;
-        
+
         $this->sessionData = &$this->_options['session_data'];
-        
+
 		// подгружаем описание таблицы
 
 		$this->tblPath = $this->_options['defs_path'];
-		
+
 		$this->tableDefinition = $this->loadTableDefinition($tblName);
 
 		if (!$this->tableDefinition) {
@@ -43,11 +43,11 @@ class dbAction
 			$this->dbDriver = $dsn;
 		} else {
 			$this->dbDriver = MDB2::factory($dsn);
-			
+
 			if (PEAR::isError($this->dbDriver)) {
 			    throw new DatabaseException("Can't connect to database: ".$this->dbDriver->getMessage());
 			}
-			
+
 			$this->dbDriver->setFetchMode(MDB2_FETCHMODE_ASSOC);
 			$this->dbDriver->loadModule('Extended');
 		}
@@ -59,12 +59,12 @@ class dbAction
 		} else {
 			$tblAlias = $this->tableDefinition->name;
 		}
-		
+
 		$this->alias = $tblAlias;
 	}
 
 	function loadTableData($action = 'list') {
-		
+
 
 		$tblName = $this->tableDefinition->name;
 
@@ -77,9 +77,9 @@ class dbAction
 			$fields[] = $groupby.' AS _group_field';
 		}
 
-		
+
 		// init filters
-		
+
 		if (!isset($this->sessionData['DB_FILTERS'][$tblName])) {
 			$this->sessionData['DB_FILTERS'][$tblName] = array();
 			foreach ($this->tableDefinition->fields as $item) {
@@ -89,7 +89,7 @@ class dbAction
 				}
 			}
 		}
-		
+
 		if ($customSQL = $this->tableDefinition->getAttribute('customSQL')) {
 		} else {
 
@@ -206,7 +206,7 @@ class dbAction
                     if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
                         $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
                     }
-                    
+
                     if (isset($value)) {
                         $where[] = $value == 'NULL' ? $tblName.".".$field." IS NULL" : $tblName.".".$field." IN ($value)";
                     }
@@ -331,7 +331,7 @@ class dbAction
 	}
 
 	function loadRow($id) {
-		
+
 		if (!in_array($id, (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias])) {
 			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
 			die;*/
@@ -361,7 +361,7 @@ class dbAction
 		}
 	}
 
-	function performAction($action, $needRedirect = true) 
+	function performAction($action, $needRedirect = true)
 	{
 		$this->adjustPostData();
 		$baseURL = '?';
@@ -386,13 +386,13 @@ class dbAction
 
 
 		if (!empty($this->tableDefinition->attributes['customHandler'])) {
-		    
-            
+
+
 			include_once $this->getOption('handlers_path').$this->tableDefinition->attributes['customHandler'].'.php';
 			if (class_exists('customTableHandler')) {
 				$customHandler = new customTableHandler($this);
 				$customHandler->params = $this->getOption('handler_params');
-				
+
 				if (method_exists ($customHandler, 'handle')) {
 					$info = array('action' => 'post');
 					$handledEvent = $customHandler->handle($info);
@@ -417,16 +417,16 @@ class dbAction
 			if (isset($actionInfo['relation'])) {
 				$action = 'relation';
 			}
-			
+
 			$transactionActions = array('save', 'insert', 'remove');
 			if (in_array($action, $transactionActions)) {
-				
+
 				if (!$this->dbDriver->inTransaction()) {
 					$this->dbDriver->beginTransaction();
 					$isTransaction = true;
 				}
 			}
-			
+
 			switch ($action) {
 				case "save": {
 					$status = $this->updateDBItem();
@@ -467,7 +467,7 @@ class dbAction
 			if ($isTransaction) {
 				$this->dbDriver->rollback();
 			}
-			
+
 			$this->error();
 		}
 
@@ -475,16 +475,16 @@ class dbAction
 			if (isset($customHandler) && method_exists ($customHandler, 'afterCommit')) {
 				$customHandler->afterCommit($this->updateInfo);
 			}
-			
+
 			if (!empty($this->updateInfo['lastErrorMessage'])) {
 				$this->lastErrorMessage = $this->updateInfo['lastErrorMessage'];
 				if ($isTransaction) {
 					$this->dbDriver->rollback();
 				}
-				
+
 				$this->error();
 			}
-			
+
 			if ($isTransaction) {
 				$this->dbDriver->commit();
 			}
@@ -498,7 +498,7 @@ class dbAction
 				'url'        => $newLocation,
 				'isPoupMode' => $isPoupMode
 			);
-			
+
 			$this->jsonResponse($response);
 		}
 
@@ -509,23 +509,23 @@ class dbAction
 
 		return true;
 	}
-	
+
 	public function error()
 	{
 		$message = empty($this->lastErrorMessage) ? __('ERR_UNKNOWN') : $this->lastErrorMessage;
-		
+
 		$response = array(
 			'type'    => 'error',
 			'message' => $this->getText($message)
 		);
-		
+
 		$this->jsonResponse($response);
 	} // end error
-	
+
 	public function jsonResponse($response)
 	{
 		header('Content-Type: text/html; charset='.$this->getOption('charset'));
-		
+
 		// TODO: Move to root logic
 		$json = json_encode($response);
 		echo "<script>parent.setIframeResponse('".mysql_real_escape_string($json)."');</script>";
@@ -553,18 +553,18 @@ class dbAction
 	private function prepareQueryParams()
 	{
 	    $primaryKey = $this->tableDefinition->getAttribute('primaryKey');
-	    
+
 	    $columns   = array();
 	    $values    = array();
 	    $many2many = array();
 		$toUpload  = array();
 
 		foreach ($this->tableDefinition->fields as $info) {
-		    
+
 		    if ($info->attributes['type'] == 'readonly') {
                 continue;
 		    }
-		    
+
 		    $value = null;
 
 		    $isProcessing = true;
@@ -573,9 +573,9 @@ class dbAction
 			        $many2many[] = $info;
 				    $isProcessing = false;
 			    } break;
-			    
+
 			    case 'file': {
-			    	
+
     			    if (empty($_FILES[$info->name]['name'])) {
     					$isProcessing = false;
     				}
@@ -583,13 +583,13 @@ class dbAction
 	    				$value =  $info->getValue();
 	    				$toUpload[] = $info;
     				}
-    				
+
 			    } break;
-			    
-			    default: 
+
+			    default:
                     $value = $info->getValue($_POST);
 			} // end switch
-			
+
 			if (!$isProcessing) {
 				continue;
 			}
@@ -599,20 +599,20 @@ class dbAction
                 $this->lastErrorMessage = $info->lastErrorMessage;
                 return false;
             }
-			
+
 		    if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
 				continue;
 			}
-			
+
 			$columns[] = $this->dbDriver->escape($info->name);
 			$values[] = $this->dbDriver->quote($value);
 		} // end foreach
-		
+
 		return array($columns, $values, $many2many, $toUpload);
 	} // end prepareQueryParams
 
 	function prepareAddonWhere($value, $currentValue = false) {
-		
+
 		$value = @preg_replace_callback("#S%(.+?)%#", create_function('$matches', 'return $GLOBALS["_sessionData"][$matches[1]];'), $value);
 		if ($currentValue !== false) {
 			if (is_null($currentValue)) {
@@ -731,15 +731,15 @@ class dbAction
 		elSel.options.add(oOption);';
 		}
 		echo '<script>
-		
+
 		var elSel = parent.document.getElementById("'.$_GET['ajaxChild'].'");
   		var i;
 		for (i = elSel.length - 1; i>=0; i--) {
 			elSel.remove(i);
 		}
-		
+
 	'.$html.'
-	
+
 	</script>';
 		die;
 
@@ -833,7 +833,7 @@ class dbAction
 		}
 		// Сохраняем саму строку
 		$this->loadRow($itemID);
-		
+
 		// Удаляем данные для дочерхних таблиц
 		if (isset($this->tableDefinition->actions['child'])) {
 			$relation = $this->tableDefinition->relations['child'][$this->tableDefinition->actions['child']['relation']];
@@ -883,17 +883,17 @@ class dbAction
 	// ------------------------------------------
 	// ------- Добавление записи в базу  --------
 	// ------------------------------------------
-    function insertDBItem() 
+    function insertDBItem()
     {
-		
-		
+
+
 		$result = $this->prepareQueryParams();
 		if($this->wasError) {
 		    return false;
 		}
 
 		list($columns, $values, $many2many, $toUpload) = $result;
-		
+
 		if (isset($_POST['__token'])) {
 			if (isset($this->sessionData['insert'][$_POST['__token']])) {
 				$tokenData = $this->sessionData['insert'][$_POST['__token']];
@@ -907,10 +907,10 @@ class dbAction
 				return false;
 			}
 		}
-		
+
 		$sql = 'INSERT INTO '.$this->tableDefinition->name.' ';
 		$sql .= " (".join(", ", $columns).") values (".$this->prepareAddonWhere(join(", ", $values)).") ";
-		
+
 		$result = $this->dbDriver->query($sql);
 		if (PEAR::isError($result)) {
 			$this->mysqlerror2text($result, 'insert');
@@ -929,9 +929,9 @@ class dbAction
 
 		return true;
 	} // end insertDBItem
-	
+
 	function createInsertToken() {
-		
+
 
 
 		$token = md5(rand());
@@ -1004,7 +1004,7 @@ class dbAction
 			// FIXME: @bred нелогично что нет возможности изменить путь сохранения файлов
 			$uploadPath = !empty($info->attributes['uploadDirPath']) ? $info->attributes['uploadDirPath'] : $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
 			#$uploadPath = $this->_options['base_path'].'storage/'.$this->tableDefinition->name.'/';
-			
+
 			if (!is_dir($uploadPath)) {
 			    mkdir($uploadPath, 0777, true);
 			}
@@ -1038,7 +1038,7 @@ class dbAction
 		}
 	}
 
-	function updateDBItem() 
+	function updateDBItem()
 	{
 		if (!is_numeric($_GET['ID'])) {
 			return false;
@@ -1051,12 +1051,12 @@ class dbAction
 		}
 
 		list($columns, $values, $many2many, $toUpload) = $result;
-		
+
 		$rows = array();
 		foreach($columns as $index => $column) {
             $rows[] = $column . " = ".$values[$index];
 		}
-		
+
 		$sql = 'UPDATE '.$this->tableDefinition->name.' SET '.join(', ', $rows);
 		$sql .= ' WHERE '.$this->tableDefinition->primaryKey. ' = '.(int)$id;
 
@@ -1128,7 +1128,7 @@ class dbAction
 
 
 	function followRelation($action) {
-		
+
 
 		$relation = $this->tableDefinition->relations[$action['type']][$action['relation']];
 		if (empty($relation)) {
@@ -1199,14 +1199,14 @@ class dbAction
 		}
 
 		$url = str_replace("/".$this->sessionData['DB_CURRENT_TABLE']."/", "/".$relation['foreignTable']."/", $this->getHttpPath());
-		
+
 		header("Location: ".$url);
 		die();
 	}
 
 
 	function getOrderDirection() {
-		
+
 		$tblName = $this->tableDefinition->name;
 
 		// Мы уже один раз считали сортировку
@@ -1277,12 +1277,12 @@ class dbAction
 
 	function getFieldString($field, $table, $as = false) {
 		$value = strpos($field, '(') ? $field : $table.".".$field;
-		
+
 		// Fix for multiple join table
 		if (preg_match("#as\s([\.a-zA-z]+)#", $value, $match)) {
 			$value = $match[1];
 		}
-		
+
 		if ($as) {
 			$value .= ' as '.$as;
 		}
@@ -1308,12 +1308,12 @@ class dbAction
 		$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		return $path;
 	} // end getHttpPath
-	
+
 	public function getOption($name)
 	{
-	    return isset($this->_options[$name]) ? $this->_options[$name] : false; 
+	    return isset($this->_options[$name]) ? $this->_options[$name] : false;
 	}
-    
-} 
+
+}
 
 ?>

@@ -12,7 +12,7 @@
 class tableDefinition {
 
     public $tblAction;
-    
+
 	var $name = '';
 	var $fields = array();
 	var $defaultOrder = array();
@@ -45,14 +45,10 @@ class tableDefinition {
 			$this->raiseError("Cant open file $file for reading!");
 			return false;
 		}
-		
+
 		$tpl = dbDisplayer::getTemplateInstance();
-		try {
-            $info = Controller::call('TblDefinition', 'definition', array(&$tpl));
-		} catch( Exception $exp) {
-		    $info = array();
-		}
-		
+		$info = array();
+
         $tableDef = trim($tpl->fetch($file));
 
 		$xmlObj = simplexml_load_string($tableDef);
