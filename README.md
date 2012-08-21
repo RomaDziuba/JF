@@ -29,3 +29,12 @@ Jimbo.showLoadingBar('#container', {
 
 Jimbo.hideLoadingBar('#container');
 ```
+``` css
+.loading {
+	height: 80px;
+	width: 80px;
+	background: url('/images/loading.gif');
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+```
