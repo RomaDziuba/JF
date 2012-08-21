@@ -26,9 +26,9 @@ datetime
 		sorting="true" />
 ```
 Specific attributes:
-*default* - default date value,
-*format* - date format, [see strftime](http://php.net/manual/ru/function.strftime.php),
-*length* - deprecated, better use attribute format
+* *default* - default date value,
+* *format* - date format, [see strftime](http://php.net/manual/ru/function.strftime.php),
+* *length* - deprecated, better use attribute format
 
 wysiwyg
 -------------------------
@@ -50,8 +50,8 @@ file
 		fileName="wphid__ID__.jpg" />
 ```
 Specific attributes:
-*thumb* - dimension of image thumb, used only if field upload images,
-*fileName* - template for file name, __ID__ will be change to row id
+* *thumb* - dimension of image thumb, used only if field upload images,
+* *fileName* - template for file name, __ID__ will be change to row id
 
 
 Jimbo JavaScript Functions
