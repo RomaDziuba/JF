@@ -4,7 +4,9 @@ var Jimbo = {
 	growlTimer: growl_timer,
 
 	responseIframe: setIframeResponse,
-	response: jsonResponse
+	response: jsonResponse,
+	showLoadingBar: system_showLoadingBar,
+	hideLoadingBar: system_hideLoadingBar
 };
 
 
@@ -545,6 +547,82 @@ function growl_create(caption, desc, persistent)
         }
     }).removeData('qtip');
 } // end system_createGrowl
+
+function system_showLoadingBar(selector, options)
+{
+	var defaults = {
+		className: 'loading',
+		zindex: 5000,
+		hPos: 'center',
+   		vPos: 'center',
+	}
+
+	var options =  $.extend(defaults, options);
+
+	var container = jQuery(selector);
+	if (container.length == 0) {
+		return false;
+	}
+
+	var loaderID = jQuery(container).attr('id');
+
+	var loadingDiv = jQuery('<div></div>');
+
+	jQuery(loadingDiv).addClass(options.className);
+	jQuery(loadingDiv).addClass('jimbo-loader-' + loaderID);
+
+	jQuery(loadingDiv).css('display', 'none');
+	jQuery(document.body).append(loadingDiv);
+
+	jQuery(loadingDiv).css('position', 'absolute');
+	jQuery(loadingDiv).css('z-index', options.zindex);
+
+	var border_top_width = jQuery(container).css('border-top-width');
+	var border_left_width = jQuery(container).css('border-left-width');
+
+	//
+	// IE will return values like 'medium' as the default border,
+	// but we need a number
+	//
+	border_top_width = isNaN(parseInt(border_top_width)) ? 0 : border_top_width;
+	border_left_width = isNaN(parseInt(border_left_width)) ? 0 : border_left_width;
+
+	var indicatorLeft = jQuery(container).offset().left +  parseInt(border_left_width);
+	var indicatorTop = jQuery(container).offset().top + parseInt(border_top_width);
+
+	var overlay_width = parseInt(jQuery(container).width()) + parseInt(jQuery(container).css('padding-right')) + parseInt(jQuery(container).css('padding-left'));
+	var overlay_height = parseInt(jQuery(container).height()) + parseInt(jQuery(container).css('padding-top')) + parseInt(jQuery(container).css('padding-bottom'));
+
+
+	if ( options.hPos.toString().toLowerCase() == 'center' ) {
+		jQuery(loadingDiv).css('left', (indicatorLeft + ((overlay_width - parseInt(jQuery(loadingDiv).width())) / 2)).toString()  + 'px');
+	} else if ( options.hPos.toString().toLowerCase() == 'left' ) {
+		jQuery(loadingDiv).css('left', (indicatorLeft + parseInt(jQuery(container).css('margin-left'))).toString() + 'px');
+	} else if ( options.hPos.toString().toLowerCase() == 'right' ) {
+		jQuery(loadingDiv).css('left', (indicatorLeft + (overlay_width - parseInt(jQuery(loadingDiv).width()))).toString()  + 'px');
+	} else {
+		jQuery(loadingDiv).css('left', (indicatorLeft + parseInt(options.hPos)).toString() + 'px');
+	}
+
+	if ( options.vPos.toString().toLowerCase() == 'center' ) {
+		jQuery(loadingDiv).css('top', (indicatorTop + ((overlay_height - parseInt(jQuery(loadingDiv).height())) / 2)).toString()  + 'px');
+	} else if ( options.vPos.toString().toLowerCase() == 'top' ) {
+		jQuery(loadingDiv).css('top', indicatorTop.toString() + 'px');
+	} else if ( options.vPos.toString().toLowerCase() == 'bottom' ) {
+		jQuery(loadingDiv).css('top', (indicatorTop + (overlay_height - parseInt(jQuery(loadingDiv).height()))).toString()  + 'px');
+	} else {
+		jQuery(loadingDiv).css('top', (indicatorTop + parseInt(options.vPos)).toString() + 'px' );
+	}
+
+	jQuery(loadingDiv).show();
+
+} // end system_showLoadingBar
+
+function system_hideLoadingBar(selector)
+{
+	var loaderID = jQuery(selector).attr('id');
+	jQuery('.jimbo-loader-' + loaderID).remove();
+} // end system_hideLoadingBar
 
 
 $(document).ready(function() {

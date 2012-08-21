@@ -13,3 +13,19 @@ $(document).ready(function() {
 });
 </script>
 ```
+
+Show loading bar in html element
+-------------------------
+
+``` js
+Jimbo.showLoadingBar('#container');
+Jimbo.showLoadingBar($('#container'));
+Jimbo.showLoadingBar('#container', {
+	className: 'loading',
+	zindex: 5000,
+	hPos: 'center',
+	vPos: 'center'
+});
+
+Jimbo.hideLoadingBar('#container');
+```
