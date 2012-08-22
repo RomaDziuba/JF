@@ -1,4 +1,6 @@
 var Jimbo = {
+	base: '/',
+
 	growlCreate: growl_create,
 	updateGrowls: growl_update,
 	growlTimer: growl_timer,
@@ -12,6 +14,7 @@ var Jimbo = {
 
 function jsonResponse(data)
 {
+	console.log(data);
 	if (data['eval'] != undefined) {
 		eval(data['eval']);
 	}
@@ -23,6 +26,11 @@ function jsonResponse(data)
     }
 
 	switch(data['type']) {
+		case 'notifications':
+			jQuery.each(data['messages'], function(index, msg) {
+				  Jimbo.growlCreate(data['title'], msg, false);
+			});
+			break;
 		case 'error':
 			dbaUpdateError(data);
 			break;
@@ -44,6 +52,10 @@ function jsonResponse(data)
 				setTimeout("document.location.replace('"+data['url']+"')", 1200);
 			}
 			break;
+	}
+
+	if (data['js'] != undefined) {
+		eval(data['js']);
 	}
 
 	return true;
@@ -349,7 +361,7 @@ $.getViewHeight = function() {
 
 function showLoadingBar()
 {
-	base = jimbo.base == undefined ? '/' : jimbo.base;
+	var base = (Jimbo.base == undefined) ? '/' : Jimbo.base;
 	obj = $("#loadingBar");
 	if(obj.length == 0) {
 		$('body').append('<div id="loadingBar" align="center"><img src="' + base + 'images/load.gif" /></div>');
