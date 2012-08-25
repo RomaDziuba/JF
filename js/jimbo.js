@@ -330,17 +330,18 @@ function dbaListActions(select)
 
 function loadContent(url, id, callback)
 {
-	id = (id == undefined) ? 'loader' : id;
+	var id = (id == undefined) ? 'loader' : id;
 
-	obj = $("#" + id);
+	var obj = $("#" + id);
 	if(obj.length == 0) {
-		$('body').append('<div id="'+id+'"></div>');
+		obj = $('<div id="'+id+'"></div>');
+		obj.css("display", "none");
+		$('body').append(obj);
 	}
-	obj = $("#" + id);
 
-	obj.load(url, function() {
+	obj.load(url, function(data) {
 		if (callback) {
-			callback(data);
+			callback(data, obj);
 		}
 	});
 } // end loadContent

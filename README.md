@@ -1,5 +1,16 @@
 For translation file we recommend use http://www.poedit.net/download.php
 
+Response
+================================
+
+``` php
+$response = new Response(Response::JSON);
+
+$response->addParam("status", false);
+
+$response->send();
+```
+
 Database Table Xml
 ================================
 

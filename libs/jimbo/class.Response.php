@@ -36,9 +36,15 @@ class Response
         $this->response['type'] = $type;
     }
 
-    public function addParam($name, $value)
+    public function addParam($name, $value = false)
     {
-        $this->response[$name] = $value;
+        if (is_array($name)) {
+            foreach ($name as $n => $value) {
+                $this->response[$n] = $value;
+            }
+        } else {
+            $this->response[$name] = $value;
+        }
     }
 
     public function addMessage($message)
