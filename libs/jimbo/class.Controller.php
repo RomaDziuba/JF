@@ -876,19 +876,21 @@ class Controller extends EventDispatcher
         return isset($this->_options[$name]) ? $this->_options[$name] : false;
     }
 
-    public function &getObject($objectName, $pluginName = false)
+    public function &getObject($objectName, $pluginName = false, $path = false)
     {
         if (!isset($this->db)) {
             throw new SystemException(__("Undefined db connection in jimbo controller"));
         }
 
-        if ($pluginName) {
-        	if (is_bool($pluginName)) {
-        		$pluginName = $objectName;
-        	}
-            $path = $this->getOption("plugins_path").$pluginName.'/';
-        } else {
-            $path = $this->getOption("objects_path");
+        if (!$path) {
+            if ($pluginName) {
+            	if (is_bool($pluginName)) {
+            		$pluginName = $objectName;
+            	}
+                $path = $this->getOption("plugins_path").$pluginName.DIRECTORY_SEPARATOR;
+            } else {
+                $path = $this->getOption("objects_path");
+            }
         }
 
         $obj = Object::getInstance($objectName, $this->db, $path);

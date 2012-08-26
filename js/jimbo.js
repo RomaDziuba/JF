@@ -1,5 +1,6 @@
 var Jimbo = {
 	base: '/',
+	mode: 'jquery',
 
 	growlCreate: growl_create,
 	updateGrowls: growl_update,
@@ -8,13 +9,17 @@ var Jimbo = {
 	responseIframe: setIframeResponse,
 	response: jsonResponse,
 	showLoadingBar: system_showLoadingBar,
-	hideLoadingBar: system_hideLoadingBar
+	hideLoadingBar: system_hideLoadingBar,
+
+	dialog: system_dialog,
+	confirm: system_confirm
 };
 
 
 function jsonResponse(data)
 {
-	console.log(data);
+	hideLoadingBar();
+
 	if (data['eval'] != undefined) {
 		eval(data['eval']);
 	}
@@ -63,7 +68,7 @@ function jsonResponse(data)
 
 function dbaUpdateError(data)
 {
-	if(typeof(jimbo) == undefined || jimbo.mode != 'jquery') {
+	if (Jimbo.mode != 'jquery') {
 		/*text = $('<textarea class="errorlog" style="margin:0px;" readonly="readonly"></textarea>');
 		$('#form_actions>td').append(text);*/
 	}
@@ -100,25 +105,29 @@ function dbaUpdateSuccess(data)
 
 function setIframeResponse(jsonStr)
 {
-	hideLoadingBar();
 	var data = eval('(' + jsonStr + ')');
 	jsonResponse(data);
 } // end setIframeResponse
 
 function showMessages(title, messages, height, width)
 {
-	widthDialog = width == undefined ? 400 : width;
-	heightDialog = height == undefined ? 280 : height;
+	var widthDialog = width == undefined ? 400 : width;
+	var heightDialog = height == undefined ? 280 : height;
 
-	obj = $("#dialog-message");
+	var obj = $("#dialog-message");
 	if(obj.length == 0) {
-		$('body').append('<div id="dialog-message"></div>');
+		obj = $('body').append('<div id="dialog-message"></div>');
 	}
-	obj = $("#dialog-message");
 
 	$(obj).attr('title', title);
 	// FIXME: add template
-	$(obj).html(messages);
+	$(obj).html("");
+
+	$(messages).each(function() {
+		var item = $("<p>" + this + "</p>");
+		$(obj).append(item);
+	});
+
 
 	$(obj).dialog({
 		modal: true,
@@ -637,6 +646,73 @@ function system_hideLoadingBar(selector)
 	jQuery('.jimbo-loader-' + loaderID).remove();
 } // end system_hideLoadingBar
 
+
+function system_dialog(content, title)
+{
+		$('<div />').qtip(
+		{
+			content: {
+				text: content,
+				title: title
+			},
+			position: {
+				my: 'center', at: 'center', // Center it...
+				target: $(window) // ... in the window
+			},
+			show: {
+				ready: true, // Show it straight away
+				modal: {
+					on: true, // Make it modal (darken the rest of the page)...
+					blur: false // ... but don't close the tooltip when clicked
+				}
+			},
+			hide: false, // We'll hide it maunally so disable hide events
+			style: 'ui-tooltip-light ui-tooltip-rounded ui-tooltip-dialogue', // Add a few styles
+			events: {
+				// Hide the tooltip when any buttons in the dialogue are clicked
+				render: function(event, api) {
+					$('button', api.elements.content).click(api.hide);
+				},
+				// Destroy the tooltip once it's hidden as we no longer need it!
+				hide: function(event, api) { api.destroy(); }
+			}
+		});
+} // end system_dialog
+
+
+function system_confirm(params)
+{
+	var defaults = {
+		title: 'Confirm',
+		okCaption: 'Ok',
+		cancelCaption: 'Cancel',
+		callback: null,
+		question: null
+    };
+
+	var options = $.extend(defaults, params);
+
+	if (!options.callback) {
+		return false;
+	}
+
+	var message = $('<p />', { text: options.question });
+	var ok = $('<button />', {
+		text: options.okCaption,
+		click: function() { options.callback(true); }
+	});
+
+	ok.css('float', 'right');
+
+	var cancel = $('<button />', {
+		text: options.cancelCaption,
+		click: function() { options.callback(false); }
+	});
+
+	cancel.css('float', 'right');
+
+	Jimbo.dialog( message.add(cancel).add(ok), options.title);
+}
 
 $(document).ready(function() {
 	$(document).delegate('.qtip.jgrowl', 'mouseover mouseout', Jimbo.growlTimer);

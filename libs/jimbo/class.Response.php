@@ -62,6 +62,12 @@ class Response
         return count($this->response['messages']);
     }
 
+    public function hasMessages()
+    {
+        return !empty($this->response['messages']);
+    }
+
+
 
     public function getType()
     {
