@@ -46,7 +46,7 @@ function jsonResponse(data)
 
 		case 'redirect':
 			if (data['url'] != undefined) {
-				setTimeout("document.location.replace('"+data['url']+"')", 1200);
+				setTimeout("document.location.replace('"+data['url']+"')", 3000);
 			}
 			break;
 
@@ -54,7 +54,7 @@ function jsonResponse(data)
 			var messages = !data['message'] ? data['messages'] : data['message'];
 			showMessages(data['title'], messages);
 			if(data['url'] != undefined) {
-				setTimeout("document.location.replace('"+data['url']+"')", 1200);
+				setTimeout("document.location.replace('"+data['url']+"')", 3000);
 			}
 			break;
 	}
@@ -105,6 +105,7 @@ function dbaUpdateSuccess(data)
 
 function setIframeResponse(jsonStr)
 {
+	console.log(jsonStr);
 	var data = eval('(' + jsonStr + ')');
 	jsonResponse(data);
 } // end setIframeResponse

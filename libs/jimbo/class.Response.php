@@ -2,6 +2,7 @@
 class Response
 {
     const ACTION_REDIRECT = "redirect";
+    const ACTION_ALERT = "alert";
 
     const NORMAL      = 'normal';
     const JSON        = 'json';
@@ -125,7 +126,7 @@ class Response
     {
         global $jimbo;
 
-        if ($this->response['type'] == 'redirect') {
+        if ($this->response['type'] == self::ACTION_REDIRECT) {
 
             if ($this->notifications) {
                 $jimbo->addParam("notifications", $this->notifications);
