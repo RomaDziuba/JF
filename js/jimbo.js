@@ -116,8 +116,10 @@ function showMessages(title, messages, height, width)
 	var heightDialog = height == undefined ? 280 : height;
 
 	var obj = $("#dialog-message");
-	if(obj.length == 0) {
-		obj = $('body').append('<div id="dialog-message"></div>');
+	console.log(obj);
+	if (obj.length == 0) {
+		obj = $('<div id="dialog-message"></div>');
+		$('body').append('<div id="dialog-message"></div>');
 	}
 
 	$(obj).attr('title', title);
@@ -129,14 +131,13 @@ function showMessages(title, messages, height, width)
 		$(obj).append(item);
 	});
 
-
 	$(obj).dialog({
 		modal: true,
 		width: widthDialog,
 		height:heightDialog,
 		buttons: {
 			Ok: function() {
-				$(this).dialog('close');
+				$(this).dialog('destroy').remove();
 			}
 		}
 	});
@@ -397,7 +398,7 @@ function showLoadingBar()
 
 function hideLoadingBar()
 {
-	$("#loadingBar").dialog("destroy");
+	$("#loadingBar").dialog("destroy").remove();
 }
 
 function doSelectTo(obj, id) {
