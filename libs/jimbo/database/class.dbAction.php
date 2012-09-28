@@ -37,21 +37,6 @@ class dbAction
 		    throw new Exception("Unrecognized xml format");
 		}
 
-		// подключение к БД
-		if (is_object($dsn)) {
-			// объект PEAR_DB
-			$this->dbDriver = $dsn;
-		} else {
-			$this->dbDriver = MDB2::factory($dsn);
-
-			if (PEAR::isError($this->dbDriver)) {
-			    throw new DatabaseException("Can't connect to database: ".$this->dbDriver->getMessage());
-			}
-
-			$this->dbDriver->setFetchMode(MDB2_FETCHMODE_ASSOC);
-			$this->dbDriver->loadModule('Extended');
-		}
-
 		$this->tableName = $tblName;
 
 		if (isset($this->tableDefinition->attributes['alias'])) {
@@ -60,8 +45,43 @@ class dbAction
 			$tblAlias = $this->tableDefinition->name;
 		}
 
+		$this->dbDriver = $this->getDbDriverByDsn($dsn);
+
 		$this->alias = $tblAlias;
 	}
+
+	/**
+	 * Returns connection to database
+	 *
+	 * @param string|object $dsn
+	 * @throws Exception
+	 * @return mixed
+	 */
+	protected function getDbDriverByDsn($dsn)
+	{
+	    if (is_object($dsn)) {
+	        return $dsn;
+	    }
+
+	    if (!class_exists("MDB2")) {
+	        throw new Exception("PEAR MDB2 extension not loaded!");
+	    }
+
+	    $db = MDB2::factory($dsn, array('quote_identifier' => true, 'persistent' => false));
+
+	    if ($db->isError($db)) {
+	        throw new Exception("Database connection error");
+	    }
+
+	    $db->setFetchMode(MDB2_FETCHMODE_ASSOC);
+	    $db->setOption('portability', MDB2_PORTABILITY_NONE);
+	    $db->loadModule('Datatype', null, 'Common');
+	    $db->loadModule('Extended');
+	    $db->query('SET NAMES '.$this->tableDefinition->charset);
+
+	    return $db;
+	} // end getDbDriverByDsn
+
 
 	function loadTableData($action = 'list') {
 
