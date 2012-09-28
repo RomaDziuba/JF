@@ -55,7 +55,11 @@ class Response
 
     public function addNotification($message)
     {
-        $this->notifications[] = $message;
+        if (is_array($message)) {
+            $this->notifications = array_merge($this->notifications, $message);
+        } else {
+            $this->notifications[] = $message;
+        }
     } // end addNotification
 
     public function getMessageCount()
