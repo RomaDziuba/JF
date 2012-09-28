@@ -34,7 +34,7 @@ class dbAction
 		$this->tableDefinition = $this->loadTableDefinition($tblName);
 
 		if (!$this->tableDefinition) {
-		    throw new Exception();
+		    throw new Exception("Unrecognized xml format");
 		}
 
 		// подключение к БД

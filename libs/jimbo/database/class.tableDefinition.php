@@ -32,18 +32,15 @@ class tableDefinition {
 	function loadFromXML($file, $useCache = true) {
 
 		if (!extension_loaded('simplexml')) {
-			$this->raiseError("Sorry, simplexml extension not loaded!");
-			return false;
+		    throw new Exception("Sorry, simplexml extension not loaded!");
 		}
 
 		if (!file_exists($file)) {
-			$this->raiseError("File ".$file." not found!");
-			return false;
+		    throw new Exception("File ".$file." not found!");
 		}
 
 		if (!is_file($file)) {
-			$this->raiseError("Cant open file $file for reading!");
-			return false;
+			throw new Exception("Cant open file $file for reading!");
 		}
 
 		$tpl = dbDisplayer::getTemplateInstance();
@@ -81,7 +78,7 @@ class tableDefinition {
 
 			$className = $xmlField['type']."FormField";
 
-			if(!class_exists($className)) {
+			if (!class_exists($className)) {
 				continue;
 			}
 
