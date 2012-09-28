@@ -916,8 +916,11 @@ class dbAction
 			$this->mysqlerror2text($result, 'insert');
 			return false;
 		} else {
-			$id = mysql_insert_id($this->dbDriver->connection);
-			$this->updateInfo = array('id' => $id, 'action' => 'insert');
+		    $id = $this->getLastInsertID();
+			$this->updateInfo = array(
+		        'id' => $id,
+		        'action' => 'insert'
+			);
 		}
 
 		$this->uploadFiles($toUpload, $id);
@@ -929,6 +932,34 @@ class dbAction
 
 		return true;
 	} // end insertDBItem
+
+	/**
+	 * Returns last insert id in database table
+	 *
+	 * @throws Exception
+	 * @return integer
+	 */
+	private function getLastInsertID()
+	{
+	    $connection = &$this->dbDriver->connection;
+
+	    if (!isset($connection)) {
+	        throw new Exception("Undefined db connection in dbDriver");
+	    }
+
+        if (is_resource($connection)) {
+            return mysql_insert_id($connection);
+        }
+
+        $className =  get_class($connection);
+
+        if ($className == "mysqli") {
+            return mysqli_insert_id($connection);
+        }
+
+	    throw new Exception("Undefined db connection type in dbDriver");
+	} // end getLastInsertID
+
 
 	function createInsertToken() {
 
