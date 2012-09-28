@@ -50,7 +50,7 @@ class Response
 
     public function addMessage($message)
     {
-        $this->response['messages'][] = $message;
+        $this->response['messages'][] = htmlentities($message, ENT_QUOTES);
     }
 
     public function addNotification($message)
