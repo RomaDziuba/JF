@@ -310,7 +310,13 @@ class dbDisplayer extends EventDispatcher
 				}
 
 				// Поле отображаем само себя
-				$displayValue =  ($field->attributes['type'] == 'numerator') ? ++$numerator : $field->displayValue($tdRow[$field->name]);
+				if ($field->attributes['type'] == 'numerator') {
+				    $displayValue = ++$numerator;
+				} else {
+				    $displayValue = isset($tdRow[$field->name]) ? $tdRow[$field->name] : false;
+				    $displayValue = $field->displayValue($displayValue, $tdRow);
+				}
+
 
 				// Поле может быть ссылкой
 				if (!empty($field->attributes['clicable'])) {
@@ -655,7 +661,7 @@ class dbDisplayer extends EventDispatcher
 		}
 
 		// FIXME:
-		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false;
+		$path = !$customTemplate && defined('TPL_ROOT') ? TPL_ROOT : false;
 		$tpl = self::getTemplateInstance($path);
 
 		if ($what == 'insert') {
@@ -682,13 +688,7 @@ class dbDisplayer extends EventDispatcher
 		foreach ($tableDefinition->fields as $field) {
 			$item = array();
 
-			if ($field->name == $primaryKey) {
-				// Не показываем primary key
-				continue;
-			}
-
-			if ($field->getAttribute('type') == 'sql') {
-				// Вычисляемое SQL поле, пропускаем
+			if ($field->name == $primaryKey || $field->isVirtualField($what)) {
 				continue;
 			}
 
@@ -719,10 +719,11 @@ class dbDisplayer extends EventDispatcher
 				$items[] = $item;
 			}
 
-			if ($qtip = $field->getAttribute('hint')) {
+			$qtip = $field->getAttribute('hint');
+			if ($qtip) {
 				$qtips[$field->name] = $qtip;
 			}
-		}
+		} // end foreach
 
 		$info['backaction'] = $this->getBackAction();
 
@@ -732,7 +733,9 @@ class dbDisplayer extends EventDispatcher
 			$info['actionbutton'] = __('BUTTON_'.strtoupper($what));
 		}
 
+		// FIXME:
 		$info['afetrpatyjs'] = isset($GLOBALS['dba_afetrpatyjs']) ? $GLOBALS['dba_afetrpatyjs'] : '';
+
 		$tpl->assign('items', $items);
 		$tpl->assign('info', $info);
 		$tpl->assign('qtips', $qtips);
@@ -745,13 +748,9 @@ class dbDisplayer extends EventDispatcher
 			$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);
 		}
 
+		$templateName = $customTemplate ? $customTemplate : 'dba_form.ihtml';
 
-		if (empty($customTemplate)) {
-			return trim($tpl->fetch('dba_form.ihtml'));
-		} else {
-			$tpl->assign('body', trim($tpl->fetch($customTemplate)));
-			return trim($tpl->fetch('dba_customform.ihtml'));
-		}
+		return $tpl->fetch($templateName);
 	}
 
 	function getBackAction() {

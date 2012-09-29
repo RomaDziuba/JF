@@ -208,12 +208,11 @@ class tableDefinition {
 		}
 	}
 
-	function getAttribute($nane) {
-		if (isset($this->attributes[$nane])) {
-			return $this->attributes[$nane];
-		} else {
-			return false;
-		}
+
+
+	public function getAttribute($name)
+	{
+	    return isset($this->attributes[$name]) ? $this->attributes[$name] : false;
 	}
 }
 ?>

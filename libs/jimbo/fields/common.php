@@ -1,15 +1,22 @@
 <?php
 
-class abstractFormField {
+class abstractFormField
+{
 
     public $tblAction;
-    
-	var $attributes;
-	var $name;
-	
+
+    /**
+     * Attributes of field defined in xml
+     *
+     * @var array
+     */
+	public $attributes;
+
+	public $name;
+
 	public $lastErrorMessage = false;
-	
-	public function __construct($tblAction) 
+
+	public function __construct($tblAction)
 	{
         $this->tblAction = $tblAction;
 	}
@@ -27,12 +34,9 @@ class abstractFormField {
 		$this->attributes['caption'] = @html_entity_decode($node['caption'], ENT_COMPAT, $charset);
 	}
 
-	function getAttribute($name) {
-		if (isset($this->attributes[$name])) {
-			return $this->attributes[$name]	;
-		} else {
-			return '';
-		}
+	public function getAttribute($name)
+	{
+	    return isset($this->attributes[$name]) ? $this->attributes[$name] : false;
 	}
 
 	function getFilter($value) {
@@ -59,7 +63,18 @@ class abstractFormField {
 		return "<input style='{$width}' type='text' name='{$this->name}' value='{$value}' class='thin'>";
 	}
 
-	function displayValue($value) {
+	/**
+	 * Returns true if field must be ignored in update table logic
+	 *
+	 * @return boolean
+	 */
+	public function isVirtualField($section = false)
+	{
+	    return false;
+	} // end isVirtualField
+
+	public function displayValue($value, $row = false)
+	{
 		if (isset($this->attributes['trim']) && ($this->attributes['trim'] != 'false')) {
 			// need to trim
 			if (is_numeric($this->attributes['trim'])) {
@@ -76,8 +91,9 @@ class abstractFormField {
 		} else {
 			$value = htmlspecialchars($value);
 		}
+
 		return $value;
-	}
+	} // end displayValue
 
 	function displayRow($value) {
 		$width = $this->getWidth();
@@ -95,7 +111,7 @@ class abstractFormField {
 			return substr($string, $from, $to);
 		}
 	}
-	
+
     function getWidth($inline = false, $default = '380px') {
         $width = $this->getAttribute('inputWidth');
         if ($inline) {
@@ -105,22 +121,22 @@ class abstractFormField {
         }
         return 'width:'.$width.';';
     }
-	
+
     public function getValue($requests = array())
     {
         $value = empty($requests[$this->name]) ? '' : $requests[$this->name];
-        
+
         if( !$value && isset($this->attributes['isnull']) ) {
             $value = null;
         }
-        
+
         if(!$this->isValidValue($value)) {
             return false;
         }
-        
+
         return $value;
     } // end getValue
-    
+
     public function isValidValue($value)
     {
         if (isset($this->attributes['required']) && empty($value)) {
@@ -130,18 +146,18 @@ class abstractFormField {
 
         return true;
     } // end isValidValue
-    
 
-}
+
+} // end class abstractFormField
 
 
 class fileFormField extends abstractFormField {
 
 	function getEditInput($value = '', $inline = false) {
         $_sessionData = &$this->tblAction->sessionData;
-	    
+
 	    $httpBase = $this->tblAction->getOption('http_base');
-	    
+
 		$value = explode(';0;', $value);
 		if (!empty($this->attributes['fileName'])) {
 			$httpPath = !empty($this->attributes['httpPath']) ? $this->attributes['httpPath'] : $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/';
@@ -149,25 +165,25 @@ class fileFormField extends abstractFormField {
 		} elseif (isset($GLOBALS['currentID'])) {
 			$link = $httpBase.'getfile/'.$_sessionData['DB_CURRENT_TABLE'].'/'.$this->name.'/'.$GLOBALS['currentID'].'/'.$value[0];
 		}
-		
+
 		$html = '<input type="file" name="'.$this->name.'" class="thin">';
 		if (isset($link)) {
 			$html .= '&nbsp; <a href="'.$link.'" class="db_link" target="_blank" style="margin:2px">'.$value[0].'</a>';
 		}
-		
+
 		return $html;
 	}
 
 	function displayValue($value) {
-        
+
 	    $_sessionData = &$this->tblAction->sessionData;
         $httpBase = $this->tblAction->getOption('http_base');
-	    
+
 		$value = explode(';0;', $value);
 		if (!empty($value[0])) {
 			if (!empty($this->attributes['fileName'])) {
 				$httpPath = !empty($this->attributes['httpPath']) ? $this->attributes['httpPath'] : $httpBase.'storage/'.$_sessionData['DB_CURRENT_TABLE'].'/';
-				
+
 				$preview = $httpPath.'thumbs/'.$value[0];
 				$link = $httpPath.$value[0];
 			} else {
@@ -183,15 +199,15 @@ class fileFormField extends abstractFormField {
 			return '';
 		}
 	}
-	
-	
+
+
 	public function getValue($requests = array())
     {
         $value = $_FILES[$this->name]['name'].';0;'.$_FILES[$this->name]['type'];
-        
+
         return $value;
     } // end getValue
-	
+
 }
 
 
@@ -220,16 +236,16 @@ class md5FormField extends abstractFormField {
     public function getValue($requests = array())
     {
         $value = parent::getValue($requests);
-        
+
         if(!$value) {
             return false;
         }
-        
+
         $value = strlen($value) != 32 ? md5($value) : $value;
-        
+
         return $value;
     }
-	
+
 }
 
 
@@ -297,45 +313,45 @@ class timestampFormField extends abstractFormField {
 
 /**
  * DateTime Field
- * 
+ *
  * @package Jimbo
  * @subpackage Fields
  */
-class datetimeFormField extends abstractFormField 
+class datetimeFormField extends abstractFormField
 {
     public $needTime;
 
-    function readItself($node, $charset = 'UTF-8') 
+    function readItself($node, $charset = 'UTF-8')
     {
         parent::readItself($node);
-        
+
         $length = $this->getAttribute('length');
         if (!in_array($length, array(5, 10, 16, 19)))  {
             $this->attributes['length'] = 19;
         }
     } // end readItself
 
-    function getEditInput($value = '', $inline = false) 
+    function getEditInput($value = '', $inline = false)
     {
         if (!empty($this->attributes['readonly'])) {
             return $this->displayRO($value) ;
         }
 
         $format = $this->getFormat();
-        
+
         $value = substr($value, 0, $this->getAttribute('length'));
         if ($value == '0000-00-00') {
             $value = '';
         }
-        
+
         if (empty($value)) {
             $value  = isset($this->attributes['default']) ? $this->attributes['default'] :  strftime($format);
         } else {
             $value = strftime($format, strtotime($value));
         }
-        
+
         $width = $this->getWidth($inline, '350px');
-        
+
         return $this->getHtml($value, $width, $format);
     } // end getEditInput
 
@@ -348,9 +364,9 @@ class datetimeFormField extends abstractFormField
         if($format) {
             return $format;
         }
-        
+
         $length = $this->getAttribute('length');
-        
+
         if ( in_array($length, array(16, 19)) ) {
             $this->needTime = 'true';
             $format = '%Y-%m-%d %H:%M';
@@ -361,43 +377,43 @@ class datetimeFormField extends abstractFormField
             $this->needTime = 'false';
             $format = '%Y-%m-%d';
         }
-        
+
         return $format;
     } // end getFormat
-    
-    function displayValue($value) 
+
+    function displayValue($value)
     {
         $length = $this->getAttribute('length');
         if (!in_array($length, array(5, 10, 16, 19)))  {
             $this->attributes['length'] = 10;
         }
-        
+
         $format = $this->getFormat();
         $value = substr($value, 0, $length);
-        
+
         if(!empty($value)) {
             $value = strftime($format, strtotime($value));
         }
-        
+
         return $value.'';
     } // end displayValue
-    
+
     public function getRangeFilter($filterName, $value)
     {
     	$tpl = dbDisplayer::getTemplateInstance();
-    	
+
     	$tpl->assign("attributes", $this->attributes);
     	$tpl->assign("value", $value);
     	$tpl->assign("filterName", $filterName);
-    	
+
     	return $tpl->fetch("fields/datetime/filter_range.tpl");
-    	
+
     } // end getRangeFilter
-    
+
     private function getHtml($value, $width, $format)
     {
         $content = '<input style="'.$width.' vertical-align:top;" type="text" name="'.$this->name.'" id="'.$this->name.'" value="'.$value.'" />
-        <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$this->name.'_cal" name="'.$this->name.'_cal" /> 
+        <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="'.$this->name.'_cal" name="'.$this->name.'_cal" />
         <script type="text/javascript">
             Calendar.setup({
                 inputField     :    "'.$this->name.'",           //*
@@ -408,22 +424,22 @@ class datetimeFormField extends abstractFormField
             });
         </script>
         ';
-        
+
         return $content;
     } // end getHtml
-    
+
     public function getValue($requests = array())
     {
         $value = parent::getValue($requests);
-        
+
     	if( !$value && isset($this->attributes['isnull']) ) {
             $value = null;
 			return $value;
         }
-        
+
         return date('Y-m-d H:i:s', strtotime($value));
     } // end getValue
-    
+
 } // end class datetimeFormField
 
 
@@ -628,9 +644,13 @@ class many2manyFormField extends abstractFormField {
 	}
 }
 
-class sqlFormField  extends abstractFormField {
-
-}
+class sqlFormField  extends abstractFormField
+{
+    public function isVirtualField()
+    {
+        return true;
+    }
+} // end class sqlFormField
 
 class comboFormField extends abstractFormField {
 

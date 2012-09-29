@@ -661,35 +661,35 @@ class dbAction
 	    $many2many = array();
 		$toUpload  = array();
 
-		foreach ($this->tableDefinition->fields as $info) {
+		foreach ($this->tableDefinition->fields as $field) {
 
-		    if ($info->attributes['type'] == 'readonly') {
+		    if ($field->attributes['type'] == 'readonly') {
                 continue;
 		    }
 
 		    $value = null;
 
 		    $isProcessing = true;
-			switch ($info->attributes['type']) {
+			switch ($field->attributes['type']) {
 			    case 'many2many': {
-			        $many2many[] = $info;
+			        $many2many[] = $field;
 				    $isProcessing = false;
 			    } break;
 
 			    case 'file': {
 
-    			    if (empty($_FILES[$info->name]['name'])) {
+    			    if (empty($_FILES[$field->name]['name'])) {
     					$isProcessing = false;
     				}
     				else {
-	    				$value =  $info->getValue();
-	    				$toUpload[] = $info;
+	    				$value =  $field->getValue();
+	    				$toUpload[] = $field;
     				}
 
 			    } break;
 
 			    default:
-                    $value = $info->getValue($_POST);
+                    $value = $field->getValue($_POST);
 			} // end switch
 
 			if (!$isProcessing) {
@@ -698,15 +698,15 @@ class dbAction
 
 			if ($value === false) {
                 $this->wasError = true;
-                $this->lastErrorMessage = $info->lastErrorMessage;
+                $this->lastErrorMessage = $field->lastErrorMessage;
                 return false;
             }
 
-		    if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
+		    if ( ($field->name == $primaryKey) || empty($field->name) || $field->isVirtualField()) {
 				continue;
 			}
 
-			$columns[] = $this->dbDriver->escape($info->name);
+			$columns[] = $this->dbDriver->escape($field->name);
 			$values[] = $this->dbDriver->quote($value);
 		} // end foreach
 
