@@ -220,6 +220,11 @@ function openJqueryPopup(id)
 
 } // end openJqueryPopup
 
+function openFullWindow(uri)
+{
+	window.location.href = uri;
+}
+
 function openWindow(uri)
 {
 	mode = (jimbo.mode == undefined) ? 'popup' : jimbo.mode;
