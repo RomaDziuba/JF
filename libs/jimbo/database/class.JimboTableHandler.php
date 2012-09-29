@@ -13,7 +13,7 @@ abstract class JimboTableHandler
 		$this->tblAction = $tblAction;
 	}
 
-	public function display()
+	public function display($info, &$result)
     {
         return false;
     }
@@ -54,6 +54,52 @@ abstract class JimboTableHandler
     	$actions = array('insert', 'save');
 
     	return in_array($needle, $actions);
+    }
+
+    /**
+     * Override this method if you need change data in rows table for list template
+     *
+     * @param array $rows
+     * @return array
+     */
+    public function modifyTableData($rows)
+    {
+        return $rows;
+    }
+
+    /**
+     * Old method for highlight row. Don't use this method in production
+     *
+     * @param array $pageIDs
+     * @return array
+     */
+    public function highlightlist($pageIDs)
+    {
+        return false;
+    }
+
+    /**
+     * Override for show custome values in filters
+     *
+     * @param strinf $fieldName
+     * @return boolean
+     */
+    public function getFilterValues($fieldName)
+    {
+        return false;
+    }
+
+    /**
+     * Override this method for modified template or change data for edit form
+     *
+     * @param string  $section
+     * @param Template_Lite $tpl
+     * @param array $currentRow
+     * @return boolean
+     */
+    public function templateCallback($section, &$tpl, &$currentRow)
+    {
+        return false;
     }
 
 
