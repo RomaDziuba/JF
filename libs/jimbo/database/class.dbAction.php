@@ -279,19 +279,7 @@ class dbAction
 
 			}
 
-
-			// Предустановленные фильтры
-            if (!empty($this->tableDefinition->filters)) {
-                foreach ($this->tableDefinition->filters as $field => $value) {
-                    if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
-                        $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
-                    }
-
-                    if (isset($value)) {
-                        $where[] = $value == 'NULL' ? $tblName.".".$field." IS NULL" : $tblName.".".$field." IN ($value)";
-                    }
-                }
-            }
+			$this->prepareFiltersWhereCondition($tblName, $where);
 
 			// ParentID влияет на выборку
 			if (isset($this->tableDefinition->actions['parent'])) {
@@ -405,6 +393,47 @@ class dbAction
 		$dataRes->free();
 		return $this->dbData;
 	}
+
+	/**
+	 * Prepare sql condition based on tag filters in xml
+	 *
+	 * @param string $tblName
+	 * @param reference $where
+	 * @return boolean
+	 */
+	private function prepareFiltersWhereCondition($tblName, &$where)
+	{
+	    if (empty($this->tableDefinition->filters)) {
+	        return false;
+	    }
+
+        foreach ($this->tableDefinition->filters as $field => $value) {
+
+            if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
+                $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
+            }
+
+            if (!isset($value)) {
+                continue;
+            }
+
+            if ($value == 'NULL') {
+                $where[] = $tblName.".".$field." IS NULL";
+                continue;
+            }
+
+            $inValues = array_filter(explode(",", $value));
+            foreach ($inValues as &$item) {
+                $item = $this->dbDriver->quote(trim($item));
+            }
+            unset($item);
+            $value = join(", ", $inValues);
+
+            $where[] = $tblName.".".$field." IN (".$value.")";
+        }
+
+        return true;
+	} //end prepareFiltersWhereCondition
 
 	function getParentIdVar($relation) {
 		return 'DB_T:'.$this->tableDefinition->name.'F:'.$relation['field'];

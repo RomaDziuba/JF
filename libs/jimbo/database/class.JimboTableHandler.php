@@ -35,6 +35,11 @@ abstract class JimboTableHandler
         return $actions;
     } // end getAlowedActions
 
+    public function isRemove()
+    {
+        return isset($_POST['performPost']) && $_POST['performPost'] == 'remove';
+    }
+
     public function isInsert()
     {
     	return isset($_POST['performPost']) && $_POST['performPost'] == 'insert';
