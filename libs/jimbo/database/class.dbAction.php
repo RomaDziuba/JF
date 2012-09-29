@@ -6,6 +6,8 @@
 *
 * @author Alexander Voytsekhovskyy <young@php.net>;
 * @version 2.0
+* @package Jimbo
+* @subpackage Databases
 */
 
 class dbAction

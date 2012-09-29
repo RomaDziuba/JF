@@ -7,6 +7,8 @@
 *
 * @autor Alexander Voytsekhovskyy <young@php.net>;
 * @version 1.1
+* @package Jimbo
+* @subpackage Databases
 */
 
 class tableDefinition {

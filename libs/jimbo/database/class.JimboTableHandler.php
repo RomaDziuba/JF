@@ -1,6 +1,8 @@
 <?php
 /**
+ * @author Denis Panaskin <denis@panaskin.com>
  * @package Jimbo
+ * @subpackage Databases
  */
 abstract class JimboTableHandler
 {

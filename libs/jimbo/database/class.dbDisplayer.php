@@ -8,9 +8,9 @@ require_once $__jimboLibPath.'/class.JimboEvent.php';
 *
 * @autor Alexander Voytsekhovskyy <young@php.net>;
 * @version 1.2
+* @package Jimbo
+* @subpackage Databases
 */
-
-
 class dbDisplayer extends EventDispatcher
 {
 
