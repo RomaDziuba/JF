@@ -36,6 +36,10 @@ class DisplayPlugin extends ObjectJimboPlugin
 
     public function getPluginTemplatePath()
     {
+        if (!isset($this->options['plugin_path'])) {
+            return false;
+        }
+
         return $this->options['plugin_path']."templates".DIRECTORY_SEPARATOR;
     }
 
