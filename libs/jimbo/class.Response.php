@@ -50,7 +50,13 @@ class Response
 
     public function addMessage($message)
     {
-        $this->response['messages'][] = htmlentities($message, ENT_QUOTES);
+        if (is_array($message)) {
+            foreach ($message as $item) {
+                $this->response['messages'][] = htmlentities($item, ENT_QUOTES);
+            }
+        } else {
+            $this->response['messages'][] = htmlentities($message, ENT_QUOTES);
+        }
     }
 
     public function addNotification($message)
@@ -147,7 +153,6 @@ class Response
                 echo $this->response['content'];
             }
         }
-
     }
 
 
