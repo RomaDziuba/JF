@@ -11,6 +11,7 @@ $response->addParam("status", false);
 $response->send();
 ```
 
+
 Database Table Xml
 ================================
 
@@ -64,6 +65,29 @@ Specific attributes:
 * *thumb* - dimension of image thumb, used only if field upload images,
 * *fileName* - template for file name, __ID__ will be change to row id
 
+
+Write custome field without sql logic
+-------------------------
+
+``` xml
+<field type="preview" caption="Info" width="40%" />
+```
+
+``` php
+class previewFormField extends abstractFormField
+{
+    public function displayValue($value, $row = false)
+    {
+        return print_r($row, 1);
+    }
+
+    public function isVirtualField($section = false)
+    {
+        return true;
+    }
+
+}
+```
 
 Jimbo JavaScript Functions
 ================================

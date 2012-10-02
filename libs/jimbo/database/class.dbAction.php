@@ -6,6 +6,8 @@
 *
 * @author Alexander Voytsekhovskyy <young@php.net>;
 * @version 2.0
+* @package Jimbo
+* @subpackage Databases
 */
 
 class dbAction
@@ -18,6 +20,14 @@ class dbAction
 	public $wasError;
 	public $dbDriver;
 	public $currentRow;
+
+	/**
+	 * Instance of custome handler
+	 *
+	 * @var NULL|customTableHandler
+	 */
+	protected $customeHandler;
+
 
 	public function __construct($dsn, $tblName, &$options)
 	{
@@ -34,22 +44,7 @@ class dbAction
 		$this->tableDefinition = $this->loadTableDefinition($tblName);
 
 		if (!$this->tableDefinition) {
-		    throw new Exception();
-		}
-
-		// подключение к БД
-		if (is_object($dsn)) {
-			// объект PEAR_DB
-			$this->dbDriver = $dsn;
-		} else {
-			$this->dbDriver = MDB2::factory($dsn);
-
-			if (PEAR::isError($this->dbDriver)) {
-			    throw new DatabaseException("Can't connect to database: ".$this->dbDriver->getMessage());
-			}
-
-			$this->dbDriver->setFetchMode(MDB2_FETCHMODE_ASSOC);
-			$this->dbDriver->loadModule('Extended');
+		    throw new Exception("Unrecognized xml format");
 		}
 
 		$this->tableName = $tblName;
@@ -60,8 +55,93 @@ class dbAction
 			$tblAlias = $this->tableDefinition->name;
 		}
 
+		$this->dbDriver = $this->getDbDriverByDsn($dsn);
+
 		$this->alias = $tblAlias;
+
+		$this->customeHandler = $this->getCustomeHandlerInstance();
 	}
+
+
+	/**
+	 * Returns instance custome handler for table
+	 *
+	 * @throws Exception
+	 * @return NULL|customTableHandler
+	 */
+	protected function getCustomeHandlerInstance()
+	{
+	    $customHandlerName = &$this->tableDefinition->attributes['customHandler'];
+	    if (!isset($customHandlerName)) {
+	        return null;
+	    }
+
+	    $path = $this->getOption('handlers_path').$customHandlerName.'.php';
+
+	    if (!file_exists($path)) {
+	        throw new Exception("Not found file for custome handler: ".$path);
+	    }
+
+	    require_once $path;
+
+	    if (!class_exists('customTableHandler')) {
+	        throw new Exception("Not found class customTableHandler: ".$path);
+	    }
+
+	    $customHandler = new customTableHandler($this);
+
+	    // For compatibility, the old handler
+	    if (property_exists($customHandler, 'params')) {
+	        $customHandler->params = $this->getOption('handler_params');
+	    }
+
+	    return $customHandler;
+	} // end getCustomeHandlerInstance
+
+	/**
+	 * Returns reference to custome handler instance. Return NULL if custome
+	 * handler not defined in xml
+	 *
+	 * @return customTableHandler
+	 */
+	public function &getCustomeHandler()
+	{
+	    return $this->customeHandler;
+	}
+
+
+	/**
+	 * Returns connection to database
+	 *
+	 * @param string|object $dsn
+	 * @throws Exception
+	 * @return mixed
+	 */
+	protected function getDbDriverByDsn($dsn)
+	{
+	    if (is_object($dsn)) {
+	        return $dsn;
+	    }
+
+	    if (!class_exists("MDB2")) {
+	        throw new Exception("PEAR MDB2 extension not loaded!");
+	    }
+
+	    $db = MDB2::factory($dsn, array('quote_identifier' => true, 'persistent' => false));
+
+	    if ($db->isError($db)) {
+	        throw new Exception("Database connection error");
+	    }
+
+	    $db->setFetchMode(MDB2_FETCHMODE_ASSOC);
+	    $db->setOption('portability', MDB2_PORTABILITY_NONE);
+	    $db->loadModule('Datatype', null, 'Common');
+	    $db->loadModule('Extended');
+	    $db->query('SET NAMES '.$this->tableDefinition->charset);
+
+	    return $db;
+	} // end getDbDriverByDsn
+
 
 	function loadTableData($action = 'list') {
 
@@ -199,19 +279,7 @@ class dbAction
 
 			}
 
-
-			// Предустановленные фильтры
-            if (!empty($this->tableDefinition->filters)) {
-                foreach ($this->tableDefinition->filters as $field => $value) {
-                    if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
-                        $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
-                    }
-
-                    if (isset($value)) {
-                        $where[] = $value == 'NULL' ? $tblName.".".$field." IS NULL" : $tblName.".".$field." IN ($value)";
-                    }
-                }
-            }
+			$this->prepareFiltersWhereCondition($tblName, $where);
 
 			// ParentID влияет на выборку
 			if (isset($this->tableDefinition->actions['parent'])) {
@@ -326,6 +394,47 @@ class dbAction
 		return $this->dbData;
 	}
 
+	/**
+	 * Prepare sql condition based on tag filters in xml
+	 *
+	 * @param string $tblName
+	 * @param reference $where
+	 * @return boolean
+	 */
+	private function prepareFiltersWhereCondition($tblName, &$where)
+	{
+	    if (empty($this->tableDefinition->filters)) {
+	        return false;
+	    }
+
+        foreach ($this->tableDefinition->filters as $field => $value) {
+
+            if (preg_match("/^S%(.+)%$/", $value, $tmp)) {
+                $value = isset($this->sessionData[$tmp[1]]) ? $this->sessionData[$tmp[1]] : 'NULL';
+            }
+
+            if (!isset($value)) {
+                continue;
+            }
+
+            if ($value == 'NULL') {
+                $where[] = $tblName.".".$field." IS NULL";
+                continue;
+            }
+
+            $inValues = array_filter(explode(",", $value));
+            foreach ($inValues as &$item) {
+                $item = $this->dbDriver->quote(trim($item));
+            }
+            unset($item);
+            $value = join(", ", $inValues);
+
+            $where[] = $tblName.".".$field." IN (".$value.")";
+        }
+
+        return true;
+	} //end prepareFiltersWhereCondition
+
 	function getParentIdVar($relation) {
 		return 'DB_T:'.$this->tableDefinition->name.'F:'.$relation['field'];
 	}
@@ -361,6 +470,36 @@ class dbAction
 		}
 	}
 
+	/**
+	 * Returns true if allowed row edit
+	 *
+	 * @param string $action current action
+	 * @param mixed $rowID
+	 * @return boolean
+	 */
+	protected function isEditableRow($action, $rowID = false)
+	{
+	    if (!in_array($action, array('save', 'remove'))) {
+	        return true;
+	    }
+
+	    if (!$rowID) {
+	        if (!isset($_REQUEST['ID'])) {
+	            return false;
+	        }
+
+	        $rowID = $_REQUEST['ID'];
+	    }
+
+	    // FIXME: Need refactorinf of DB_ALLOWED_IDS
+	    $allowedIDs = &$this->sessionData['DB_ALLOWED_IDS'][$this->alias];
+	    if (!isset($allowedIDs)) {
+	        return false;
+	    }
+
+	    return in_array($rowID, $allowedIDs);
+	} // end isEditableRow
+
 	function performAction($action, $needRedirect = true)
 	{
 		$this->adjustPostData();
@@ -373,42 +512,34 @@ class dbAction
 
 		// defaults
 		$wasCommit = false;
-		$handledEvent = false;
+		$isHandled = false;
 		$status = true;
 		$isTransaction = false;
 
-		if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
-			/*echo "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			die;*/
-			$this->lastErrorMessage = "<font style='color:red; font-weight: bold'>System error. Please, contact support</font>";
-			return false;
+		//if (in_array($action, array('save', 'remove')) && (!in_array($_REQUEST['ID'], (array)@$this->sessionData['DB_ALLOWED_IDS'][$this->alias]))) {
+		if (!$this->isEditableRow($action)) {
+		    throw new PermissionsException("Not allowed edit row with id ".$_REQUEST['ID']);
 		}
 
+		$customHandler = $this->getCustomeHandler();
+		$hasHandleLogic = $customHandler && method_exists ($customHandler, 'handle');
+		if ($hasHandleLogic) {
+		    $info = array(
+	            'action' => 'post'
+		    );
 
-		if (!empty($this->tableDefinition->attributes['customHandler'])) {
-
-
-			include_once $this->getOption('handlers_path').$this->tableDefinition->attributes['customHandler'].'.php';
-			if (class_exists('customTableHandler')) {
-				$customHandler = new customTableHandler($this);
-				$customHandler->params = $this->getOption('handler_params');
-
-				if (method_exists ($customHandler, 'handle')) {
-					$info = array('action' => 'post');
-					$handledEvent = $customHandler->handle($info);
-					if ($handledEvent && !empty($info['lastErrorMessage'])) {
-						// Processed with error code
-						$status = false;
-						$this->lastErrorMessage = $info['lastErrorMessage'];
-					} elseif ($handledEvent) {
-						$wasCommit = true;
-					}
-				}
+			$isHandled = $customHandler->handle($info);
+			if ($isHandled && !empty($info['lastErrorMessage'])) {
+				// Processed with error code
+				$status = false;
+				$this->lastErrorMessage = $info['lastErrorMessage'];
+			} elseif ($isHandled) {
+				$wasCommit = true;
 			}
 		}
 
 
-		if (!$handledEvent) {
+		if (!$isHandled) {
 			if (isset($this->tableDefinition->actions[$action])) {
 				$actionInfo = $this->tableDefinition->actions[$action];
 			} else {
@@ -472,7 +603,7 @@ class dbAction
 		}
 
 		if ($wasCommit) {
-			if (isset($customHandler) && method_exists ($customHandler, 'afterCommit')) {
+			if ($customHandler && method_exists ($customHandler, 'afterCommit')) {
 				$customHandler->afterCommit($this->updateInfo);
 			}
 
@@ -559,35 +690,35 @@ class dbAction
 	    $many2many = array();
 		$toUpload  = array();
 
-		foreach ($this->tableDefinition->fields as $info) {
+		foreach ($this->tableDefinition->fields as $field) {
 
-		    if ($info->attributes['type'] == 'readonly') {
+		    if ($field->attributes['type'] == 'readonly') {
                 continue;
 		    }
 
 		    $value = null;
 
 		    $isProcessing = true;
-			switch ($info->attributes['type']) {
+			switch ($field->attributes['type']) {
 			    case 'many2many': {
-			        $many2many[] = $info;
+			        $many2many[] = $field;
 				    $isProcessing = false;
 			    } break;
 
 			    case 'file': {
 
-    			    if (empty($_FILES[$info->name]['name'])) {
+    			    if (empty($_FILES[$field->name]['name'])) {
     					$isProcessing = false;
     				}
     				else {
-	    				$value =  $info->getValue();
-	    				$toUpload[] = $info;
+	    				$value =  $field->getValue();
+	    				$toUpload[] = $field;
     				}
 
 			    } break;
 
 			    default:
-                    $value = $info->getValue($_POST);
+                    $value = $field->getValue($_POST);
 			} // end switch
 
 			if (!$isProcessing) {
@@ -596,15 +727,15 @@ class dbAction
 
 			if ($value === false) {
                 $this->wasError = true;
-                $this->lastErrorMessage = $info->lastErrorMessage;
+                $this->lastErrorMessage = $field->lastErrorMessage;
                 return false;
             }
 
-		    if ( ($info->name == $primaryKey) || empty($info->name) || ($info->attributes['type'] == 'sql')) {
+		    if ( ($field->name == $primaryKey) || empty($field->name) || $field->isVirtualField()) {
 				continue;
 			}
 
-			$columns[] = $this->dbDriver->escape($info->name);
+			$columns[] = $this->dbDriver->escape($field->name);
 			$values[] = $this->dbDriver->quote($value);
 		} // end foreach
 
@@ -916,8 +1047,11 @@ class dbAction
 			$this->mysqlerror2text($result, 'insert');
 			return false;
 		} else {
-			$id = mysql_insert_id($this->dbDriver->connection);
-			$this->updateInfo = array('id' => $id, 'action' => 'insert');
+		    $id = $this->getLastInsertID();
+			$this->updateInfo = array(
+		        'id' => $id,
+		        'action' => 'insert'
+			);
 		}
 
 		$this->uploadFiles($toUpload, $id);
@@ -929,6 +1063,34 @@ class dbAction
 
 		return true;
 	} // end insertDBItem
+
+	/**
+	 * Returns last insert id in database table
+	 *
+	 * @throws Exception
+	 * @return integer
+	 */
+	private function getLastInsertID()
+	{
+	    $connection = &$this->dbDriver->connection;
+
+	    if (!isset($connection)) {
+	        throw new Exception("Undefined db connection in dbDriver");
+	    }
+
+        if (is_resource($connection)) {
+            return mysql_insert_id($connection);
+        }
+
+        $className =  get_class($connection);
+
+        if ($className == "mysqli") {
+            return mysqli_insert_id($connection);
+        }
+
+	    throw new Exception("Undefined db connection type in dbDriver");
+	} // end getLastInsertID
+
 
 	function createInsertToken() {
 
