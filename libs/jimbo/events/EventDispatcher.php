@@ -12,13 +12,11 @@ require_once dirname(__FILE__)."/Event.php";
  */
 class EventDispatcher extends ArrayObject implements IEventDispatcher
 {
-	private $listeners;
+	private $listeners = array();
 
 	public function __construct()
     {
         parent::__construct(array(), ArrayObject::ARRAY_AS_PROPS);
-
-        $this->listeners = array();
     }
 
     /**

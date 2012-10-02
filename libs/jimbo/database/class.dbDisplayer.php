@@ -8,10 +8,10 @@ require_once $__jimboLibPath.'/class.JimboEvent.php';
 *
 * @autor Alexander Voytsekhovskyy <young@php.net>;
 * @version 1.2
+* @package Jimbo
+* @subpackage Databases
 */
-
-
-class dbDisplayer extends EventDispatcher 
+class dbDisplayer extends EventDispatcher
 {
 
 	var $knownActions = array('child', 'edit', 'remove', 'about', 'parent', 'excel');
@@ -20,36 +20,38 @@ class dbDisplayer extends EventDispatcher
 
 	private static $tpl;
 
-	function dbDisplayer(&$tblAction, &$tpl = null) {
+	public function __construct(&$tblAction, &$tpl = null)
+	{
 		$this->tblAction = &$tblAction;
 
 		self::$tpl = $tpl;
+
+		$this->customHandler = $this->tblAction->getCustomeHandler();
 	}
 
-	function performDisplay($action) {
-
+	public function performDisplay($action)
+	{
 		if (isset($_GET['ID'])) {
-			if (!$this->tblAction->loadRow(mysql_real_escape_string($_GET['ID']))) {
+		    $rowID = (int) $_GET['ID'];
+		    $res = $this->tblAction->loadRow($rowID);
+			if (!$res) {
 				$action = 'error';
 				$errorType = 'invalidRow';
 			}
-			$this->currentID = (int)$_GET['ID'];
-			$GLOBALS['currentID'] = (int)$_GET['ID'];
+
+			$this->currentID = $rowID;
+			$GLOBALS['currentID'] = $rowID;
 		}
 
-		$tableDefinition = $this->tblAction->tableDefinition;
+		$tableDefinition = &$this->tblAction->tableDefinition;
 
-		if (!empty($tableDefinition->attributes['customHandler'])) {
-			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
-			$this->customHandler = new customTableHandler($this->tblAction);
-			$this->customHandler->params = $this->tblAction->getOption('handler_params');
+		if ($this->customHandler) {
 			$info['action'] = $action;
 			$result = '';
 			if ($this->customHandler->display($info, $result)) {
 				return $result;
 			}
 		}
-
 
 		switch ($action) {
 			case "insert":
@@ -65,21 +67,20 @@ class dbDisplayer extends EventDispatcher
 				$content = $this->displayErrorMessage($errorType);
 			} break;
 			default: {
-
 				$content = $this->displayList();
 			}
 		}
 
 		return $content;
-	}
+	} // end performDisplay
 
-	
+
 	public static function &getTemplateInstance($tplRoot = false)
 	{
 		if (!class_exists("Template_Lite")) {
 			require_once dirname(__FILE__)."/../../templates/class.template.php";
 		}
-	    
+
 	    if (!is_null(self::$tpl)) {
 	        if ($tplRoot) {
 	            self::$tpl->template_dir = $tplRoot;
@@ -88,33 +89,33 @@ class dbDisplayer extends EventDispatcher
 
             return self::$tpl;
 	    }
-	    
+
 	    if (!$tplRoot) {
             $tplRoot = realpath(dirname(__FILE__).'/../../templates');
 	    }
-	    
+
         if (!is_dir($tplRoot)) {
             throw new Exception('Not found template directory: '.$tplRoot);
         }
-	    
+
 		$tpl = new Template_Lite();
 		$tpl->template_dir = $tplRoot;
 		$tpl->compile_dir = $tplRoot.'/compiled/';
 		$tpl->force_compile = true;
 		$tpl->cache = false;
 		$tpl->reserved_template_varname = "tpl";
-		
+
 		$tpl->register_function("plugin", array("Controller", "pluginSmarty"));
 		$tpl->register_function("lang", array("Controller", "getLangSmarty"));
 
 		self::$tpl = $tpl;
-		
+
 		return self::$tpl;
 	} // end getTemplateInstance
 
 	function displayError($message) {
 	    throw new Exception($message);
-        
+
 		$tpl = self::getTemplateInstance();
 		$tpl->assign('message', $message);
 		return $tpl->fetch('error.ihtml');
@@ -180,7 +181,7 @@ class dbDisplayer extends EventDispatcher
 		$tableData = $this->tblAction->loadTableData();
 		$tpl = self::getTemplateInstance();
 
-		if (isset($this->customHandler) && method_exists($this->customHandler, 'modifyTableData')) {
+		if ($this->customHandler && method_exists($this->customHandler, 'modifyTableData')) {
 			if (!empty($tableData)) {
 				$tableData = $this->customHandler->modifyTableData($tableData);
 			}
@@ -269,9 +270,9 @@ class dbDisplayer extends EventDispatcher
 				}
 			}
 		}
-		 
+
         $info['generalActions'] = $this->getGeneralActions();
-		
+
 		foreach($tableData as $tdRow) {
 			// HotFix: для полей которые могут от этого зависеть
 			$ID = $tdRow[$tableDefinition->getAttribute('primaryKey')];
@@ -281,7 +282,7 @@ class dbDisplayer extends EventDispatcher
 			$line = array('id' => $ID);
 			$pageIDs[] = $ID;
 
-			if (isset($this->customHandler) && method_exists($this->customHandler, 'getAlowedActions')) {
+			if ($this->customHandler && method_exists($this->customHandler, 'getAlowedActions')) {
 				$alowedActions = $this->customHandler->getAlowedActions(array_keys($tableDefinition->actions), $tdRow);
 			} else {
 				$alowedActions = array_keys($tableDefinition->actions);
@@ -309,7 +310,13 @@ class dbDisplayer extends EventDispatcher
 				}
 
 				// Поле отображаем само себя
-				$displayValue =  ($field->attributes['type'] == 'numerator') ? ++$numerator : $field->displayValue($tdRow[$field->name]);
+				if ($field->attributes['type'] == 'numerator') {
+				    $displayValue = ++$numerator;
+				} else {
+				    $displayValue = isset($tdRow[$field->name]) ? $tdRow[$field->name] : false;
+				    $displayValue = $field->displayValue($displayValue, $tdRow);
+				}
+
 
 				// Поле может быть ссылкой
 				if (!empty($field->attributes['clicable'])) {
@@ -385,11 +392,11 @@ class dbDisplayer extends EventDispatcher
                     'target' => $target,
                     'popup' => $external,
                     'popupFunction' => $popupFunction,
-				    'js' => isset($action['js']) ? $action['js'] : false, 
+				    'js' => isset($action['js']) ? $action['js'] : false,
                 );
-				
+
                 $lineKey = (isset($action['view']) && $action['view'] == "list") ? 'action_lists' : 'actions';
-				
+
 
 				$line[$lineKey][] = $item;
 			}
@@ -400,7 +407,7 @@ class dbDisplayer extends EventDispatcher
 		$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias] = array_unique(array_merge($pageIDs, (array)@$_sessionData['DB_ALLOWED_IDS'][$this->tblAction->alias]));
 
 
-		if (isset($this->customHandler) && method_exists($this->customHandler, 'getAlowedActions')) {
+		if ($this->customHandler && method_exists($this->customHandler, 'getAlowedActions')) {
 			$alowedActions = $this->customHandler->getAlowedActions(array_keys($tableDefinition->actions));
 		} else {
 			$alowedActions = array_keys($tableDefinition->actions);
@@ -409,12 +416,10 @@ class dbDisplayer extends EventDispatcher
 		$info['insert'] = isset($tableDefinition->actions['insert']['caption']) && (in_array('insert', $alowedActions)) ? $tableDefinition->actions['insert']['caption'] : '';
 		$info['excel'] = isset($tableDefinition->actions['excel']['caption']) && (in_array('excel', $alowedActions)) ? $tableDefinition->actions['excel']['caption'] : '';
 
-		$_GET['pageID'] = 3;
-		
 		// Навигация по страницам
 		if ( ($forPage = $this->tblAction->rowsPerPage) && ($this->tblAction->totalRows > $forPage)) {
 			require_once 'Pager/Pager.php';
-			
+
 			$params = array(
 			'totalItems' => $this->tblAction->totalRows,
 			'mode'       => 'Sliding',
@@ -428,12 +433,12 @@ class dbDisplayer extends EventDispatcher
 			'fileName' => '?pageID=%d',
 			'currentPage' => $this->tblAction->pageID
 			);
-			
+
 			$pager = Pager::factory($params);
 			$links = $pager->getLinks();
 			$info['pager'] = $links['all'];
 		}
-		
+
 
 		if (!empty($tableDefinition->grouped)) {
 			$gSelect = '
@@ -460,7 +465,7 @@ class dbDisplayer extends EventDispatcher
 			$info['fastAdd'] = true;
 		}
 
-		if (isset($this->customHandler) && method_exists($this->customHandler, 'highlightlist')) {
+		if ($this->customHandler && method_exists($this->customHandler, 'highlightlist')) {
 			$info['highlight'] = $this->customHandler->highlightlist($pageIDs);
 		}
 		$info['fieldInputs'] = $fieldInputs;
@@ -470,16 +475,16 @@ class dbDisplayer extends EventDispatcher
 		}
 
 		$info['base_http_icon'] = $this->tblAction->getOption('http_base_icon');
-		
+
 		// to be able change data from the code generating event with reference to data
         $obj = array(
             'info' => &$info,
             'data' => &$data,
         );
-        
+
         $event = new JimboEvent(JimboEvent::PREDISPLAY_LIST, $obj);
         $this->dispatchEvent($event);
-        
+
         $tpl->assign($obj);
 		return trim($tpl->fetch($tplFile));
 	}
@@ -496,15 +501,15 @@ class dbDisplayer extends EventDispatcher
 		    if( !isset($action['view']) || $action['view'] != 'top' ) {
 		        continue;
 		    }
-		    
+
 		    $link = isset($action['link']) ? $action['link'] : '?action='.$type;
-		    
+
 		    $item = array(
 				'caption' => $action['caption'],
 				'href' => $link,
-				'js' => isset($action['js']) ? $action['js'] : false, 
+				'js' => isset($action['js']) ? $action['js'] : false,
             );
-		    
+
 		    $generalActions[$type] = $item;
 
 		    unset($this->tblAction->tableDefinition->actions[$type]);
@@ -512,7 +517,7 @@ class dbDisplayer extends EventDispatcher
 
 		return $generalActions;
 	} // end getGeneralActions
-	
+
 	function addListFilters () {
 		$_sessionData = &$this->tblAction->sessionData;
 
@@ -549,7 +554,7 @@ class dbDisplayer extends EventDispatcher
 					$values = $field->valuesList;
 				} elseif ($field->getAttribute('type') == 'foreignKey') {
 					$values = false;
-					if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
+					if ($this->customHandler && method_exists($this->customHandler, 'getFilterValues')) {
 						$values = $this->customHandler->getFilterValues($field->name);
 					}
 					if ($values === false) {
@@ -557,7 +562,7 @@ class dbDisplayer extends EventDispatcher
 						$values =  (array)$tableDefinition->fields[$key]->keyData;
 					}
 				} elseif ($field->getAttribute('type') == 'sql') {
-					if (isset($this->customHandler) && method_exists($this->customHandler, 'getFilterValues')) {
+					if ($this->customHandler && method_exists($this->customHandler, 'getFilterValues')) {
 						$values = $this->customHandler->getFilterValues($field->name);
 					}
 				} else {
@@ -576,7 +581,7 @@ class dbDisplayer extends EventDispatcher
 				$html .= '</select>';
 				$filters[] = $html;
 			} elseif (strtolower($filterType) == 'range') {
-				
+
 				if (is_callable(array($field, 'getRangeFilter'))) {
 					$filters[] = $field->getRangeFilter($filterName, $value);
 				} else {
@@ -603,10 +608,10 @@ class dbDisplayer extends EventDispatcher
                     $filters[] = $html;
                 } elseif ($field->getAttribute('type') == 'datetime') {
                     $format = substr($field->getFormat(), 0, 8);
-                    
+
                     $html = '
                     <input type="text" name="filter['.$filterName.']" id="filter['.$filterName.']" value="'.$value.'" size="10" style="vertical-align: top">
-                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="filter_'.$field->name.'_cal" name="'.$field->name.'_cal"> 
+                    <input type="reset" value=" ... " class="button" style="vertical-align:top;" id="filter_'.$field->name.'_cal" name="'.$field->name.'_cal">
                     <script type="text/javascript">
                         Calendar.setup({
                             inputField     :    "filter['.$filterName.']",
@@ -656,7 +661,7 @@ class dbDisplayer extends EventDispatcher
 		}
 
 		// FIXME:
-		$path = !empty($customTemplate) && defined('TPL_ROOT') ? TPL_ROOT : false;
+		$path = !$customTemplate && defined('TPL_ROOT') ? TPL_ROOT : false;
 		$tpl = self::getTemplateInstance($path);
 
 		if ($what == 'insert') {
@@ -683,13 +688,7 @@ class dbDisplayer extends EventDispatcher
 		foreach ($tableDefinition->fields as $field) {
 			$item = array();
 
-			if ($field->name == $primaryKey) {
-				// Не показываем primary key
-				continue;
-			}
-
-			if ($field->getAttribute('type') == 'sql') {
-				// Вычисляемое SQL поле, пропускаем
+			if ($field->name == $primaryKey || $field->isVirtualField($what)) {
 				continue;
 			}
 
@@ -720,10 +719,11 @@ class dbDisplayer extends EventDispatcher
 				$items[] = $item;
 			}
 
-			if ($qtip = $field->getAttribute('hint')) {
+			$qtip = $field->getAttribute('hint');
+			if ($qtip) {
 				$qtips[$field->name] = $qtip;
 			}
-		}
+		} // end foreach
 
 		$info['backaction'] = $this->getBackAction();
 
@@ -733,7 +733,9 @@ class dbDisplayer extends EventDispatcher
 			$info['actionbutton'] = __('BUTTON_'.strtoupper($what));
 		}
 
+		// FIXME:
 		$info['afetrpatyjs'] = isset($GLOBALS['dba_afetrpatyjs']) ? $GLOBALS['dba_afetrpatyjs'] : '';
+
 		$tpl->assign('items', $items);
 		$tpl->assign('info', $info);
 		$tpl->assign('qtips', $qtips);
@@ -742,22 +744,13 @@ class dbDisplayer extends EventDispatcher
 			$GLOBALS['dbaCustomTemplate'] = 'light.ihtml';
 		}
 
-		if (!empty($tableDefinition->attributes['customHandler'])) {
-			include_once $this->tblAction->getOption('handlers_path').$tableDefinition->attributes['customHandler'].'.php';
-			$this->customHandler = new customTableHandler($this->tblAction);
-			$this->customHandler->params = $this->tblAction->getOption('handler_params');
-			if (method_exists($this->customHandler, 'templateCallback')) {
-				$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);
-			}
+		if ($this->customHandler && method_exists($this->customHandler, 'templateCallback')) {
+			$this->customHandler->templateCallback('form', $tpl, $this->tblAction->currentRow);
 		}
 
+		$templateName = $customTemplate ? $customTemplate : 'dba_form.ihtml';
 
-		if (empty($customTemplate)) {
-			return trim($tpl->fetch('dba_form.ihtml'));
-		} else {
-			$tpl->assign('body', trim($tpl->fetch($customTemplate)));
-			return trim($tpl->fetch('dba_customform.ihtml'));
-		}
+		return $tpl->fetch($templateName);
 	}
 
 	function getBackAction() {
@@ -785,7 +778,7 @@ class dbDisplayer extends EventDispatcher
 	}
 
 
-	
+
 
 }
 

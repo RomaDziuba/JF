@@ -1,6 +1,6 @@
 <script>
 {literal}
-jQuery(document).ready(function() { 
+jQuery(document).ready(function() {
     initPopup();
 });
 {/literal}
@@ -10,7 +10,7 @@ jQuery(document).ready(function() {
     <iframe name="db_system" style="display:none" id="db_system"></iframe>
     <form id="tbl_form" name="tbl_form"  method="post"  target="db_system" enctype="multipart/form-data" {if $tpl.CONST.JIMBO_POPUP_MODE != "popup"}action="?action={$tpl.GET.action}&ID={$tpl.GET.ID}"{/if} onsubmit="showLoadingBar();">
         <input type="hidden" name="picker" id="picker" />
-        
+
         <table class="jform" cellpadding="0" cellspacing="0" border="0"  width="100%" align="center">
 			<thead>
                 <tr>
@@ -20,7 +20,6 @@ jQuery(document).ready(function() {
             <tbody>
             	<tr>
                 	<td align="center" valign="top">
-                
 						<table class="dba_form_hint" border="0" cellspacing="0" cellpadding="0" width="100%">
                         {if $info.hint}
                             <tr><td colspan="2" align="center"><br/>{$info.hint}<br/><br/></td></tr>
@@ -30,7 +29,7 @@ jQuery(document).ready(function() {
 							<td colspan="2" valign="top">
 								<div class="formRows">
                                     <table class="dba_form_fields" border="0" cellspacing="0" cellpadding="0" width="100%"  id="tblform" align="center">
-                                        {foreach value=item from=$items }  
+                                        {foreach value=item from=$items }
                                             <tr class="odd">
                                                 <td class="label" >{$item.caption}:</td>
                                                 <td align="left">{$item.input}
@@ -45,7 +44,7 @@ jQuery(document).ready(function() {
                             </td>
                         </tr>
                     	</table>
-                   
+
                     </td>
 				</tr>
             	<tr id="form_actions" class="ka_odd">
@@ -61,10 +60,10 @@ jQuery(document).ready(function() {
             </tbody>
         </table>
 
-        {if $info.token} 
+        {if $info.token}
             <input type="hidden" name="__token" value="{$info.token}" />
         {/if}
-    
+
         <input type="hidden" name="performPost" value="{$info.action}" />
     </form>
 </div>
@@ -101,7 +100,7 @@ function doTip(el, tip) {
          tooltip: 'bottomLeft'
       }
    },
-	style: { 
+	style: {
 		width: 400,
 		tip: 'bottomLeft',
 		name: 'ui-tooltip-jf-form'
@@ -112,6 +111,6 @@ function doTip(el, tip) {
 
 {/literal}
 { foreach value=value key=key from=$qtips }
-doTip('{$key}', '{$value}') 
+doTip('{$key}', '{$value}')
 {/foreach}
 </script>

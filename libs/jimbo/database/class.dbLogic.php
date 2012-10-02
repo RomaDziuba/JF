@@ -1,11 +1,16 @@
 <?php
+/**
+ *
+ * @package Jimbo
+ * @subpackage Databases
+ */
 class dbLogic {
 
 	var $knownPostActions = array('save', 'insert', 'remove', 'info');
 
 	function detectPerformAction($tblAction) {
 		$_sessionData = &$tblAction->sessionData;
-		
+
 		if (isset($_REQUEST['filter_wtd'])) {
 			if ( ($_REQUEST['filter_wtd'] == 'apply') && (empty($_REQUEST['grouped_action']))) {
 
@@ -17,11 +22,11 @@ class dbLogic {
 						}
 					}
 				}
-				
+
 				$tblName = $tblAction->tableDefinition->name;
-				
+
 				unset($_GET['order']);
-				
+
 				if (!isset($_sessionData['DB_FILTERS'][$tblName])) {
 					$_sessionData['DB_FILTERS'][$tblName] = array();
 				}
@@ -35,10 +40,10 @@ class dbLogic {
 			}
 			//Header("Location: ".$_SERVER['REQUEST_URI']);
 			//die;
-			
+
 		}
 
-		$allowedActions = array_keys($tblAction->tableDefinition->actions);		
+		$allowedActions = array_keys($tblAction->tableDefinition->actions);
 
 		if (in_array('edit', $allowedActions)) {
 			$allowedActions[] = 'save';
@@ -70,7 +75,7 @@ class dbLogic {
 		$allowedActions = array_keys($tblAction->tableDefinition->actions);
 
 		$action = ($status && isset($_POST['performPost'])) ? 'list' : (isset($_GET['action']) ? $_GET['action'] : 'list');
-		
+
 		if (!in_array($action, $allowedActions)) {
 			// Permission denied
 			return 'list';

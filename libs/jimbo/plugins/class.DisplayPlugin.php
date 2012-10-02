@@ -34,12 +34,21 @@ class DisplayPlugin extends ObjectJimboPlugin
         $this->vars[$key] = &$value;
     }
 
+    public function getPluginTemplatePath()
+    {
+        if (!isset($this->options['plugin_path'])) {
+            return false;
+        }
+
+        return $this->options['plugin_path']."templates".DIRECTORY_SEPARATOR;
+    }
+
     public function fetch($file, $cached_name = null, $time_cached = null, $tpl = null)
     {
         global $jimbo;
 
-        $pluginPath = $this->options['plugin_path'].'templates/'.$file;
-        $path = $jimbo->tpl->template_dir.'/'.$file;
+        $pluginPath = $this->getPluginTemplatePath().$file;
+        $path = $jimbo->tpl->template_dir.DIRECTORY_SEPARATOR.$file;
 
         if (file_exists($pluginPath)) {
             $path = $pluginPath;
